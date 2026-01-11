@@ -470,6 +470,119 @@ img {
 }
 
 /* ==========================================
+   Contact Page
+   ========================================== */
+.contact-hero {
+    padding: 10rem 3rem 4rem;
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.contact-title {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.contact-subtitle {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.1em;
+}
+
+.contact-section {
+    padding: 5rem 3rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.contact-container {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 5rem;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 1rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #555;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--color-text);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 150px;
+}
+
+.btn-submit {
+    align-self: flex-start;
+    margin-top: 1rem;
+}
+
+.contact-info {
+    padding-top: 1rem;
+}
+
+.info-block {
+    margin-bottom: 2.5rem;
+}
+
+.info-block h3 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+}
+
+.info-block p {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    line-height: 1.8;
+}
+
+.nav-link.active {
+    color: var(--color-text);
+}
+
+/* ==========================================
    Responsive Design
    ========================================== */
 @media (max-width: 1024px) {
@@ -526,6 +639,23 @@ img {
     .footer-links {
         flex-wrap: wrap;
         gap: 2rem;
+    }
+
+    .contact-container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .contact-hero {
+        padding: 8rem 1.5rem 3rem;
+    }
+
+    .contact-section {
+        padding: 3rem 1.5rem;
+    }
+
+    .contact-title {
+        font-size: 2rem;
     }
 }
 
