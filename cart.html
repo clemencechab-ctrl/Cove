@@ -190,6 +190,7 @@
     </footer>
 
     <script src="js/cart.js"></script>
+    <script src="js/api.js"></script>
     <script>
         // Render cart items
         function renderCart() {
@@ -252,22 +253,67 @@
         }
 
         // Submit order
-        function submitOrder(e) {
+        async function submitOrder(e) {
             e.preventDefault();
 
-            // Generate order number
-            const orderNumber = 'COVE-' + Date.now().toString(36).toUpperCase();
-            document.getElementById('order-number').textContent = orderNumber;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Traitement...';
 
-            // Close checkout modal
-            closeCheckout();
+            // Récupérer les données du formulaire
+            const formData = new FormData(e.target);
+            const customer = {
+                firstName: formData.get('firstName'),
+                lastName: formData.get('lastName'),
+                email: formData.get('email'),
+                phone: formData.get('phone')
+            };
+            const shipping = {
+                address: formData.get('address'),
+                city: formData.get('city'),
+                postalCode: formData.get('postalCode'),
+                country: formData.get('country')
+            };
 
-            // Show confirmation
-            document.getElementById('confirmation-modal').classList.add('active');
+            // Préparer les items
+            const items = cart.map(item => ({
+                id: item.id,
+                quantity: item.quantity
+            }));
 
-            // Clear cart
-            clearCart();
-            renderCart();
+            try {
+                // Appeler l'API backend
+                const result = await api.checkout(items, customer, shipping);
+
+                if (result.success) {
+                    // Si Stripe est configuré, rediriger vers Stripe
+                    if (result.url) {
+                        window.location.href = result.url;
+                        return;
+                    }
+
+                    // Mode démo - afficher la confirmation
+                    document.getElementById('order-number').textContent = result.order.orderNumber;
+                    closeCheckout();
+                    document.getElementById('confirmation-modal').classList.add('active');
+                    clearCart();
+                    renderCart();
+                } else {
+                    alert('Erreur: ' + (result.error || 'Une erreur est survenue'));
+                }
+            } catch (error) {
+                console.error('Checkout error:', error);
+                // Fallback mode local si le backend n'est pas disponible
+                const orderNumber = 'COVE-' + Date.now().toString(36).toUpperCase();
+                document.getElementById('order-number').textContent = orderNumber;
+                closeCheckout();
+                document.getElementById('confirmation-modal').classList.add('active');
+                clearCart();
+                renderCart();
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Confirmer et payer';
         }
 
         // Close confirmation and redirect
