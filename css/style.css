@@ -53,9 +53,10 @@ img {
     left: 0;
     right: 0;
     z-index: 1000;
-    padding: 1.5rem 3rem;
+    padding: 0.5rem 3rem;
     background: rgba(0, 0, 0, 0.9);
     backdrop-filter: blur(10px);
+    height: 70px;
 }
 
 .nav {
@@ -64,6 +65,7 @@ img {
     align-items: center;
     max-width: 1400px;
     margin: 0 auto;
+    height: 100%;
 }
 
 .nav-left, .nav-right {
@@ -83,6 +85,10 @@ img {
     color: var(--color-text);
 }
 
+.logo {
+    position: relative;
+}
+
 .logo a {
     display: flex;
     align-items: center;
@@ -92,6 +98,10 @@ img {
     height: 140px;
     width: auto;
     filter: invert(1) brightness(2);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 /* ==========================================
