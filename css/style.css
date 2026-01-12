@@ -84,9 +84,13 @@ img {
 }
 
 .logo a {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 40px;
+    width: auto;
 }
 
 /* ==========================================
@@ -411,6 +415,11 @@ img {
     font-size: 1.8rem;
     font-weight: 700;
     letter-spacing: 0.2em;
+}
+
+.footer-logo-img {
+    height: 50px;
+    width: auto;
 }
 
 .footer-tagline {
