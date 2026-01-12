@@ -91,6 +91,7 @@ img {
 .logo img {
     height: 40px;
     width: auto;
+    filter: invert(1) brightness(2);
 }
 
 /* ==========================================
@@ -420,6 +421,7 @@ img {
 .footer-logo-img {
     height: 50px;
     width: auto;
+    filter: invert(1) brightness(2);
 }
 
 .footer-tagline {
