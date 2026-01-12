@@ -89,7 +89,7 @@ img {
 }
 
 .logo img {
-    height: 70px;
+    height: 140px;
     width: auto;
     filter: invert(1) brightness(2);
 }
@@ -419,7 +419,7 @@ img {
 }
 
 .footer-logo-img {
-    height: 90px;
+    height: 180px;
     width: auto;
     filter: invert(1) brightness(2);
 }
