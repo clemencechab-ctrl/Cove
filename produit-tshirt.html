@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVE - T-Shirt Chat</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-left">
+                <a href="index.html#collection" class="nav-link">Collection</a>
+                <a href="index.html#lookbook" class="nav-link">Lookbook</a>
+            </div>
+            <div class="logo">
+                <a href="index.html"><img src="image/logo-cove.png" alt="COVE"></a>
+            </div>
+            <div class="nav-right">
+                <a href="contact.html" class="nav-link">Contact</a>
+                <a href="cart.html" class="nav-link">Panier (<span id="cart-count">0</span>)</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Product Page -->
+    <section class="product-page">
+        <div class="product-container">
+            <!-- Product Gallery -->
+            <div class="product-gallery">
+                <div class="product-main-image">
+                    <img src="image/t-shirt-chat-drole-2.webp" alt="T-Shirt Chat" id="main-image">
+                </div>
+                <div class="product-thumbnails">
+                    <div class="thumbnail active" onclick="changeImage('image/t-shirt-chat-drole-2.webp', this)">
+                        <img src="image/t-shirt-chat-drole-2.webp" alt="T-Shirt Chat Vue 1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="product-info">
+                <div class="product-breadcrumb">
+                    <a href="index.html">Accueil</a> / <a href="index.html#collection">Collection</a> / T-Shirt Chat
+                </div>
+
+                <h1 class="product-title">T-Shirt Chat</h1>
+                <p class="product-price">65 EUR</p>
+
+                <div class="product-description">
+                    <p>T-shirt en coton epais de qualite premium, imprime avec un design exclusif COVE. Coupe reguliere, confortable et durable.</p>
+                </div>
+
+                <div class="product-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Composition</span>
+                        <span class="detail-value">100% Coton biologique</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Grammage</span>
+                        <span class="detail-value">220g/m2</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Coupe</span>
+                        <span class="detail-value">Regular fit</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Entretien</span>
+                        <span class="detail-value">Lavage 30° - Ne pas secher en machine</span>
+                    </div>
+                </div>
+
+                <div class="product-size">
+                    <label class="size-label">Taille</label>
+                    <div class="size-options">
+                        <button class="size-btn" onclick="selectSize('S', this)">S</button>
+                        <button class="size-btn" onclick="selectSize('M', this)">M</button>
+                        <button class="size-btn active" onclick="selectSize('L', this)">L</button>
+                        <button class="size-btn" onclick="selectSize('XL', this)">XL</button>
+                    </div>
+                    <a href="#" class="size-guide-link">Guide des tailles</a>
+                </div>
+
+                <div class="product-actions">
+                    <button class="btn-add-to-cart" onclick="addToCart(1, 'T-Shirt Chat', 65, 'image/t-shirt-chat-drole-2.webp'); showNotification();">
+                        Ajouter au panier
+                    </button>
+                </div>
+
+                <div class="product-extra-info">
+                    <div class="extra-item">
+                        <span class="extra-icon">&#10003;</span>
+                        <span>Livraison gratuite</span>
+                    </div>
+                    <div class="extra-item">
+                        <span class="extra-icon">&#8634;</span>
+                        <span>Retours sous 14 jours</span>
+                    </div>
+                    <div class="extra-item">
+                        <span class="extra-icon">&#9733;</span>
+                        <span>Qualite premium</span>
+                    </div>
+                </div>
+
+                <div class="product-accordion">
+                    <div class="accordion-item">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Description complete</span>
+                            <span class="accordion-icon">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p>Ce t-shirt incarne l'esprit COVE : un design unique, une qualite irreprochable et un confort absolu. Fabrique en coton biologique certifie, il offre une douceur exceptionnelle tout en respectant l'environnement.</p>
+                            <p>L'impression haute definition resiste aux lavages repetes. La coupe regular fit convient a toutes les morphologies.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Livraison</span>
+                            <span class="accordion-icon">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p>Livraison gratuite en France metropolitaine, Belgique, Suisse et Luxembourg.</p>
+                            <p>Delai de livraison : 5-10 jours ouvrables.</p>
+                            <p>Suivi de commande par email.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <button class="accordion-header" onclick="toggleAccordion(this)">
+                            <span>Retours</span>
+                            <span class="accordion-icon">+</span>
+                        </button>
+                        <div class="accordion-content">
+                            <p>Retours acceptes sous 14 jours apres reception.</p>
+                            <p>Article dans son etat d'origine, non porte, etiquettes attachees.</p>
+                            <p>Consultez notre <a href="retours.html">politique de retour</a> pour plus de details.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notification -->
+    <div class="cart-notification" id="cart-notification">
+        <span class="notification-icon">&#10003;</span>
+        <span>Article ajoute au panier</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <img src="image/logo-cove.png" alt="COVE" class="footer-logo-img">
+                <p class="footer-tagline">Streetwear Premium</p>
+                <p class="footer-credit">made by Clemence</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Navigation</h4>
+                    <a href="index.html#collection">Collection</a>
+                    <a href="index.html#lookbook">Lookbook</a>
+                    <a href="about.html">About</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Contact</h4>
+                    <a href="contact.html">Nous contacter</a>
+                    <a href="https://www.instagram.com/covestudio.off/" target="_blank">Instagram</a>
+                    <a href="https://www.tiktok.com/@covestudio.off" target="_blank">TikTok</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <a href="cgv.html">CGV</a>
+                    <a href="mentions-legales.html">Mentions legales</a>
+                    <a href="confidentialite.html">Confidentialite</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 COVE. Tous droits reserves.</p>
+        </div>
+    </footer>
+
+    <script src="js/cart.js"></script>
+    <script>
+        let selectedSize = 'L';
+
+        function changeImage(src, thumb) {
+            document.getElementById('main-image').src = src;
+            document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+            thumb.classList.add('active');
+        }
+
+        function selectSize(size, btn) {
+            selectedSize = size;
+            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function toggleAccordion(header) {
+            const item = header.parentElement;
+            const isActive = item.classList.contains('active');
+
+            document.querySelectorAll('.accordion-item').forEach(i => i.classList.remove('active'));
+
+            if (!isActive) {
+                item.classList.add('active');
+                header.querySelector('.accordion-icon').textContent = '-';
+            } else {
+                header.querySelector('.accordion-icon').textContent = '+';
+            }
+
+            document.querySelectorAll('.accordion-item:not(.active) .accordion-icon').forEach(icon => {
+                icon.textContent = '+';
+            });
+        }
+
+        function showNotification() {
+            const notification = document.getElementById('cart-notification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

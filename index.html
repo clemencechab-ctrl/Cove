@@ -61,141 +61,31 @@
             <p class="section-subtitle">Automne / Hiver 2026</p>
         </div>
 
-        <div class="shop-filters">
-            <button class="filter-btn active" data-filter="all">Tout</button>
-            <button class="filter-btn" data-filter="tops">Tops</button>
-            <button class="filter-btn" data-filter="bottoms">Pantalons</button>
-            <button class="filter-btn" data-filter="outerwear">Vestes</button>
-            <button class="filter-btn" data-filter="accessories">Accessoires</button>
-        </div>
-
         <div class="shop-grid">
-            <!-- Product 1 -->
+            <!-- Product 1 - T-Shirt -->
             <article class="shop-card" data-category="tops">
-                <div class="shop-card-image">
-                    <img src="image/t-shirt-chat-drole-2.webp" alt="T-Shirt Chat">
-                    <div class="shop-card-overlay">
-                        <button class="btn-add-cart" onclick="addToCart(1, 'T-Shirt Chat', 65, 'image/t-shirt-chat-drole-2.webp')">
-                            Ajouter au panier
-                        </button>
+                <a href="produit-tshirt.html" class="shop-card-link">
+                    <div class="shop-card-image">
+                        <img src="image/t-shirt-chat-drole-2.webp" alt="T-Shirt Chat">
                     </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">T-Shirt Chat</h3>
-                    <p class="shop-card-price">65 EUR</p>
-                </div>
+                    <div class="shop-card-info">
+                        <h3 class="shop-card-name">T-Shirt Chat</h3>
+                        <p class="shop-card-price">65 EUR</p>
+                    </div>
+                </a>
             </article>
 
-            <!-- Product 2 -->
+            <!-- Product 2 - Hoodie -->
             <article class="shop-card" data-category="tops">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80" alt="Hoodie Essential">
-                    <div class="shop-card-overlay">
-                        <button class="btn-add-cart" onclick="addToCart(2, 'Hoodie Essential', 120, 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80')">
-                            Ajouter au panier
-                        </button>
+                <a href="produit-hoodie.html" class="shop-card-link">
+                    <div class="shop-card-image">
+                        <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80" alt="Hoodie Essential">
                     </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">Hoodie Essential</h3>
-                    <p class="shop-card-price">120 EUR</p>
-                </div>
-            </article>
-
-            <!-- Product 3 -->
-            <article class="shop-card" data-category="bottoms">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&q=80" alt="Cargo Pants">
-                    <div class="shop-card-overlay">
-                        <button class="btn-add-cart" onclick="addToCart(3, 'Cargo Pants', 95, 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&q=80')">
-                            Ajouter au panier
-                        </button>
+                    <div class="shop-card-info">
+                        <h3 class="shop-card-name">Hoodie Essential</h3>
+                        <p class="shop-card-price">120 EUR</p>
                     </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">Cargo Pants</h3>
-                    <p class="shop-card-price">95 EUR</p>
-                </div>
-            </article>
-
-            <!-- Product 4 -->
-            <article class="shop-card" data-category="outerwear">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80" alt="Jacket Bomber">
-                    <div class="shop-card-overlay">
-                        <button class="btn-add-cart" onclick="addToCart(4, 'Jacket Bomber', 180, 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80')">
-                            Ajouter au panier
-                        </button>
-                    </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">Jacket Bomber</h3>
-                    <p class="shop-card-price">180 EUR</p>
-                </div>
-            </article>
-
-            <!-- Product 5 -->
-            <article class="shop-card" data-category="tops">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80" alt="Sweatshirt Logo">
-                    <div class="shop-card-overlay">
-                        <button class="btn-add-cart" onclick="addToCart(5, 'Sweatshirt Logo', 85, 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80')">
-                            Ajouter au panier
-                        </button>
-                    </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">Sweatshirt Logo</h3>
-                    <p class="shop-card-price">85 EUR</p>
-                </div>
-            </article>
-
-            <!-- Product 6 -->
-            <article class="shop-card" data-category="accessories">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=600&q=80" alt="Cap Classic">
-                    <div class="shop-card-overlay">
-                        <button class="btn-add-cart" onclick="addToCart(6, 'Cap Classic', 35, 'https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=600&q=80')">
-                            Ajouter au panier
-                        </button>
-                    </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">Cap Classic</h3>
-                    <p class="shop-card-price">35 EUR</p>
-                </div>
-            </article>
-
-            <!-- Product 7 -->
-            <article class="shop-card" data-category="tops">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80" alt="T-Shirt Basic Noir">
-                    <div class="shop-card-overlay">
-                        <button class="btn-add-cart" onclick="addToCart(7, 'T-Shirt Basic Noir', 55, 'https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80')">
-                            Ajouter au panier
-                        </button>
-                    </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">T-Shirt Basic Noir</h3>
-                    <p class="shop-card-price">55 EUR</p>
-                </div>
-            </article>
-
-            <!-- Product 8 -->
-            <article class="shop-card" data-category="outerwear">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80" alt="Veste Denim">
-                    <div class="shop-card-overlay">
-                        <button class="btn-add-cart" onclick="addToCart(8, 'Veste Denim', 145, 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80')">
-                            Ajouter au panier
-                        </button>
-                    </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">Veste Denim</h3>
-                    <p class="shop-card-price">145 EUR</p>
-                </div>
+                </a>
             </article>
         </div>
     </section>
@@ -224,8 +114,8 @@
         <div class="about-content">
             <h2 class="about-title">COVE</h2>
             <p class="about-text">
-                Une marque née de la passion pour le streetwear authentique.
-                Chaque pièce est pensée pour allier confort, style et durabilité.
+                Une marque nee de la passion pour le streetwear authentique.
+                Chaque piece est pensee pour allier confort, style et durabilite.
                 COVE, c'est plus qu'une marque, c'est une vision.
             </p>
         </div>
@@ -234,8 +124,8 @@
     <!-- Newsletter -->
     <section class="newsletter">
         <div class="newsletter-content">
-            <h3 class="newsletter-title">Restez informé</h3>
-            <p class="newsletter-text">Inscrivez-vous pour recevoir les dernières nouveautés</p>
+            <h3 class="newsletter-title">Restez informe</h3>
+            <p class="newsletter-text">Inscrivez-vous pour recevoir les dernieres nouveautes</p>
             <form class="newsletter-form">
                 <input type="email" placeholder="Votre email" class="newsletter-input">
                 <button type="submit" class="btn-primary">S'inscrire</button>
@@ -249,7 +139,7 @@
             <div class="footer-brand">
                 <img src="image/logo-cove.png" alt="COVE" class="footer-logo-img">
                 <p class="footer-tagline">Streetwear Premium</p>
-                <p class="footer-credit">made by Clémence</p>
+                <p class="footer-credit">made by Clemence</p>
             </div>
             <div class="footer-links">
                 <div class="footer-column">
@@ -266,34 +156,16 @@
                 </div>
                 <div class="footer-column">
                     <h4>Legal</h4>
-                    <a href="#">CGV</a>
-                    <a href="#">Mentions légales</a>
-                    <a href="#">Confidentialité</a>
+                    <a href="cgv.html">CGV</a>
+                    <a href="mentions-legales.html">Mentions legales</a>
+                    <a href="confidentialite.html">Confidentialite</a>
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 COVE. Tous droits réservés.</p>
+            <p>&copy; 2026 COVE. Tous droits reserves.</p>
         </div>
     </footer>
     <script src="js/cart.js"></script>
-    <script>
-        // Filter functionality
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                const filter = btn.dataset.filter;
-                document.querySelectorAll('.shop-card').forEach(card => {
-                    if (filter === 'all' || card.dataset.category === filter) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            });
-        });
-    </script>
 </body>
 </html>
