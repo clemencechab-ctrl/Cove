@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COVE - Hoodie Essential</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>COVE - Essential Hoodie</title>
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,11 +18,11 @@
                 <a href="index.html#lookbook" class="nav-link">Lookbook</a>
             </div>
             <div class="logo">
-                <a href="index.html"><img src="image/logo-cove.png" alt="COVE"></a>
+                <a href="index.html"><img src="../image/logo-cove.png" alt="COVE"></a>
             </div>
             <div class="nav-right">
                 <a href="contact.html" class="nav-link">Contact</a>
-                <a href="cart.html" class="nav-link">Panier (<span id="cart-count">0</span>)</a>
+                <a href="cart.html" class="nav-link">Cart (<span id="cart-count">0</span>)</a>
             </div>
         </nav>
     </header>
@@ -33,20 +33,20 @@
             <!-- Product Gallery -->
             <div class="product-gallery">
                 <div class="product-main-image">
-                    <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80" alt="Hoodie Essential" id="main-image">
+                    <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80" alt="Essential Hoodie" id="main-image">
                 </div>
                 <div class="product-thumbnails">
                     <div class="thumbnail active" onclick="changeImage('https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80', this)">
-                        <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80" alt="Hoodie Vue 1">
+                        <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80" alt="Hoodie View 1">
                     </div>
                     <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&q=80', this)">
-                        <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&q=80" alt="Hoodie Vue 2">
+                        <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&q=80" alt="Hoodie View 2">
                     </div>
                     <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?w=800&q=80', this)">
-                        <img src="https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?w=800&q=80" alt="Hoodie Vue 3">
+                        <img src="https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?w=800&q=80" alt="Hoodie View 3">
                     </div>
                     <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1509942774463-acf339cf87d5?w=800&q=80', this)">
-                        <img src="https://images.unsplash.com/photo-1509942774463-acf339cf87d5?w=800&q=80" alt="Hoodie Vue 4">
+                        <img src="https://images.unsplash.com/photo-1509942774463-acf339cf87d5?w=800&q=80" alt="Hoodie View 4">
                     </div>
                 </div>
             </div>
@@ -54,99 +54,99 @@
             <!-- Product Info -->
             <div class="product-info">
                 <div class="product-breadcrumb">
-                    <a href="index.html">Accueil</a> / <a href="index.html#collection">Collection</a> / Hoodie Essential
+                    <a href="index.html">Home</a> / <a href="index.html#collection">Collection</a> / Essential Hoodie
                 </div>
 
-                <h1 class="product-title">Hoodie Essential</h1>
+                <h1 class="product-title">Essential Hoodie</h1>
                 <p class="product-price">120 EUR</p>
 
                 <div class="product-description">
-                    <p>Le hoodie signature COVE. Coupe oversize, capuche doublee, poche kangourou. Un essentiel du streetwear revisite avec des finitions haut de gamme.</p>
+                    <p>The signature COVE hoodie. Oversize fit, lined hood, kangaroo pocket. A streetwear essential revisited with premium finishes.</p>
                 </div>
 
                 <div class="product-details">
                     <div class="detail-row">
                         <span class="detail-label">Composition</span>
-                        <span class="detail-value">80% Coton - 20% Polyester</span>
+                        <span class="detail-value">80% Cotton - 20% Polyester</span>
                     </div>
                     <div class="detail-row">
-                        <span class="detail-label">Grammage</span>
+                        <span class="detail-label">Weight</span>
                         <span class="detail-value">400g/m2</span>
                     </div>
                     <div class="detail-row">
-                        <span class="detail-label">Coupe</span>
+                        <span class="detail-label">Fit</span>
                         <span class="detail-value">Oversize</span>
                     </div>
                     <div class="detail-row">
-                        <span class="detail-label">Entretien</span>
-                        <span class="detail-value">Lavage 30° - Sechage a plat</span>
+                        <span class="detail-label">Care</span>
+                        <span class="detail-value">Machine wash 30° - Lay flat to dry</span>
                     </div>
                 </div>
 
                 <div class="product-size">
-                    <label class="size-label">Taille</label>
+                    <label class="size-label">Size</label>
                     <div class="size-options">
                         <button class="size-btn" onclick="selectSize('S', this)">S</button>
                         <button class="size-btn" onclick="selectSize('M', this)">M</button>
                         <button class="size-btn active" onclick="selectSize('L', this)">L</button>
                         <button class="size-btn" onclick="selectSize('XL', this)">XL</button>
                     </div>
-                    <a href="#" class="size-guide-link">Guide des tailles</a>
+                    <a href="#" class="size-guide-link">Size guide</a>
                 </div>
 
                 <div class="product-actions">
-                    <button class="btn-add-to-cart" onclick="addToCart(2, 'Hoodie Essential', 120, 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80'); showNotification();">
-                        Ajouter au panier
+                    <button class="btn-add-to-cart" onclick="addToCart(2, 'Essential Hoodie', 120, 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80'); showNotification();">
+                        Add to cart
                     </button>
                 </div>
 
                 <div class="product-extra-info">
                     <div class="extra-item">
                         <span class="extra-icon">&#10003;</span>
-                        <span>Livraison gratuite</span>
+                        <span>Free shipping</span>
                     </div>
                     <div class="extra-item">
                         <span class="extra-icon">&#8634;</span>
-                        <span>Retours sous 14 jours</span>
+                        <span>Returns within 14 days</span>
                     </div>
                     <div class="extra-item">
                         <span class="extra-icon">&#9733;</span>
-                        <span>Qualite premium</span>
+                        <span>Premium quality</span>
                     </div>
                 </div>
 
                 <div class="product-accordion">
                     <div class="accordion-item">
                         <button class="accordion-header" onclick="toggleAccordion(this)">
-                            <span>Description complete</span>
+                            <span>Full description</span>
                             <span class="accordion-icon">+</span>
                         </button>
                         <div class="accordion-content">
-                            <p>Le Hoodie Essential est la piece maitresse de la collection COVE. Fabrique dans un molleton epais et doux, il offre chaleur et confort tout au long de la journee.</p>
-                            <p>La coupe oversize permet une liberte de mouvement totale. La capuche doublee protege efficacement du froid. La poche kangourou est renforcee pour plus de durabilite.</p>
-                            <p>Finitions premium : coutures doubles, cordons en coton cire, etiquette tissee COVE.</p>
+                            <p>The Essential Hoodie is the centerpiece of the COVE collection. Made from thick, soft fleece, it offers warmth and comfort throughout the day.</p>
+                            <p>The oversize fit allows total freedom of movement. The lined hood effectively protects from the cold. The kangaroo pocket is reinforced for extra durability.</p>
+                            <p>Premium finishes: double stitching, waxed cotton drawstrings, woven COVE label.</p>
                         </div>
                     </div>
                     <div class="accordion-item">
                         <button class="accordion-header" onclick="toggleAccordion(this)">
-                            <span>Livraison</span>
+                            <span>Shipping</span>
                             <span class="accordion-icon">+</span>
                         </button>
                         <div class="accordion-content">
-                            <p>Livraison gratuite en France metropolitaine, Belgique, Suisse et Luxembourg.</p>
-                            <p>Delai de livraison : 5-10 jours ouvrables.</p>
-                            <p>Suivi de commande par email.</p>
+                            <p>Free shipping to France, Belgium, Switzerland and Luxembourg.</p>
+                            <p>Delivery time: 5-10 business days.</p>
+                            <p>Order tracking by email.</p>
                         </div>
                     </div>
                     <div class="accordion-item">
                         <button class="accordion-header" onclick="toggleAccordion(this)">
-                            <span>Retours</span>
+                            <span>Returns</span>
                             <span class="accordion-icon">+</span>
                         </button>
                         <div class="accordion-content">
-                            <p>Retours acceptes sous 14 jours apres reception.</p>
-                            <p>Article dans son etat d'origine, non porte, etiquettes attachees.</p>
-                            <p>Consultez notre <a href="retours.html">politique de retour</a> pour plus de details.</p>
+                            <p>Returns accepted within 14 days of receipt.</p>
+                            <p>Item in original condition, unworn, tags attached.</p>
+                            <p>See our <a href="retours.html">return policy</a> for more details.</p>
                         </div>
                     </div>
                 </div>
@@ -157,21 +157,21 @@
     <!-- Notification -->
     <div class="cart-notification" id="cart-notification">
         <span class="notification-icon">&#10003;</span>
-        <span>Article ajoute au panier</span>
+        <span>Item added to cart</span>
     </div>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-brand">
-                <img src="image/logo-cove.png" alt="COVE" class="footer-logo-img">
-                <p class="footer-tagline">Streetwear Premium</p>
+                <img src="../image/logo-cove.png" alt="COVE" class="footer-logo-img">
+                <p class="footer-tagline">Premium Streetwear</p>
                 <p class="footer-credit">made by Clemence</p>
                 <div class="language-selector">
-                    <span>Langue</span>
+                    <span>Language</span>
                     <div class="language-options">
-                        <a href="produit-hoodie.html" class="active">FR</a>
-                        <a href="en/produit-hoodie.html">EN</a>
+                        <a href="../produit-hoodie.html">FR</a>
+                        <a href="produit-hoodie.html" class="active">EN</a>
                     </div>
                 </div>
             </div>
@@ -184,24 +184,24 @@
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
-                    <a href="contact.html">Nous contacter</a>
+                    <a href="contact.html">Contact us</a>
                     <a href="https://www.instagram.com/covestudio.off/" target="_blank">Instagram</a>
                     <a href="https://www.tiktok.com/@covestudio.off" target="_blank">TikTok</a>
                 </div>
                 <div class="footer-column">
                     <h4>Legal</h4>
-                    <a href="cgv.html">CGV</a>
-                    <a href="mentions-legales.html">Mentions legales</a>
-                    <a href="confidentialite.html">Confidentialite</a>
+                    <a href="cgv.html">Terms of Sale</a>
+                    <a href="mentions-legales.html">Legal Notice</a>
+                    <a href="confidentialite.html">Privacy Policy</a>
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 COVE. Tous droits reserves.</p>
+            <p>&copy; 2026 COVE. All rights reserved.</p>
         </div>
     </footer>
 
-    <script src="js/cart.js"></script>
+    <script src="../js/cart.js"></script>
     <script>
         let selectedSize = 'L';
 

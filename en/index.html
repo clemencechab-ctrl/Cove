@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COVE - Collection</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -17,20 +17,20 @@
                 <a href="#lookbook" class="nav-link">Lookbook</a>
             </div>
             <div class="logo">
-                <a href="index.html"><img src="image/logo-cove.png" alt="COVE"></a>
+                <a href="index.html"><img src="../image/logo-cove.png" alt="COVE"></a>
             </div>
             <div class="nav-right">
                 <a href="contact.html" class="nav-link">Contact</a>
-                <a href="cart.html" class="nav-link">Panier (<span id="cart-count">0</span>)</a>
+                <a href="cart.html" class="nav-link">Cart (<span id="cart-count">0</span>)</a>
             </div>
         </nav>
     </header>
 
     <section class="hero">
         <div class="hero-content">
-            <h1 class="hero-title">NOUVELLE COLLECTION</h1>
-            <p class="hero-subtitle">Automne / Hiver 2026</p>
-            <a href="#collection" class="btn-primary">Voir la collection</a>
+            <h1 class="hero-title">NEW COLLECTION</h1>
+            <p class="hero-subtitle">Fall / Winter 2026</p>
+            <a href="#collection" class="btn-primary">View collection</a>
         </div>
         <div class="hero-image">
             <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1920&q=80" alt="Hero Image">
@@ -48,19 +48,19 @@
     <section id="collection" class="shop-section">
         <div class="section-header">
             <h2 class="section-title">Collection</h2>
-            <p class="section-subtitle">Automne / Hiver 2026</p>
+            <p class="section-subtitle">Fall / Winter 2026</p>
         </div>
         <div class="shop-grid">
             <article class="shop-card" data-category="tops">
                 <a href="produit-tshirt.html" class="shop-card-link">
                     <div class="shop-card-image">
-                        <img src="image/t-shirt-chat-drole-2.webp" alt="T-Shirt Chat">
+                        <img src="../image/t-shirt-chat-drole-2.webp" alt="Cat T-Shirt">
                         <div class="shop-card-overlay">
-                            <button class="btn-quick-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart(1, 'T-Shirt Chat', 65, 'image/t-shirt-chat-drole-2.webp'); showQuickNotification();">Ajouter au panier</button>
+                            <button class="btn-quick-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart(1, 'Cat T-Shirt', 65, '../image/t-shirt-chat-drole-2.webp'); showQuickNotification();">Add to cart</button>
                         </div>
                     </div>
                     <div class="shop-card-info">
-                        <h3 class="shop-card-name">T-Shirt Chat</h3>
+                        <h3 class="shop-card-name">Cat T-Shirt</h3>
                         <p class="shop-card-price">65 EUR</p>
                     </div>
                 </a>
@@ -68,13 +68,13 @@
             <article class="shop-card" data-category="tops">
                 <a href="produit-hoodie.html" class="shop-card-link">
                     <div class="shop-card-image">
-                        <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80" alt="Hoodie Essential">
+                        <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80" alt="Essential Hoodie">
                         <div class="shop-card-overlay">
-                            <button class="btn-quick-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart(2, 'Hoodie Essential', 120, 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80'); showQuickNotification();">Ajouter au panier</button>
+                            <button class="btn-quick-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart(2, 'Essential Hoodie', 120, 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80'); showQuickNotification();">Add to cart</button>
                         </div>
                     </div>
                     <div class="shop-card-info">
-                        <h3 class="shop-card-name">Hoodie Essential</h3>
+                        <h3 class="shop-card-name">Essential Hoodie</h3>
                         <p class="shop-card-price">120 EUR</p>
                     </div>
                 </a>
@@ -83,35 +83,35 @@
     </section>
 
     <div class="quick-notification" id="quick-notification">
-        <span>&#10003;</span> Article ajoute au panier
+        <span>&#10003;</span> Item added to cart
     </div>
 
     <section id="lookbook" class="lookbook">
         <div class="section-header">
             <h2 class="section-title">Lookbook</h2>
-            <p class="section-subtitle">AW26</p>
+            <p class="section-subtitle">FW26</p>
         </div>
         <div class="lookbook-grid">
-            <div class="lookbook-item large"><img src="image/IMG_2255.JPG" alt="Lookbook 1"></div>
-            <div class="lookbook-item"><img src="image/IMG_4414.JPG" alt="Lookbook 2"></div>
-            <div class="lookbook-item"><img src="image/DSC00806.JPEG" alt="Lookbook 3"></div>
+            <div class="lookbook-item large"><img src="../image/IMG_2255.JPG" alt="Lookbook 1"></div>
+            <div class="lookbook-item"><img src="../image/IMG_4414.JPG" alt="Lookbook 2"></div>
+            <div class="lookbook-item"><img src="../image/DSC00806.JPEG" alt="Lookbook 3"></div>
         </div>
     </section>
 
     <section id="about" class="about">
         <div class="about-content">
             <h2 class="about-title">COVE</h2>
-            <p class="about-text">Une marque nee de la passion pour le streetwear authentique. Chaque piece est pensee pour allier confort, style et durabilite. COVE, c'est plus qu'une marque, c'est une vision.</p>
+            <p class="about-text">A brand born from a passion for authentic streetwear. Each piece is designed to combine comfort, style and durability. COVE is more than a brand, it's a vision.</p>
         </div>
     </section>
 
     <section class="newsletter">
         <div class="newsletter-content">
-            <h3 class="newsletter-title">Restez informe</h3>
-            <p class="newsletter-text">Inscrivez-vous pour recevoir les dernieres nouveautes</p>
+            <h3 class="newsletter-title">Stay informed</h3>
+            <p class="newsletter-text">Subscribe to receive the latest news</p>
             <form class="newsletter-form">
-                <input type="email" placeholder="Votre email" class="newsletter-input">
-                <button type="submit" class="btn-primary">S'inscrire</button>
+                <input type="email" placeholder="Your email" class="newsletter-input">
+                <button type="submit" class="btn-primary">Subscribe</button>
             </form>
         </div>
     </section>
@@ -119,14 +119,14 @@
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-brand">
-                <img src="image/logo-cove.png" alt="COVE" class="footer-logo-img">
-                <p class="footer-tagline">Streetwear Premium</p>
+                <img src="../image/logo-cove.png" alt="COVE" class="footer-logo-img">
+                <p class="footer-tagline">Premium Streetwear</p>
                 <p class="footer-credit">made by Clemence</p>
                 <div class="language-selector">
-                    <span>Langue</span>
+                    <span>Language</span>
                     <div class="language-options">
-                        <a href="index.html" class="active">FR</a>
-                        <a href="en/index.html">EN</a>
+                        <a href="../index.html">FR</a>
+                        <a href="index.html" class="active">EN</a>
                     </div>
                 </div>
             </div>
@@ -139,23 +139,23 @@
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
-                    <a href="contact.html">Nous contacter</a>
+                    <a href="contact.html">Contact us</a>
                     <a href="https://www.instagram.com/covestudio.off/" target="_blank">Instagram</a>
                     <a href="https://www.tiktok.com/@covestudio.off" target="_blank">TikTok</a>
                 </div>
                 <div class="footer-column">
                     <h4>Legal</h4>
-                    <a href="cgv.html">CGV</a>
-                    <a href="mentions-legales.html">Mentions legales</a>
-                    <a href="confidentialite.html">Confidentialite</a>
+                    <a href="cgv.html">Terms of Sale</a>
+                    <a href="mentions-legales.html">Legal Notice</a>
+                    <a href="confidentialite.html">Privacy Policy</a>
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 COVE. Tous droits reserves.</p>
+            <p>&copy; 2026 COVE. All rights reserved.</p>
         </div>
     </footer>
-    <script src="js/cart.js"></script>
+    <script src="../js/cart.js"></script>
     <script>
         function showQuickNotification() {
             var notification = document.getElementById('quick-notification');

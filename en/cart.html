@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COVE - Panier</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>COVE - Cart</title>
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -18,12 +18,12 @@
                 <a href="index.html#lookbook" class="nav-link">Lookbook</a>
             </div>
             <div class="logo">
-                <a href="index.html"><img src="image/logo-cove.png" alt="COVE"></a>
+                <a href="index.html"><img src="../image/logo-cove.png" alt="COVE"></a>
             </div>
             <div class="nav-right">
                 <a href="contact.html" class="nav-link">Contact</a>
                 <a href="cart.html" class="nav-link cart-link active">
-                    Panier (<span id="cart-count">0</span>)
+                    Cart (<span id="cart-count">0</span>)
                 </a>
             </div>
         </nav>
@@ -31,7 +31,7 @@
 
     <!-- Cart Hero -->
     <section class="cart-hero">
-        <h1 class="cart-title">Panier</h1>
+        <h1 class="cart-title">Cart</h1>
     </section>
 
     <!-- Cart Section -->
@@ -44,30 +44,30 @@
 
             <!-- Cart Summary -->
             <div class="cart-summary" id="cart-summary">
-                <h3>Recapitulatif</h3>
+                <h3>Summary</h3>
                 <div class="summary-row">
-                    <span>Sous-total</span>
+                    <span>Subtotal</span>
                     <span id="subtotal">0 EUR</span>
                 </div>
                 <div class="summary-row">
-                    <span>Livraison</span>
-                    <span id="shipping">Gratuite</span>
+                    <span>Shipping</span>
+                    <span id="shipping">Free</span>
                 </div>
                 <div class="summary-row total">
                     <span>Total</span>
                     <span id="total">0 EUR</span>
                 </div>
                 <button class="btn-checkout" id="checkout-btn" onclick="proceedToCheckout()">
-                    Passer la commande
+                    Checkout
                 </button>
-                <a href="index.html#collection" class="btn-continue">Continuer mes achats</a>
+                <a href="index.html#collection" class="btn-continue">Continue shopping</a>
             </div>
         </div>
 
         <!-- Empty Cart Message -->
         <div class="cart-empty" id="cart-empty" style="display: none;">
-            <p>Votre panier est vide</p>
-            <a href="index.html#collection" class="btn-primary">Voir la collection</a>
+            <p>Your cart is empty</p>
+            <a href="index.html#collection" class="btn-primary">View collection</a>
         </div>
     </section>
 
@@ -75,18 +75,18 @@
     <div class="checkout-modal" id="checkout-modal">
         <div class="checkout-content">
             <button class="checkout-close" onclick="closeCheckout()">&times;</button>
-            <h2>Finaliser la commande</h2>
+            <h2>Complete your order</h2>
 
             <form id="checkout-form" onsubmit="submitOrder(event)">
                 <div class="checkout-section">
-                    <h3>Informations de livraison</h3>
+                    <h3>Shipping information</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="firstName">Prenom</label>
+                            <label for="firstName">First name</label>
                             <input type="text" id="firstName" name="firstName" required>
                         </div>
                         <div class="form-group">
-                            <label for="lastName">Nom</label>
+                            <label for="lastName">Last name</label>
                             <input type="text" id="lastName" name="lastName" required>
                         </div>
                     </div>
@@ -95,51 +95,51 @@
                         <input type="email" id="email" name="email" required>
                     </div>
                     <div class="form-group">
-                        <label for="phone">Telephone</label>
+                        <label for="phone">Phone</label>
                         <input type="tel" id="phone" name="phone" required>
                     </div>
                     <div class="form-group">
-                        <label for="address">Adresse</label>
+                        <label for="address">Address</label>
                         <input type="text" id="address" name="address" required>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="city">Ville</label>
+                            <label for="city">City</label>
                             <input type="text" id="city" name="city" required>
                         </div>
                         <div class="form-group">
-                            <label for="postalCode">Code postal</label>
+                            <label for="postalCode">Postal code</label>
                             <input type="text" id="postalCode" name="postalCode" required>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="country">Pays</label>
+                        <label for="country">Country</label>
                         <select id="country" name="country" required>
                             <option value="FR">France</option>
-                            <option value="BE">Belgique</option>
-                            <option value="CH">Suisse</option>
+                            <option value="BE">Belgium</option>
+                            <option value="CH">Switzerland</option>
                             <option value="LU">Luxembourg</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="checkout-section">
-                    <h3>Paiement</h3>
-                    <p class="payment-info">Paiement securise par Stripe</p>
+                    <h3>Payment</h3>
+                    <p class="payment-info">Secure payment by Stripe</p>
                     <div id="card-element">
                         <!-- Stripe Card Element will be inserted here -->
                     </div>
                     <div class="payment-placeholder">
-                        <p>Mode demo - Aucun paiement reel</p>
+                        <p>Demo mode - No real payment</p>
                     </div>
                 </div>
 
                 <div class="checkout-total">
-                    <span>Total a payer:</span>
+                    <span>Total to pay:</span>
                     <span id="checkout-total">0 EUR</span>
                 </div>
 
-                <button type="submit" class="btn-pay">Confirmer et payer</button>
+                <button type="submit" class="btn-pay">Confirm and pay</button>
             </form>
         </div>
     </div>
@@ -148,10 +148,10 @@
     <div class="confirmation-modal" id="confirmation-modal">
         <div class="confirmation-content">
             <div class="confirmation-icon">&#10003;</div>
-            <h2>Commande confirmee !</h2>
-            <p>Merci pour votre achat. Vous recevrez un email de confirmation.</p>
-            <p class="order-number">Commande #<span id="order-number"></span></p>
-            <a href="index.html#collection" class="btn-primary">Retour a la collection</a>
+            <h2>Order confirmed!</h2>
+            <p>Thank you for your purchase. You will receive a confirmation email.</p>
+            <p class="order-number">Order #<span id="order-number"></span></p>
+            <a href="index.html#collection" class="btn-primary">Back to collection</a>
         </div>
     </div>
 
@@ -159,14 +159,14 @@
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-brand">
-                <img src="image/logo-cove.png" alt="COVE" class="footer-logo-img">
-                <p class="footer-tagline">Streetwear Premium</p>
+                <img src="../image/logo-cove.png" alt="COVE" class="footer-logo-img">
+                <p class="footer-tagline">Premium Streetwear</p>
                 <p class="footer-credit">made by Clemence</p>
                 <div class="language-selector">
-                    <span>Langue</span>
+                    <span>Language</span>
                     <div class="language-options">
-                        <a href="cart.html" class="active">FR</a>
-                        <a href="en/cart.html">EN</a>
+                        <a href="../cart.html">FR</a>
+                        <a href="cart.html" class="active">EN</a>
                     </div>
                 </div>
             </div>
@@ -179,25 +179,25 @@
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
-                    <a href="contact.html">Nous contacter</a>
+                    <a href="contact.html">Contact us</a>
                     <a href="https://www.instagram.com/covestudio.off/" target="_blank">Instagram</a>
                     <a href="https://www.tiktok.com/@covestudio.off" target="_blank">TikTok</a>
                 </div>
                 <div class="footer-column">
                     <h4>Legal</h4>
-                    <a href="cgv.html">CGV</a>
-                    <a href="mentions-legales.html">Mentions legales</a>
-                    <a href="confidentialite.html">Confidentialite</a>
+                    <a href="cgv.html">Terms of Sale</a>
+                    <a href="mentions-legales.html">Legal Notice</a>
+                    <a href="confidentialite.html">Privacy Policy</a>
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 COVE. Tous droits reserves.</p>
+            <p>&copy; 2026 COVE. All rights reserved.</p>
         </div>
     </footer>
 
-    <script src="js/cart.js"></script>
-    <script src="js/api.js"></script>
+    <script src="../js/cart.js"></script>
+    <script src="../js/api.js"></script>
     <script>
         // Render cart items
         function renderCart() {
@@ -265,9 +265,8 @@
 
             const submitBtn = e.target.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Traitement...';
+            submitBtn.textContent = 'Processing...';
 
-            // Récupérer les données du formulaire
             const formData = new FormData(e.target);
             const customer = {
                 firstName: formData.get('firstName'),
@@ -282,35 +281,30 @@
                 country: formData.get('country')
             };
 
-            // Préparer les items
             const items = cart.map(item => ({
                 id: item.id,
                 quantity: item.quantity
             }));
 
             try {
-                // Appeler l'API backend
                 const result = await api.checkout(items, customer, shipping);
 
                 if (result.success) {
-                    // Si Stripe est configuré, rediriger vers Stripe
                     if (result.url) {
                         window.location.href = result.url;
                         return;
                     }
 
-                    // Mode démo - afficher la confirmation
                     document.getElementById('order-number').textContent = result.order.orderNumber;
                     closeCheckout();
                     document.getElementById('confirmation-modal').classList.add('active');
                     clearCart();
                     renderCart();
                 } else {
-                    alert('Erreur: ' + (result.error || 'Une erreur est survenue'));
+                    alert('Error: ' + (result.error || 'An error occurred'));
                 }
             } catch (error) {
                 console.error('Checkout error:', error);
-                // Fallback mode local si le backend n'est pas disponible
                 const orderNumber = 'COVE-' + Date.now().toString(36).toUpperCase();
                 document.getElementById('order-number').textContent = orderNumber;
                 closeCheckout();
@@ -320,7 +314,7 @@
             }
 
             submitBtn.disabled = false;
-            submitBtn.textContent = 'Confirmer et payer';
+            submitBtn.textContent = 'Confirm and pay';
         }
 
         // Close confirmation and redirect
