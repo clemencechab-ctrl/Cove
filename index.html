@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <nav class="nav">
             <div class="nav-left">
@@ -27,7 +26,6 @@
         </nav>
     </header>
 
-    <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
             <h1 class="hero-title">NOUVELLE COLLECTION</h1>
@@ -39,34 +37,27 @@
         </div>
     </section>
 
-    <!-- Marquee -->
     <div class="marquee">
         <div class="marquee-content">
-            <span>COVE</span>
-            <span>STREETWEAR</span>
-            <span>PREMIUM</span>
-            <span>COVE</span>
-            <span>STREETWEAR</span>
-            <span>PREMIUM</span>
-            <span>COVE</span>
-            <span>STREETWEAR</span>
-            <span>PREMIUM</span>
+            <span>COVE</span><span>STREETWEAR</span><span>PREMIUM</span>
+            <span>COVE</span><span>STREETWEAR</span><span>PREMIUM</span>
+            <span>COVE</span><span>STREETWEAR</span><span>PREMIUM</span>
         </div>
     </div>
 
-    <!-- Collection / Boutique Section -->
     <section id="collection" class="shop-section">
         <div class="section-header">
             <h2 class="section-title">Collection</h2>
             <p class="section-subtitle">Automne / Hiver 2026</p>
         </div>
-
         <div class="shop-grid">
-            <!-- Product 1 - T-Shirt -->
             <article class="shop-card" data-category="tops">
                 <a href="produit-tshirt.html" class="shop-card-link">
                     <div class="shop-card-image">
                         <img src="image/t-shirt-chat-drole-2.webp" alt="T-Shirt Chat">
+                        <div class="shop-card-overlay">
+                            <button class="btn-quick-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart(1, 'T-Shirt Chat', 65, 'image/t-shirt-chat-drole-2.webp'); showQuickNotification();">Ajouter au panier</button>
+                        </div>
                     </div>
                     <div class="shop-card-info">
                         <h3 class="shop-card-name">T-Shirt Chat</h3>
@@ -74,12 +65,13 @@
                     </div>
                 </a>
             </article>
-
-            <!-- Product 2 - Hoodie -->
             <article class="shop-card" data-category="tops">
                 <a href="produit-hoodie.html" class="shop-card-link">
                     <div class="shop-card-image">
                         <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80" alt="Hoodie Essential">
+                        <div class="shop-card-overlay">
+                            <button class="btn-quick-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart(2, 'Hoodie Essential', 120, 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80'); showQuickNotification();">Ajouter au panier</button>
+                        </div>
                     </div>
                     <div class="shop-card-info">
                         <h3 class="shop-card-name">Hoodie Essential</h3>
@@ -90,38 +82,29 @@
         </div>
     </section>
 
-    <!-- Lookbook Section -->
+    <div class="quick-notification" id="quick-notification">
+        <span>&#10003;</span> Article ajoute au panier
+    </div>
+
     <section id="lookbook" class="lookbook">
         <div class="section-header">
             <h2 class="section-title">Lookbook</h2>
             <p class="section-subtitle">AW26</p>
         </div>
         <div class="lookbook-grid">
-            <div class="lookbook-item large">
-                <img src="image/IMG_2255.JPG" alt="Lookbook 1">
-            </div>
-            <div class="lookbook-item">
-                <img src="image/IMG_4414.JPG" alt="Lookbook 2">
-            </div>
-            <div class="lookbook-item">
-                <img src="image/DSC00806.JPEG" alt="Lookbook 3">
-            </div>
+            <div class="lookbook-item large"><img src="image/IMG_2255.JPG" alt="Lookbook 1"></div>
+            <div class="lookbook-item"><img src="image/IMG_4414.JPG" alt="Lookbook 2"></div>
+            <div class="lookbook-item"><img src="image/DSC00806.JPEG" alt="Lookbook 3"></div>
         </div>
     </section>
 
-    <!-- About Section -->
     <section id="about" class="about">
         <div class="about-content">
             <h2 class="about-title">COVE</h2>
-            <p class="about-text">
-                Une marque nee de la passion pour le streetwear authentique.
-                Chaque piece est pensee pour allier confort, style et durabilite.
-                COVE, c'est plus qu'une marque, c'est une vision.
-            </p>
+            <p class="about-text">Une marque nee de la passion pour le streetwear authentique. Chaque piece est pensee pour allier confort, style et durabilite. COVE, c'est plus qu'une marque, c'est une vision.</p>
         </div>
     </section>
 
-    <!-- Newsletter -->
     <section class="newsletter">
         <div class="newsletter-content">
             <h3 class="newsletter-title">Restez informe</h3>
@@ -133,7 +116,6 @@
         </div>
     </section>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-brand">
@@ -167,5 +149,14 @@
         </div>
     </footer>
     <script src="js/cart.js"></script>
+    <script>
+        function showQuickNotification() {
+            var notification = document.getElementById('quick-notification');
+            notification.classList.add('show');
+            setTimeout(function() {
+                notification.classList.remove('show');
+            }, 2500);
+        }
+    </script>
 </body>
 </html>
