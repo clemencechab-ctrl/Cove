@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
 
-// Initialiser Stripe si la clé est configurée
+// Initialiser Stripe si la cle est configuree
 let stripe = null;
 if (process.env.STRIPE_SECRET_KEY) {
     stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 }
 
-// POST /api/checkout/create-session - Créer une session Stripe Checkout
+// POST /api/checkout/create-session - Creer une session Stripe Checkout
 router.post('/create-session', async (req, res) => {
     try {
         const { items, customer, shipping } = req.body;
@@ -21,12 +21,12 @@ router.post('/create-session', async (req, res) => {
             });
         }
 
-        // Vérifier les produits et construire les line items
+        // Verifier les produits et construire les line items
         const lineItems = [];
         let subtotal = 0;
 
         for (const item of items) {
-            const product = store.getProductById(item.id);
+            const product = await store.getProductById(item.id);
 
             if (!product) {
                 return res.status(400).json({
@@ -43,7 +43,7 @@ router.post('/create-session', async (req, res) => {
                         description: product.description,
                         images: product.image.startsWith('http') ? [product.image] : []
                     },
-                    unit_amount: Math.round(product.price * 100) // Stripe utilise les centimes
+                    unit_amount: Math.round(product.price * 100)
                 },
                 quantity: item.quantity
             });
@@ -51,7 +51,7 @@ router.post('/create-session', async (req, res) => {
             subtotal += product.price * item.quantity;
         }
 
-        // Ajouter les frais de livraison si nécessaire
+        // Ajouter les frais de livraison si necessaire
         if (subtotal < 100) {
             lineItems.push({
                 price_data: {
@@ -59,16 +59,27 @@ router.post('/create-session', async (req, res) => {
                     product_data: {
                         name: 'Frais de livraison'
                     },
-                    unit_amount: 590 // 5.90€
+                    unit_amount: 590
                 },
                 quantity: 1
             });
         }
 
-        // Si Stripe n'est pas configuré, simuler le paiement
+        // Si Stripe n'est pas configure, simuler le paiement
         if (!stripe) {
-            // Créer la commande directement (mode démo)
-            const order = store.createOrder({
+            const orderItems = [];
+            for (const item of items) {
+                const product = await store.getProductById(item.id);
+                orderItems.push({
+                    productId: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: item.quantity,
+                    image: product.image
+                });
+            }
+
+            const order = await store.createOrder({
                 customer: {
                     email: customer?.email || 'demo@cove.com',
                     firstName: customer?.firstName || 'Demo',
@@ -81,28 +92,19 @@ router.post('/create-session', async (req, res) => {
                     postalCode: shipping?.postalCode || '',
                     country: shipping?.country || 'FR'
                 },
-                items: items.map(item => {
-                    const product = store.getProductById(item.id);
-                    return {
-                        productId: product.id,
-                        name: product.name,
-                        price: product.price,
-                        quantity: item.quantity,
-                        image: product.image
-                    };
-                }),
+                items: orderItems,
                 subtotal,
                 shippingCost: subtotal >= 100 ? 0 : 5.90,
                 total: subtotal + (subtotal >= 100 ? 0 : 5.90)
             });
 
-            // Mettre à jour le stock
+            // Mettre a jour le stock
             for (const item of items) {
-                store.updateProductStock(item.id, item.quantity);
+                await store.updateProductStock(item.id, item.quantity);
             }
 
-            // Marquer comme payé (mode démo)
-            store.updateOrderPayment(order.id, {
+            // Marquer comme paye (mode demo)
+            await store.updateOrderPayment(order.id, {
                 paymentIntentId: 'demo_' + Date.now()
             });
 
@@ -118,7 +120,7 @@ router.post('/create-session', async (req, res) => {
             });
         }
 
-        // Créer la session Stripe Checkout
+        // Creer la session Stripe Checkout
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             line_items: lineItems,
@@ -144,14 +146,14 @@ router.post('/create-session', async (req, res) => {
     }
 });
 
-// POST /api/checkout/verify - Vérifier le statut d'un paiement
+// POST /api/checkout/verify - Verifier le statut d'un paiement
 router.post('/verify', async (req, res) => {
     try {
         const { sessionId, orderNumber } = req.body;
 
-        // Mode démo
+        // Mode demo
         if (orderNumber) {
-            const order = store.getOrderByNumber(orderNumber);
+            const order = await store.getOrderByNumber(orderNumber);
             if (order) {
                 return res.json({
                     success: true,
@@ -165,7 +167,7 @@ router.post('/verify', async (req, res) => {
             }
         }
 
-        // Vérifier avec Stripe
+        // Verifier avec Stripe
         if (!stripe || !sessionId) {
             return res.status(400).json({
                 success: false,

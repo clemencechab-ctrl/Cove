@@ -2108,3 +2108,184 @@ img {
     color: var(--color-text);
     border-color: var(--color-text);
 }
+
+/* ==========================================
+   Admin Dashboard
+   ========================================== */
+.admin-section {
+    padding: 3rem 3rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.stat-card {
+    background: #0a0a0a;
+    border: 1px solid var(--color-border);
+    padding: 2rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.admin-clients {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.client-card {
+    background: #0a0a0a;
+    border: 1px solid var(--color-border);
+    padding: 2rem;
+}
+
+.client-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.client-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.client-email {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.client-orders {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.order-row {
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    background: #111;
+}
+
+.order-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.order-number {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.order-date {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.order-total {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.order-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #000;
+    border-radius: 3px;
+}
+
+.status-select {
+    padding: 0.4rem 0.6rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.status-select:focus {
+    outline: none;
+    border-color: var(--color-text);
+}
+
+.status-select option {
+    background: #111;
+    color: var(--color-text);
+}
+
+.order-items {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.order-item-pill {
+    padding: 0.25rem 0.6rem;
+    background: #1a1a1a;
+    border: 1px solid var(--color-border);
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+/* Admin Responsive */
+@media (max-width: 768px) {
+    .admin-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-section {
+        padding: 2rem 1.5rem;
+    }
+
+    .client-card {
+        padding: 1.5rem;
+    }
+
+    .order-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .order-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

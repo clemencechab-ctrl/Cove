@@ -1,16 +1,18 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 
 // Import routes
 const productRoutes = require('./src/routes/products');
 const orderRoutes = require('./src/routes/orders');
 const checkoutRoutes = require('./src/routes/checkout');
 const contactRoutes = require('./src/routes/contact');
+const adminRoutes = require('./src/routes/admin');
 
 // Initialize Express
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
@@ -32,6 +34,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -42,9 +45,16 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// 404 handler
+// Serve static frontend files
+const frontendPath = path.join(__dirname, '..');
+app.use(express.static(frontendPath));
+
+// Fallback: serve index.html for non-API routes
 app.use((req, res) => {
-    res.status(404).json({ error: 'Route not found' });
+    if (req.path.startsWith('/api')) {
+        return res.status(404).json({ error: 'Route not found' });
+    }
+    res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 // Error handler

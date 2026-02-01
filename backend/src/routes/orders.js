@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
 
-// POST /api/orders - Créer une commande
-router.post('/', (req, res) => {
+// POST /api/orders - Creer une commande
+router.post('/', async (req, res) => {
     try {
         const { customer, items, shipping } = req.body;
 
@@ -22,12 +22,12 @@ router.post('/', (req, res) => {
             });
         }
 
-        // Vérifier les produits et calculer le total
+        // Verifier les produits et calculer le total
         let subtotal = 0;
         const orderItems = [];
 
         for (const item of items) {
-            const product = store.getProductById(item.id);
+            const product = await store.getProductById(item.id);
 
             if (!product) {
                 return res.status(400).json({
@@ -58,8 +58,8 @@ router.post('/', (req, res) => {
         const shippingCost = subtotal >= 100 ? 0 : 5.90;
         const total = subtotal + shippingCost;
 
-        // Créer la commande
-        const order = store.createOrder({
+        // Creer la commande
+        const order = await store.createOrder({
             customer: {
                 email: customer.email,
                 firstName: customer.firstName,
@@ -78,9 +78,9 @@ router.post('/', (req, res) => {
             total
         });
 
-        // Mettre à jour le stock
+        // Mettre a jour le stock
         for (const item of items) {
-            store.updateProductStock(item.id, item.quantity);
+            await store.updateProductStock(item.id, item.quantity);
         }
 
         res.status(201).json({
@@ -98,10 +98,10 @@ router.post('/', (req, res) => {
     }
 });
 
-// GET /api/orders/:orderNumber - Détail d'une commande
-router.get('/:orderNumber', (req, res) => {
+// GET /api/orders/:orderNumber - Detail d'une commande
+router.get('/:orderNumber', async (req, res) => {
     try {
-        const order = store.getOrderByNumber(req.params.orderNumber);
+        const order = await store.getOrderByNumber(req.params.orderNumber);
 
         if (!order) {
             return res.status(404).json({
@@ -117,9 +117,9 @@ router.get('/:orderNumber', (req, res) => {
 });
 
 // GET /api/orders/customer/:email - Commandes d'un client
-router.get('/customer/:email', (req, res) => {
+router.get('/customer/:email', async (req, res) => {
     try {
-        const orders = store.getOrdersByEmail(req.params.email);
+        const orders = await store.getOrdersByEmail(req.params.email);
 
         res.json({
             success: true,

@@ -3,14 +3,15 @@ const router = express.Router();
 const store = require('../data/store');
 
 // GET /api/products - Liste tous les produits
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
     try {
-        let products = store.getProducts();
+        let products;
 
-        // Filtre par catégorie
         const { category } = req.query;
         if (category && category !== 'all') {
-            products = store.getProductsByCategory(category);
+            products = await store.getProductsByCategory(category);
+        } else {
+            products = await store.getProducts();
         }
 
         res.json({
@@ -23,10 +24,10 @@ router.get('/', (req, res) => {
     }
 });
 
-// GET /api/products/:id - Détail d'un produit
-router.get('/:id', (req, res) => {
+// GET /api/products/:id - Detail d'un produit
+router.get('/:id', async (req, res) => {
     try {
-        const product = store.getProductById(req.params.id);
+        const product = await store.getProductById(req.params.id);
 
         if (!product) {
             return res.status(404).json({
@@ -41,10 +42,10 @@ router.get('/:id', (req, res) => {
     }
 });
 
-// GET /api/products/category/:category - Produits par catégorie
-router.get('/category/:category', (req, res) => {
+// GET /api/products/category/:category - Produits par categorie
+router.get('/category/:category', async (req, res) => {
     try {
-        const products = store.getProductsByCategory(req.params.category);
+        const products = await store.getProductsByCategory(req.params.category);
 
         res.json({
             success: true,
