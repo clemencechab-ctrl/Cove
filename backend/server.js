@@ -9,6 +9,7 @@ const orderRoutes = require('./src/routes/orders');
 const checkoutRoutes = require('./src/routes/checkout');
 const contactRoutes = require('./src/routes/contact');
 const adminRoutes = require('./src/routes/admin');
+const userRoutes = require('./src/routes/users');
 
 // Initialize Express
 const app = express();
@@ -35,6 +36,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/users', userRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

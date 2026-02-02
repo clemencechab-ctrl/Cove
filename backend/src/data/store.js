@@ -3,6 +3,7 @@ const { db } = require('../config/firebase');
 const productsRef = db.ref('products');
 const ordersRef = db.ref('orders');
 const counterRef = db.ref('orderCounter');
+const usersRef = db.ref('users');
 
 module.exports = {
     // Products
@@ -113,6 +114,29 @@ module.exports = {
         };
         await ordersRef.child(foundKey).update(updates);
         return { ...foundOrder, ...updates };
+    },
+
+    // Users
+    getUserByUid: async (uid) => {
+        const snapshot = await usersRef.child(uid).once('value');
+        return snapshot.val();
+    },
+
+    createUser: async (uid, userData) => {
+        const user = {
+            email: userData.email,
+            role: userData.role || 'client',
+            createdAt: new Date().toISOString(),
+            lastLogin: new Date().toISOString()
+        };
+        await usersRef.child(uid).set(user);
+        return user;
+    },
+
+    updateLastLogin: async (uid) => {
+        const lastLogin = new Date().toISOString();
+        await usersRef.child(uid).update({ lastLogin });
+        return lastLogin;
     },
 
     updateOrderPayment: async (id, paymentData) => {
