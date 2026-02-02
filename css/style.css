@@ -2289,3 +2289,149 @@ img {
         align-items: flex-start;
     }
 }
+
+/* ==========================================
+   Account Page (Login / Register / Profile)
+   ========================================== */
+.auth-hero {
+    padding: 10rem 3rem 4rem;
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.auth-title {
+    font-size: 3rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.auth-subtitle {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.1em;
+}
+
+.auth-section {
+    padding: 4rem 3rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.auth-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.auth-tab {
+    padding: 0.7rem 1.5rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.auth-tab:hover,
+.auth-tab.active {
+    border-color: var(--color-text);
+    color: var(--color-text);
+}
+
+.auth-form {
+    display: none;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.auth-form.active {
+    display: flex;
+}
+
+.auth-error {
+    font-size: 0.85rem;
+    color: #e74c3c;
+    min-height: 1.2em;
+}
+
+.profile-section {
+    padding: 4rem 3rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.profile-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.profile-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.profile-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.profile-value {
+    font-size: 1rem;
+    color: var(--color-text);
+}
+
+.btn-logout {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: transparent;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-logout:hover {
+    background: #e74c3c;
+    color: var(--color-bg);
+}
+
+/* Account Page Responsive */
+@media (max-width: 768px) {
+    .auth-hero {
+        padding: 8rem 1.5rem 3rem;
+    }
+
+    .auth-title {
+        font-size: 2rem;
+    }
+
+    .auth-section {
+        padding: 3rem 1.5rem;
+    }
+
+    .profile-section {
+        padding: 3rem 1.5rem;
+    }
+
+    .profile-info {
+        grid-template-columns: 1fr;
+    }
+}

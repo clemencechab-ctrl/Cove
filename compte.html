@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVE - Mon Compte</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-left">
+                <a href="index.html#collection" class="nav-link">Collection</a>
+                <a href="index.html#lookbook" class="nav-link">Lookbook</a>
+            </div>
+            <div class="logo">
+                <a href="index.html"><img src="image/logo-cove.png" alt="COVE"></a>
+            </div>
+            <div class="nav-right">
+                <a href="admin.html" class="nav-link">Administration</a>
+                <a href="contact.html" class="nav-link">Contact</a>
+                <a href="compte.html" class="nav-link active">Compte</a>
+                <a href="cart.html" class="nav-link">Panier (<span id="cart-count">0</span>)</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="auth-hero">
+        <h1 class="auth-title">Mon Compte</h1>
+        <p class="auth-subtitle">Connectez-vous ou creez votre compte</p>
+    </section>
+
+    <!-- Auth Section (visible si non connecte) -->
+    <section class="auth-section" id="auth-section">
+        <div class="auth-tabs">
+            <button class="auth-tab active" data-tab="login-form">Connexion</button>
+            <button class="auth-tab" data-tab="register-form">Inscription</button>
+        </div>
+
+        <form class="auth-form active" id="login-form">
+            <div class="form-group">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" required placeholder="votre@email.com">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Mot de passe</label>
+                <input type="password" id="login-password" required placeholder="Votre mot de passe">
+            </div>
+            <p class="auth-error" id="login-error"
+               data-required="Veuillez remplir tous les champs."
+               data-invalid="Email ou mot de passe incorrect."></p>
+            <button type="submit" class="btn-primary">Se connecter</button>
+        </form>
+
+        <form class="auth-form" id="register-form">
+            <div class="form-group">
+                <label for="register-email">Email</label>
+                <input type="email" id="register-email" required placeholder="votre@email.com">
+            </div>
+            <div class="form-group">
+                <label for="register-password">Mot de passe</label>
+                <input type="password" id="register-password" required placeholder="Minimum 6 caracteres">
+            </div>
+            <div class="form-group">
+                <label for="register-confirm">Confirmer le mot de passe</label>
+                <input type="password" id="register-confirm" required placeholder="Confirmez votre mot de passe">
+            </div>
+            <p class="auth-error" id="register-error"
+               data-required="Veuillez remplir tous les champs."
+               data-mismatch="Les mots de passe ne correspondent pas."
+               data-short="Le mot de passe doit contenir au moins 6 caracteres."
+               data-fail="Erreur lors de l'inscription."></p>
+            <button type="submit" class="btn-primary">S'inscrire</button>
+        </form>
+    </section>
+
+    <!-- Profile Section (visible si connecte) -->
+    <section class="profile-section" id="profile-section" style="display: none;">
+        <div class="profile-info">
+            <div class="profile-item">
+                <span class="profile-label">Email</span>
+                <span class="profile-value" id="profile-email">-</span>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Role</span>
+                <span class="profile-value" id="profile-role">-</span>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Date de creation</span>
+                <span class="profile-value" id="profile-created">-</span>
+            </div>
+            <div class="profile-item">
+                <span class="profile-label">Derniere connexion</span>
+                <span class="profile-value" id="profile-login">-</span>
+            </div>
+        </div>
+        <button class="btn-logout" id="btn-logout">Se deconnecter</button>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <img src="image/logo-cove.png" alt="COVE" class="footer-logo-img">
+                <p class="footer-tagline">Streetwear Premium</p>
+                <p class="footer-credit">made by Clemence</p>
+                <div class="language-selector">
+                    <span>Langue</span>
+                    <div class="language-options">
+                        <a href="compte.html" class="active">FR</a>
+                        <a href="en/compte.html">EN</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Navigation</h4>
+                    <a href="index.html">Collection</a>
+                    <a href="index.html#lookbook">Lookbook</a>
+                    <a href="about.html">About</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Contact</h4>
+                    <a href="mailto:contact@cove.com">contact@cove.com</a>
+                    <a href="https://www.instagram.com/covestudio.off/" target="_blank">Instagram</a>
+                    <a href="https://www.tiktok.com/@covestudio.off" target="_blank">TikTok</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <a href="cgv.html">CGV</a>
+                    <a href="mentions-legales.html">Mentions legales</a>
+                    <a href="confidentialite.html">Confidentialite</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 COVE. Tous droits reserves.</p>
+        </div>
+    </footer>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/cart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            auth.init();
+        });
+    </script>
+</body>
+</html>

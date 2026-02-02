@@ -23,6 +23,7 @@
             <div class="nav-right">
                 <a href="admin.html" class="nav-link">Administration</a>
                 <a href="contact.html" class="nav-link">Contact</a>
+                <a href="compte.html" class="nav-link">Account</a>
                 <a href="cart.html" class="nav-link">Cart (<span id="cart-count">0</span>)</a>
             </div>
         </nav>
@@ -34,20 +35,14 @@
             <!-- Product Gallery -->
             <div class="product-gallery">
                 <div class="product-main-image">
-                    <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80" alt="Essential Hoodie" id="main-image">
+                    <img src="../image/hoodie front.JPG" alt="Essential Hoodie" id="main-image">
                 </div>
                 <div class="product-thumbnails">
-                    <div class="thumbnail active" onclick="changeImage('https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80', this)">
-                        <img src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80" alt="Hoodie View 1">
+                    <div class="thumbnail active" onclick="changeImage('../image/hoodie front.JPG', this)">
+                        <img src="../image/hoodie front.JPG" alt="Hoodie Front">
                     </div>
-                    <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&q=80', this)">
-                        <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=800&q=80" alt="Hoodie View 2">
-                    </div>
-                    <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?w=800&q=80', this)">
-                        <img src="https://images.unsplash.com/photo-1578768079052-aa76e52ff62e?w=800&q=80" alt="Hoodie View 3">
-                    </div>
-                    <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1509942774463-acf339cf87d5?w=800&q=80', this)">
-                        <img src="https://images.unsplash.com/photo-1509942774463-acf339cf87d5?w=800&q=80" alt="Hoodie View 4">
+                    <div class="thumbnail" onclick="changeImage('../image/hoodie back.JPG', this)">
+                        <img src="../image/hoodie back.JPG" alt="Hoodie Back">
                     </div>
                 </div>
             </div>
@@ -96,7 +91,7 @@
                 </div>
 
                 <div class="product-actions">
-                    <button class="btn-add-to-cart" onclick="addToCart(2, 'Essential Hoodie', 120, 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&q=80'); showNotification();">
+                    <button class="btn-add-to-cart" onclick="addToCart(2, 'Essential Hoodie', 120, '../image/hoodie front.JPG'); showNotification();">
                         Add to cart
                     </button>
                 </div>

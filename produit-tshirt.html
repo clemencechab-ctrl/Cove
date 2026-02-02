@@ -23,6 +23,7 @@
             <div class="nav-right">
                 <a href="admin.html" class="nav-link">Administration</a>
                 <a href="contact.html" class="nav-link">Contact</a>
+                <a href="compte.html" class="nav-link">Compte</a>
                 <a href="cart.html" class="nav-link">Panier (<span id="cart-count">0</span>)</a>
             </div>
         </nav>
@@ -34,20 +35,14 @@
             <!-- Product Gallery -->
             <div class="product-gallery">
                 <div class="product-main-image">
-                    <img src="image/t-shirt-chat-drole-2.webp" alt="T-Shirt Chat" id="main-image">
+                    <img src="image/t shirt front.JPG" alt="T-Shirt Chat" id="main-image">
                 </div>
                 <div class="product-thumbnails">
-                    <div class="thumbnail active" onclick="changeImage('image/t-shirt-chat-drole-2.webp', this)">
-                        <img src="image/t-shirt-chat-drole-2.webp" alt="T-Shirt Chat Vue 1">
+                    <div class="thumbnail active" onclick="changeImage('image/t shirt front.JPG', this)">
+                        <img src="image/t shirt front.JPG" alt="T-Shirt Chat Vue Face">
                     </div>
-                    <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80', this)">
-                        <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80" alt="T-Shirt Chat Vue 2">
-                    </div>
-                    <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80', this)">
-                        <img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80" alt="T-Shirt Chat Vue 3">
-                    </div>
-                    <div class="thumbnail" onclick="changeImage('https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800&q=80', this)">
-                        <img src="https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800&q=80" alt="T-Shirt Chat Vue 4">
+                    <div class="thumbnail" onclick="changeImage('image/tshirt back.JPG', this)">
+                        <img src="image/tshirt back.JPG" alt="T-Shirt Chat Vue Dos">
                     </div>
                 </div>
             </div>
@@ -96,7 +91,7 @@
                 </div>
 
                 <div class="product-actions">
-                    <button class="btn-add-to-cart" onclick="addToCart(1, 'T-Shirt Chat', 65, 'image/t-shirt-chat-drole-2.webp'); showNotification();">
+                    <button class="btn-add-to-cart" onclick="addToCart(1, 'T-Shirt Chat', 65, 'image/t shirt front.JPG'); showNotification();">
                         Ajouter au panier
                     </button>
                 </div>
