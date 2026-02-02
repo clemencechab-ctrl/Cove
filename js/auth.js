@@ -59,12 +59,11 @@ const auth = {
         if (profileSection) profileSection.style.display = 'block';
 
         const result = await api.getProfile();
-        if (result.success && result.user) {
-            const user = result.user;
-            document.getElementById('profile-email').textContent = user.email || '-';
-            document.getElementById('profile-role').textContent = user.role || '-';
-            document.getElementById('profile-created').textContent = user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-';
-            document.getElementById('profile-login').textContent = user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : '-';
+        if (result.email) {
+            document.getElementById('profile-email').textContent = result.email || '-';
+            document.getElementById('profile-role').textContent = result.role || '-';
+            document.getElementById('profile-created').textContent = result.createdAt ? new Date(result.createdAt).toLocaleDateString() : '-';
+            document.getElementById('profile-login').textContent = result.lastLogin ? new Date(result.lastLogin).toLocaleDateString() : '-';
         } else {
             // Token invalide
             this.handleLogout();
@@ -83,8 +82,8 @@ const auth = {
         }
 
         const result = await api.login(email, password);
-        if (result.success && result.token) {
-            localStorage.setItem('coveToken', result.token);
+        if (result.idToken) {
+            localStorage.setItem('coveToken', result.idToken);
             localStorage.setItem('coveUser', JSON.stringify(result.user));
             this.showProfile();
         } else {
@@ -115,8 +114,8 @@ const auth = {
         }
 
         const result = await api.register(email, password);
-        if (result.success && result.token) {
-            localStorage.setItem('coveToken', result.token);
+        if (result.idToken) {
+            localStorage.setItem('coveToken', result.idToken);
             localStorage.setItem('coveUser', JSON.stringify(result.user));
             this.showProfile();
         } else {
