@@ -98,6 +98,14 @@
             </div>
         </div>
         <button class="btn-logout" id="btn-logout">Se deconnecter</button>
+
+        <!-- Section Commandes -->
+        <div class="orders-section">
+            <h2 class="orders-title">Mes Commandes</h2>
+            <div class="orders-list" id="orders-list">
+                <p class="orders-loading">Chargement des commandes...</p>
+            </div>
+        </div>
     </section>
 
     <footer class="footer">
@@ -143,8 +151,85 @@
     <script src="js/auth.js"></script>
     <script src="js/cart.js"></script>
     <script>
+        // Charger les commandes de l'utilisateur
+        async function loadOrders() {
+            const ordersList = document.getElementById('orders-list');
+
+            const result = await api.getMyOrders();
+
+            if (!result.success || !result.orders || result.orders.length === 0) {
+                ordersList.innerHTML = '<p class="orders-empty">Aucune commande pour le moment.</p>';
+                return;
+            }
+
+            const statusLabels = {
+                pending: { label: 'En attente', class: 'status-pending' },
+                confirmed: { label: 'Confirmee', class: 'status-confirmed' },
+                processing: { label: 'En preparation', class: 'status-processing' },
+                shipped: { label: 'Expediee', class: 'status-shipped' },
+                delivered: { label: 'Livree', class: 'status-delivered' },
+                cancelled: { label: 'Annulee', class: 'status-cancelled' }
+            };
+
+            ordersList.innerHTML = result.orders.map(order => {
+                const status = statusLabels[order.status] || { label: order.status, class: '' };
+                const date = new Date(order.createdAt).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                const itemsHtml = order.items.map(item => `
+                    <div class="order-product">
+                        <span class="product-name">${item.name}</span>
+                        <span class="product-qty">x${item.quantity}</span>
+                        <span class="product-price">${item.price * item.quantity} EUR</span>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <span class="order-number">${order.orderNumber}</span>
+                                <span class="order-date">${date}</span>
+                            </div>
+                            <span class="order-status ${status.class}">${status.label}</span>
+                        </div>
+                        <div class="order-items">
+                            ${itemsHtml}
+                        </div>
+                        <div class="order-footer">
+                            <span class="order-total-label">Total</span>
+                            <span class="order-total">${order.total} EUR</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             auth.init();
+
+            // Observer pour charger les commandes quand le profil est visible
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        const profileSection = document.getElementById('profile-section');
+                        if (profileSection.style.display !== 'none') {
+                            loadOrders();
+                        }
+                    }
+                });
+            });
+
+            const profileSection = document.getElementById('profile-section');
+            observer.observe(profileSection, { attributes: true });
+
+            // Charger immediatement si deja connecte
+            if (localStorage.getItem('coveToken')) {
+                setTimeout(loadOrders, 500);
+            }
         });
     </script>
 </body>

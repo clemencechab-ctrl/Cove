@@ -1,9 +1,33 @@
 const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
+const { authenticate } = require('../middleware/auth');
+
+// Middleware optionnel pour récupérer l'utilisateur si connecté
+const optionalAuth = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return next();
+    }
+
+    const token = authHeader.split('Bearer ')[1];
+    try {
+        const { admin } = require('../config/firebase');
+        const decoded = await admin.auth().verifyIdToken(token);
+        const userProfile = await store.getUserByUid(decoded.uid);
+        req.user = {
+            uid: decoded.uid,
+            email: decoded.email,
+            role: userProfile ? userProfile.role : 'client'
+        };
+    } catch (error) {
+        // Token invalide, continuer sans utilisateur
+    }
+    next();
+};
 
 // POST /api/orders - Creer une commande
-router.post('/', async (req, res) => {
+router.post('/', optionalAuth, async (req, res) => {
     try {
         const { customer, items, shipping } = req.body;
 
@@ -58,8 +82,8 @@ router.post('/', async (req, res) => {
         const shippingCost = subtotal >= 100 ? 0 : 5.90;
         const total = subtotal + shippingCost;
 
-        // Creer la commande
-        const order = await store.createOrder({
+        // Préparer les données de commande
+        const orderData = {
             customer: {
                 email: customer.email,
                 firstName: customer.firstName,
@@ -76,7 +100,15 @@ router.post('/', async (req, res) => {
             subtotal,
             shippingCost,
             total
-        });
+        };
+
+        // Associer à l'utilisateur connecté si disponible
+        if (req.user) {
+            orderData.userId = req.user.uid;
+        }
+
+        // Creer la commande
+        const order = await store.createOrder(orderData);
 
         // Mettre a jour le stock
         for (const item of items) {
@@ -92,6 +124,45 @@ router.post('/', async (req, res) => {
                 total: order.total,
                 status: order.status
             }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// GET /api/orders/my-orders - Commandes de l'utilisateur connecte
+// IMPORTANT: Cette route doit etre AVANT /:orderNumber
+router.get('/my-orders', authenticate, async (req, res) => {
+    try {
+        const orders = await store.getOrdersByUserId(req.user.uid);
+
+        res.json({
+            success: true,
+            count: orders.length,
+            orders: orders.map(o => ({
+                id: o.id,
+                orderNumber: o.orderNumber,
+                status: o.status,
+                total: o.total,
+                items: o.items,
+                createdAt: o.createdAt,
+                statusHistory: o.statusHistory || []
+            }))
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// GET /api/orders/customer/:email - Commandes d'un client
+router.get('/customer/:email', async (req, res) => {
+    try {
+        const orders = await store.getOrdersByEmail(req.params.email);
+
+        res.json({
+            success: true,
+            count: orders.length,
+            orders
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -116,15 +187,45 @@ router.get('/:orderNumber', async (req, res) => {
     }
 });
 
-// GET /api/orders/customer/:email - Commandes d'un client
-router.get('/customer/:email', async (req, res) => {
+// PUT /api/orders/:id/status - Mettre a jour le statut (admin)
+router.put('/:id/status', authenticate, async (req, res) => {
     try {
-        const orders = await store.getOrdersByEmail(req.params.email);
+        // Verifier que l'utilisateur est admin/owner
+        if (req.user.role !== 'owner' && req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                error: 'Acces refuse'
+            });
+        }
+
+        const { status, comment } = req.body;
+        const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Statut invalide'
+            });
+        }
+
+        const order = await store.updateOrderStatus(req.params.id, status, comment);
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                error: 'Commande non trouvee'
+            });
+        }
 
         res.json({
             success: true,
-            count: orders.length,
-            orders
+            message: 'Statut mis a jour',
+            order: {
+                id: order.id,
+                orderNumber: order.orderNumber,
+                status: order.status,
+                statusHistory: order.statusHistory
+            }
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });

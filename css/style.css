@@ -2435,3 +2435,172 @@ img {
         grid-template-columns: 1fr;
     }
 }
+
+/* ==========================================
+   Orders Section (Account Page)
+   ========================================== */
+.orders-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.orders-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.orders-loading,
+.orders-empty {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: 2rem;
+}
+
+.order-card {
+    background: #0a0a0a;
+    border: 1px solid var(--color-border);
+    padding: 1.5rem;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.order-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.order-card .order-number {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.order-card .order-date {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+
+.order-status {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 3px;
+}
+
+.status-pending {
+    background: #f39c12;
+    color: #000;
+}
+
+.status-confirmed {
+    background: #3498db;
+    color: #fff;
+}
+
+.status-processing {
+    background: #9b59b6;
+    color: #fff;
+}
+
+.status-shipped {
+    background: #1abc9c;
+    color: #000;
+}
+
+.status-delivered {
+    background: #27ae60;
+    color: #fff;
+}
+
+.status-cancelled {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.order-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.order-product {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+}
+
+.order-product .product-name {
+    flex: 1;
+    color: var(--color-text);
+}
+
+.order-product .product-qty {
+    margin: 0 1rem;
+    color: var(--color-text-muted);
+}
+
+.order-product .product-price {
+    font-weight: 500;
+}
+
+.order-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.order-total-label {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.order-card .order-total {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Orders Responsive */
+@media (max-width: 768px) {
+    .order-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .order-product {
+        flex-wrap: wrap;
+    }
+
+    .order-product .product-name {
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+}

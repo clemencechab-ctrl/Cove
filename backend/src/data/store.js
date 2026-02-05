@@ -74,6 +74,16 @@ module.exports = {
         return orders.filter(o => o.customer && o.customer.email === email);
     },
 
+    getOrdersByUserId: async (userId) => {
+        const snapshot = await ordersRef.once('value');
+        const data = snapshot.val();
+        if (!data) return [];
+        const orders = Object.values(data);
+        return orders.filter(o => o.userId === userId).sort((a, b) =>
+            new Date(b.createdAt) - new Date(a.createdAt)
+        );
+    },
+
     createOrder: async (orderData) => {
         const newCounter = await counterRef.transaction(current => (current || 1000) + 1);
         const counterVal = newCounter.snapshot.val();
@@ -83,6 +93,11 @@ module.exports = {
             orderNumber: `COVE-${counterVal}`,
             ...orderData,
             status: 'pending',
+            statusHistory: [{
+                status: 'pending',
+                date: new Date().toISOString(),
+                comment: 'Commande créée'
+            }],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -91,7 +106,7 @@ module.exports = {
         return order;
     },
 
-    updateOrderStatus: async (id, status) => {
+    updateOrderStatus: async (id, status, comment = '') => {
         const snapshot = await ordersRef.once('value');
         const data = snapshot.val();
         if (!data) return null;
@@ -108,8 +123,25 @@ module.exports = {
 
         if (!foundKey) return null;
 
+        const statusLabels = {
+            pending: 'En attente',
+            confirmed: 'Confirmée',
+            processing: 'En préparation',
+            shipped: 'Expédiée',
+            delivered: 'Livrée',
+            cancelled: 'Annulée'
+        };
+
+        const statusHistory = foundOrder.statusHistory || [];
+        statusHistory.push({
+            status,
+            date: new Date().toISOString(),
+            comment: comment || statusLabels[status] || status
+        });
+
         const updates = {
             status,
+            statusHistory,
             updatedAt: new Date().toISOString()
         };
         await ordersRef.child(foundKey).update(updates);

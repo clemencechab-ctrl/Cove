@@ -8,8 +8,31 @@ if (process.env.STRIPE_SECRET_KEY) {
     stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 }
 
+// Middleware optionnel pour récupérer l'utilisateur si connecté
+const optionalAuth = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return next();
+    }
+
+    const token = authHeader.split('Bearer ')[1];
+    try {
+        const { admin } = require('../config/firebase');
+        const decoded = await admin.auth().verifyIdToken(token);
+        const userProfile = await store.getUserByUid(decoded.uid);
+        req.user = {
+            uid: decoded.uid,
+            email: decoded.email,
+            role: userProfile ? userProfile.role : 'client'
+        };
+    } catch (error) {
+        // Token invalide, continuer sans utilisateur
+    }
+    next();
+};
+
 // POST /api/checkout/create-session - Creer une session Stripe Checkout
-router.post('/create-session', async (req, res) => {
+router.post('/create-session', optionalAuth, async (req, res) => {
     try {
         const { items, customer, shipping } = req.body;
 
@@ -79,7 +102,7 @@ router.post('/create-session', async (req, res) => {
                 });
             }
 
-            const order = await store.createOrder({
+            const orderData = {
                 customer: {
                     email: customer?.email || 'demo@cove.com',
                     firstName: customer?.firstName || 'Demo',
@@ -96,7 +119,14 @@ router.post('/create-session', async (req, res) => {
                 subtotal,
                 shippingCost: subtotal >= 100 ? 0 : 5.90,
                 total: subtotal + (subtotal >= 100 ? 0 : 5.90)
-            });
+            };
+
+            // Associer à l'utilisateur connecté si disponible
+            if (req.user) {
+                orderData.userId = req.user.uid;
+            }
+
+            const order = await store.createOrder(orderData);
 
             // Mettre a jour le stock
             for (const item of items) {
