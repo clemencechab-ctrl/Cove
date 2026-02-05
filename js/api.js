@@ -193,6 +193,60 @@ const api = {
         } catch (error) {
             return { status: 'offline', error: error.message };
         }
+    },
+
+    // Admin - Stats
+    async getAdminStats() {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/stats`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Admin - Clients
+    async getAdminClients() {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/clients`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Admin - Update order status
+    async updateOrderStatus(orderId, status, comment = '') {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/orders/${orderId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status, comment })
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
     }
 };
 

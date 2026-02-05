@@ -2264,6 +2264,65 @@ img {
     color: var(--color-text-muted);
 }
 
+/* Access Denied */
+.access-denied-content {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.access-denied-content h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #e74c3c;
+}
+
+.access-denied-content p {
+    font-size: 1rem;
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+}
+
+/* Client Card Enhancements */
+.client-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.client-meta {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-top: 0.5rem;
+}
+
+.client-separator {
+    margin: 0 0.5rem;
+    opacity: 0.5;
+}
+
+.client-last-login {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.last-login-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.last-login-value {
+    font-size: 0.9rem;
+    color: var(--color-text);
+}
+
 /* Admin Responsive */
 @media (max-width: 768px) {
     .admin-stats {
@@ -2276,6 +2335,25 @@ img {
 
     .client-card {
         padding: 1.5rem;
+    }
+
+    .client-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .client-last-login {
+        text-align: left;
+    }
+
+    .client-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .client-separator {
+        display: none;
     }
 
     .order-info {

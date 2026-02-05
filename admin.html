@@ -35,31 +35,43 @@
         <p class="legal-subtitle">Tableau de bord en temps reel</p>
     </section>
 
-    <!-- Stats -->
-    <section class="admin-section">
-        <div id="admin-stats" class="admin-stats">
-            <div class="stat-card">
-                <span class="stat-value" id="stat-total-orders">0</span>
-                <span class="stat-label">Commandes</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value" id="stat-total-revenue">0 EUR</span>
-                <span class="stat-label">Chiffre d'affaires</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value" id="stat-total-clients">0</span>
-                <span class="stat-label">Clients</span>
-            </div>
+    <!-- Access Denied (visible si non autorise) -->
+    <section class="admin-section" id="access-denied" style="display: none;">
+        <div class="access-denied-content">
+            <h2>Acces refuse</h2>
+            <p>Vous devez etre connecte en tant qu'administrateur pour acceder a cette page.</p>
+            <a href="compte.html" class="btn-primary">Se connecter</a>
         </div>
     </section>
 
-    <!-- Clients -->
-    <section class="admin-section">
-        <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Clients &amp; Commandes</h2>
-        <div id="admin-clients" class="admin-clients">
-            <p style="text-align:center; color: var(--color-text-muted);">Chargement...</p>
-        </div>
-    </section>
+    <!-- Admin Content (visible si autorise) -->
+    <div id="admin-content" style="display: none;">
+        <!-- Stats -->
+        <section class="admin-section">
+            <div id="admin-stats" class="admin-stats">
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-total-orders">-</span>
+                    <span class="stat-label">Commandes</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-total-revenue">-</span>
+                    <span class="stat-label">Chiffre d'affaires</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-total-clients">-</span>
+                    <span class="stat-label">Clients</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clients -->
+        <section class="admin-section">
+            <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Clients &amp; Commandes</h2>
+            <div id="admin-clients" class="admin-clients">
+                <p style="text-align:center; color: var(--color-text-muted);">Chargement...</p>
+            </div>
+        </section>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
@@ -101,9 +113,186 @@
             <p>&copy; 2026 COVE. Tous droits reserves.</p>
         </div>
     </footer>
+
     <script src="js/cart.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-    <script src="js/admin.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        const statusLabels = {
+            pending: { label: 'En attente', class: 'status-pending' },
+            paid: { label: 'Paye', class: 'status-confirmed' },
+            confirmed: { label: 'Confirmee', class: 'status-confirmed' },
+            processing: { label: 'En preparation', class: 'status-processing' },
+            shipped: { label: 'Expediee', class: 'status-shipped' },
+            delivered: { label: 'Livree', class: 'status-delivered' },
+            cancelled: { label: 'Annulee', class: 'status-cancelled' }
+        };
+
+        // Verifier l'acces admin
+        async function checkAdminAccess() {
+            const token = localStorage.getItem('coveToken');
+            const userStr = localStorage.getItem('coveUser');
+
+            if (!token || !userStr) {
+                showAccessDenied();
+                return false;
+            }
+
+            try {
+                const user = JSON.parse(userStr);
+                if (user.role !== 'owner') {
+                    showAccessDenied();
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                showAccessDenied();
+                return false;
+            }
+        }
+
+        function showAccessDenied() {
+            document.getElementById('access-denied').style.display = 'block';
+            document.getElementById('admin-content').style.display = 'none';
+        }
+
+        function showAdminContent() {
+            document.getElementById('access-denied').style.display = 'none';
+            document.getElementById('admin-content').style.display = 'block';
+        }
+
+        // Charger les statistiques
+        async function loadStats() {
+            const result = await api.getAdminStats();
+
+            if (result.success) {
+                document.getElementById('stat-total-orders').textContent = result.stats.totalOrders;
+                document.getElementById('stat-total-revenue').textContent = result.stats.totalRevenue + ' EUR';
+                document.getElementById('stat-total-clients').textContent = result.stats.totalClients;
+            }
+        }
+
+        // Charger les clients
+        async function loadClients() {
+            const container = document.getElementById('admin-clients');
+            const result = await api.getAdminClients();
+
+            if (!result.success) {
+                container.innerHTML = '<p style="text-align:center; color: #e74c3c;">Erreur: ' + (result.error || 'Impossible de charger les clients') + '</p>';
+                return;
+            }
+
+            if (result.clients.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color: var(--color-text-muted);">Aucun client pour le moment.</p>';
+                return;
+            }
+
+            container.innerHTML = result.clients.map(client => {
+                const lastLogin = client.lastLogin
+                    ? new Date(client.lastLogin).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                    : 'Jamais';
+
+                const createdAt = client.createdAt
+                    ? new Date(client.createdAt).toLocaleDateString('fr-FR', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    })
+                    : '-';
+
+                const ordersHtml = client.orders.length > 0
+                    ? client.orders.map(order => {
+                        const status = statusLabels[order.status] || { label: order.status, class: '' };
+                        const orderDate = new Date(order.createdAt).toLocaleDateString('fr-FR');
+                        const itemsList = order.items.map(i => `${i.name} x${i.quantity}`).join(', ');
+
+                        return `
+                            <div class="order-row">
+                                <div class="order-info">
+                                    <span class="order-number">${order.orderNumber}</span>
+                                    <span class="order-date">${orderDate}</span>
+                                    <span class="order-total">${order.total} EUR</span>
+                                </div>
+                                <div class="order-actions">
+                                    <span class="status-badge ${status.class}">${status.label}</span>
+                                    <select class="status-select" data-order-id="${order.id}" onchange="updateStatus(this)">
+                                        <option value="">Changer statut...</option>
+                                        <option value="confirmed">Confirmer</option>
+                                        <option value="processing">En preparation</option>
+                                        <option value="shipped">Expedier</option>
+                                        <option value="delivered">Livree</option>
+                                        <option value="cancelled">Annuler</option>
+                                    </select>
+                                </div>
+                                <div class="order-items">
+                                    ${order.items.map(i => `<span class="order-item-pill">${i.name} x${i.quantity}</span>`).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')
+                    : '<p style="color: var(--color-text-muted); font-size: 0.9rem;">Aucune commande</p>';
+
+                return `
+                    <div class="client-card">
+                        <div class="client-header">
+                            <div>
+                                <div class="client-name">${client.email}</div>
+                                <div class="client-meta">
+                                    <span>Inscrit le ${createdAt}</span>
+                                    <span class="client-separator">|</span>
+                                    <span>${client.ordersCount} commande(s)</span>
+                                    <span class="client-separator">|</span>
+                                    <span>Total: ${client.totalSpent} EUR</span>
+                                </div>
+                            </div>
+                            <div class="client-last-login">
+                                <span class="last-login-label">Derniere connexion</span>
+                                <span class="last-login-value">${lastLogin}</span>
+                            </div>
+                        </div>
+                        <div class="client-orders">
+                            ${ordersHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Mettre a jour le statut d'une commande
+        async function updateStatus(select) {
+            const orderId = select.dataset.orderId;
+            const status = select.value;
+
+            if (!status) return;
+
+            select.disabled = true;
+            const result = await api.updateOrderStatus(orderId, status);
+
+            if (result.success) {
+                // Recharger les clients pour mettre a jour l'affichage
+                await loadClients();
+            } else {
+                alert('Erreur: ' + (result.error || 'Impossible de mettre a jour le statut'));
+                select.value = '';
+            }
+
+            select.disabled = false;
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', async () => {
+            const hasAccess = await checkAdminAccess();
+
+            if (hasAccess) {
+                showAdminContent();
+                await Promise.all([loadStats(), loadClients()]);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -35,38 +35,50 @@
         <p class="legal-subtitle">Real-time dashboard</p>
     </section>
 
-    <!-- Stats -->
-    <section class="admin-section">
-        <div id="admin-stats" class="admin-stats">
-            <div class="stat-card">
-                <span class="stat-value" id="stat-total-orders">0</span>
-                <span class="stat-label">Orders</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value" id="stat-total-revenue">0 EUR</span>
-                <span class="stat-label">Revenue</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-value" id="stat-total-clients">0</span>
-                <span class="stat-label">Clients</span>
-            </div>
+    <!-- Access Denied (visible if not authorized) -->
+    <section class="admin-section" id="access-denied" style="display: none;">
+        <div class="access-denied-content">
+            <h2>Access Denied</h2>
+            <p>You must be logged in as an administrator to access this page.</p>
+            <a href="compte.html" class="btn-primary">Sign In</a>
         </div>
     </section>
 
-    <!-- Clients -->
-    <section class="admin-section">
-        <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Clients &amp; Orders</h2>
-        <div id="admin-clients" class="admin-clients">
-            <p style="text-align:center; color: var(--color-text-muted);">Loading...</p>
-        </div>
-    </section>
+    <!-- Admin Content (visible if authorized) -->
+    <div id="admin-content" style="display: none;">
+        <!-- Stats -->
+        <section class="admin-section">
+            <div id="admin-stats" class="admin-stats">
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-total-orders">-</span>
+                    <span class="stat-label">Orders</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-total-revenue">-</span>
+                    <span class="stat-label">Revenue</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-total-clients">-</span>
+                    <span class="stat-label">Clients</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Clients -->
+        <section class="admin-section">
+            <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Clients &amp; Orders</h2>
+            <div id="admin-clients" class="admin-clients">
+                <p style="text-align:center; color: var(--color-text-muted);">Loading...</p>
+            </div>
+        </section>
+    </div>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-brand">
                 <img src="../image/logo-cove.png" alt="COVE" class="footer-logo-img">
-                <p class="footer-tagline">Streetwear Premium</p>
+                <p class="footer-tagline">Premium Streetwear</p>
                 <p class="footer-credit">made by Clemence</p>
                 <div class="language-selector">
                     <span>Language</span>
@@ -91,9 +103,9 @@
                 </div>
                 <div class="footer-column">
                     <h4>Legal</h4>
-                    <a href="../cgv.html">Terms</a>
-                    <a href="../mentions-legales.html">Legal</a>
-                    <a href="../confidentialite.html">Privacy</a>
+                    <a href="cgv.html">Terms</a>
+                    <a href="mentions-legales.html">Legal</a>
+                    <a href="confidentialite.html">Privacy</a>
                 </div>
             </div>
         </div>
@@ -101,9 +113,184 @@
             <p>&copy; 2026 COVE. All rights reserved.</p>
         </div>
     </footer>
+
     <script src="../js/cart.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
-    <script src="../js/admin.js"></script>
+    <script src="../js/api.js"></script>
+    <script>
+        const statusLabels = {
+            pending: { label: 'Pending', class: 'status-pending' },
+            paid: { label: 'Paid', class: 'status-confirmed' },
+            confirmed: { label: 'Confirmed', class: 'status-confirmed' },
+            processing: { label: 'Processing', class: 'status-processing' },
+            shipped: { label: 'Shipped', class: 'status-shipped' },
+            delivered: { label: 'Delivered', class: 'status-delivered' },
+            cancelled: { label: 'Cancelled', class: 'status-cancelled' }
+        };
+
+        // Check admin access
+        async function checkAdminAccess() {
+            const token = localStorage.getItem('coveToken');
+            const userStr = localStorage.getItem('coveUser');
+
+            if (!token || !userStr) {
+                showAccessDenied();
+                return false;
+            }
+
+            try {
+                const user = JSON.parse(userStr);
+                if (user.role !== 'owner') {
+                    showAccessDenied();
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                showAccessDenied();
+                return false;
+            }
+        }
+
+        function showAccessDenied() {
+            document.getElementById('access-denied').style.display = 'block';
+            document.getElementById('admin-content').style.display = 'none';
+        }
+
+        function showAdminContent() {
+            document.getElementById('access-denied').style.display = 'none';
+            document.getElementById('admin-content').style.display = 'block';
+        }
+
+        // Load statistics
+        async function loadStats() {
+            const result = await api.getAdminStats();
+
+            if (result.success) {
+                document.getElementById('stat-total-orders').textContent = result.stats.totalOrders;
+                document.getElementById('stat-total-revenue').textContent = result.stats.totalRevenue + ' EUR';
+                document.getElementById('stat-total-clients').textContent = result.stats.totalClients;
+            }
+        }
+
+        // Load clients
+        async function loadClients() {
+            const container = document.getElementById('admin-clients');
+            const result = await api.getAdminClients();
+
+            if (!result.success) {
+                container.innerHTML = '<p style="text-align:center; color: #e74c3c;">Error: ' + (result.error || 'Unable to load clients') + '</p>';
+                return;
+            }
+
+            if (result.clients.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color: var(--color-text-muted);">No clients yet.</p>';
+                return;
+            }
+
+            container.innerHTML = result.clients.map(client => {
+                const lastLogin = client.lastLogin
+                    ? new Date(client.lastLogin).toLocaleDateString('en-US', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                    : 'Never';
+
+                const createdAt = client.createdAt
+                    ? new Date(client.createdAt).toLocaleDateString('en-US', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    })
+                    : '-';
+
+                const ordersHtml = client.orders.length > 0
+                    ? client.orders.map(order => {
+                        const status = statusLabels[order.status] || { label: order.status, class: '' };
+                        const orderDate = new Date(order.createdAt).toLocaleDateString('en-US');
+
+                        return `
+                            <div class="order-row">
+                                <div class="order-info">
+                                    <span class="order-number">${order.orderNumber}</span>
+                                    <span class="order-date">${orderDate}</span>
+                                    <span class="order-total">${order.total} EUR</span>
+                                </div>
+                                <div class="order-actions">
+                                    <span class="status-badge ${status.class}">${status.label}</span>
+                                    <select class="status-select" data-order-id="${order.id}" onchange="updateStatus(this)">
+                                        <option value="">Change status...</option>
+                                        <option value="confirmed">Confirm</option>
+                                        <option value="processing">Processing</option>
+                                        <option value="shipped">Ship</option>
+                                        <option value="delivered">Delivered</option>
+                                        <option value="cancelled">Cancel</option>
+                                    </select>
+                                </div>
+                                <div class="order-items">
+                                    ${order.items.map(i => `<span class="order-item-pill">${i.name} x${i.quantity}</span>`).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }).join('')
+                    : '<p style="color: var(--color-text-muted); font-size: 0.9rem;">No orders</p>';
+
+                return `
+                    <div class="client-card">
+                        <div class="client-header">
+                            <div>
+                                <div class="client-name">${client.email}</div>
+                                <div class="client-meta">
+                                    <span>Registered on ${createdAt}</span>
+                                    <span class="client-separator">|</span>
+                                    <span>${client.ordersCount} order(s)</span>
+                                    <span class="client-separator">|</span>
+                                    <span>Total: ${client.totalSpent} EUR</span>
+                                </div>
+                            </div>
+                            <div class="client-last-login">
+                                <span class="last-login-label">Last login</span>
+                                <span class="last-login-value">${lastLogin}</span>
+                            </div>
+                        </div>
+                        <div class="client-orders">
+                            ${ordersHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update order status
+        async function updateStatus(select) {
+            const orderId = select.dataset.orderId;
+            const status = select.value;
+
+            if (!status) return;
+
+            select.disabled = true;
+            const result = await api.updateOrderStatus(orderId, status);
+
+            if (result.success) {
+                await loadClients();
+            } else {
+                alert('Error: ' + (result.error || 'Unable to update status'));
+                select.value = '';
+            }
+
+            select.disabled = false;
+        }
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', async () => {
+            const hasAccess = await checkAdminAccess();
+
+            if (hasAccess) {
+                showAdminContent();
+                await Promise.all([loadStats(), loadClients()]);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -149,6 +149,16 @@ module.exports = {
     },
 
     // Users
+    getAllUsers: async () => {
+        const snapshot = await usersRef.once('value');
+        const data = snapshot.val();
+        if (!data) return [];
+        return Object.entries(data).map(([uid, user]) => ({
+            uid,
+            ...user
+        }));
+    },
+
     getUserByUid: async (uid) => {
         const snapshot = await usersRef.child(uid).once('value');
         return snapshot.val();
