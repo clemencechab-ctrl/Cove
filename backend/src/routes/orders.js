@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
 const { authenticate } = require('../middleware/auth');
+const { sendOrderStatusUpdate } = require('../utils/email');
 
 // Middleware optionnel pour récupérer l'utilisateur si connecté
 const optionalAuth = async (req, res, next) => {
@@ -215,6 +216,11 @@ router.put('/:id/status', authenticate, async (req, res) => {
                 success: false,
                 error: 'Commande non trouvee'
             });
+        }
+
+        // Envoyer email de notification pour les statuts pertinents
+        if (['confirmed', 'shipped', 'delivered'].includes(status) && order.customer?.email) {
+            sendOrderStatusUpdate(order, status);
         }
 
         res.json({

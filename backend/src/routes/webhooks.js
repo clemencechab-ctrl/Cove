@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
+const { sendOrderConfirmation } = require('../utils/email');
 
 // POST /api/webhooks/stripe
 router.post('/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -34,7 +35,10 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
                         paymentIntentId: session.payment_intent
                     });
                     console.log(`Webhook: Order ${orderNumber} marked as paid`);
-                    // TODO Phase 6: envoyer email de confirmation
+                    const order = await store.getOrderById(orderId);
+                    if (order) {
+                        sendOrderConfirmation(order);
+                    }
                 } catch (err) {
                     console.error(`Webhook: Failed to update order ${orderNumber}:`, err.message);
                 }

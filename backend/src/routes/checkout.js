@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
+const { sendOrderConfirmation } = require('../utils/email');
 
 // Initialiser Stripe si la cle est configuree
 let stripe = null;
@@ -137,6 +138,9 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             await store.updateOrderPayment(order.id, {
                 paymentIntentId: 'demo_' + Date.now()
             });
+
+            // Envoyer email de confirmation (mode demo)
+            sendOrderConfirmation({ ...order, ...orderData, status: 'paid' });
 
             return res.json({
                 success: true,
