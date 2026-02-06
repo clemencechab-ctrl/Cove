@@ -150,6 +150,49 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             });
         }
 
+        // Creer la commande en DB avant de rediriger vers Stripe
+        const orderItems = [];
+        for (const item of items) {
+            const product = await store.getProductById(item.id);
+            orderItems.push({
+                productId: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: item.quantity,
+                image: product.image
+            });
+        }
+
+        const orderData = {
+            customer: {
+                email: customer?.email || '',
+                firstName: customer?.firstName || '',
+                lastName: customer?.lastName || '',
+                phone: customer?.phone || ''
+            },
+            shipping: {
+                address: shipping?.address || '',
+                city: shipping?.city || '',
+                postalCode: shipping?.postalCode || '',
+                country: shipping?.country || 'FR'
+            },
+            items: orderItems,
+            subtotal,
+            shippingCost: subtotal >= 100 ? 0 : 5.90,
+            total: subtotal + (subtotal >= 100 ? 0 : 5.90)
+        };
+
+        if (req.user) {
+            orderData.userId = req.user.uid;
+        }
+
+        const order = await store.createOrder(orderData);
+
+        // Decrementer le stock
+        for (const item of items) {
+            await store.updateProductStock(item.id, item.quantity);
+        }
+
         // Creer la session Stripe Checkout
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -159,16 +202,16 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             cancel_url: `${process.env.FRONTEND_URL}/cart.html?canceled=true`,
             customer_email: customer?.email,
             metadata: {
-                items: JSON.stringify(items),
-                customer: JSON.stringify(customer),
-                shipping: JSON.stringify(shipping)
+                orderId: String(order.id),
+                orderNumber: order.orderNumber
             }
         });
 
         res.json({
             success: true,
             sessionId: session.id,
-            url: session.url
+            url: session.url,
+            orderNumber: order.orderNumber
         });
     } catch (error) {
         console.error('Checkout error:', error);
@@ -207,9 +250,19 @@ router.post('/verify', async (req, res) => {
 
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 
+        // Backup idempotent du webhook : mettre a jour la commande si payee
+        if (session.payment_status === 'paid' && session.metadata?.orderId) {
+            await store.updateOrderPayment(session.metadata.orderId, {
+                paymentIntentId: session.payment_intent
+            });
+        }
+
+        const stripeOrderNumber = session.metadata?.orderNumber || null;
+
         res.json({
             success: true,
             paid: session.payment_status === 'paid',
+            orderNumber: stripeOrderNumber,
             session: {
                 id: session.id,
                 status: session.payment_status,

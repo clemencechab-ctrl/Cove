@@ -326,9 +326,46 @@
             }
         });
 
+        // Handle Stripe return
+        async function handleStripeReturn() {
+            const params = new URLSearchParams(window.location.search);
+            const sessionId = params.get('session_id');
+            const success = params.get('success');
+            const canceled = params.get('canceled');
+            const orderParam = params.get('order');
+
+            // Clean URL
+            if (success || canceled) {
+                history.replaceState({}, '', window.location.pathname);
+            }
+
+            if (success === 'true' && sessionId) {
+                try {
+                    const result = await api.verifyPayment(sessionId);
+                    if (result.success && result.paid) {
+                        document.getElementById('order-number').textContent = result.orderNumber || '';
+                        document.getElementById('confirmation-modal').classList.add('active');
+                        clearCart();
+                        renderCart();
+                    }
+                } catch (error) {
+                    console.error('Payment verification error:', error);
+                }
+            } else if (success === 'true' && orderParam) {
+                // Demo return (no session_id)
+                document.getElementById('order-number').textContent = orderParam;
+                document.getElementById('confirmation-modal').classList.add('active');
+                clearCart();
+                renderCart();
+            } else if (canceled === 'true') {
+                alert('Payment canceled. Your cart has been kept.');
+            }
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             renderCart();
+            handleStripeReturn();
         });
     </script>
 </body>

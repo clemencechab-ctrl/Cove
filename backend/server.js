@@ -10,6 +10,7 @@ const checkoutRoutes = require('./src/routes/checkout');
 const contactRoutes = require('./src/routes/contact');
 const adminRoutes = require('./src/routes/admin');
 const userRoutes = require('./src/routes/users');
+const webhookRoutes = require('./src/routes/webhooks');
 
 // Initialize Express
 const app = express();
@@ -31,6 +32,7 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.use('/api/webhooks', webhookRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/checkout', checkoutRoutes);
