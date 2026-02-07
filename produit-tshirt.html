@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COVE - T-Shirt Chat</title>
+    <title>COVE - T-shirt Cove</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,14 +36,14 @@
             <!-- Product Gallery -->
             <div class="product-gallery">
                 <div class="product-main-image">
-                    <img src="image/t shirt front.JPG" alt="T-Shirt Chat" id="main-image">
+                    <img src="image/t shirt front.JPG" alt="T-shirt Cove" id="main-image">
                 </div>
                 <div class="product-thumbnails">
                     <div class="thumbnail active" onclick="changeImage('image/t shirt front.JPG', this)">
-                        <img src="image/t shirt front.JPG" alt="T-Shirt Chat Vue Face">
+                        <img src="image/t shirt front.JPG" alt="T-shirt Cove Vue Face">
                     </div>
                     <div class="thumbnail" onclick="changeImage('image/tshirt back.JPG', this)">
-                        <img src="image/tshirt back.JPG" alt="T-Shirt Chat Vue Dos">
+                        <img src="image/tshirt back.JPG" alt="T-shirt Cove Vue Dos">
                     </div>
                 </div>
             </div>
@@ -50,10 +51,10 @@
             <!-- Product Info -->
             <div class="product-info">
                 <div class="product-breadcrumb">
-                    <a href="index.html">Accueil</a> / <a href="index.html#collection">Collection</a> / T-Shirt Chat
+                    <a href="index.html">Accueil</a> / <a href="index.html#collection">Collection</a> / T-shirt Cove
                 </div>
 
-                <h1 class="product-title">T-Shirt Chat</h1>
+                <h1 class="product-title">T-shirt Cove</h1>
                 <p class="product-price">65 EUR</p>
 
                 <div class="product-description">
@@ -91,7 +92,7 @@
                 </div>
 
                 <div class="product-actions">
-                    <button class="btn-add-to-cart" onclick="addToCart(1, 'T-Shirt Chat', 65, 'image/t shirt front.JPG'); showNotification();">
+                    <button class="btn-add-to-cart" onclick="addToCart(1, 'T-shirt Cove', 65, 'image/t shirt front.JPG', selectedSize);">
                         Ajouter au panier
                     </button>
                 </div>
@@ -210,6 +211,17 @@
             selectedSize = size;
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            // Reactiver/desactiver le bouton selon le stock de la taille
+            const addBtn = document.querySelector('.btn-add-to-cart');
+            if (btn.disabled) {
+                addBtn.disabled = true;
+                addBtn.textContent = 'Rupture de stock';
+                addBtn.classList.add('disabled');
+            } else {
+                addBtn.disabled = false;
+                addBtn.textContent = 'Ajouter au panier';
+                addBtn.classList.remove('disabled');
+            }
         }
 
         function toggleAccordion(header) {

@@ -99,6 +99,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
                     name: product.name,
                     price: product.price,
                     quantity: item.quantity,
+                    size: item.size || null,
                     image: product.image
                 });
             }
@@ -129,9 +130,9 @@ router.post('/create-session', optionalAuth, async (req, res) => {
 
             const order = await store.createOrder(orderData);
 
-            // Mettre a jour le stock
+            // Mettre a jour le stock (par taille si applicable)
             for (const item of items) {
-                await store.updateProductStock(item.id, item.quantity);
+                await store.updateProductStock(item.id, item.quantity, item.size || null);
             }
 
             // Marquer comme paye (mode demo)
@@ -163,6 +164,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
                 name: product.name,
                 price: product.price,
                 quantity: item.quantity,
+                size: item.size || null,
                 image: product.image
             });
         }
@@ -192,9 +194,9 @@ router.post('/create-session', optionalAuth, async (req, res) => {
 
         const order = await store.createOrder(orderData);
 
-        // Decrementer le stock
+        // Decrementer le stock (par taille si applicable)
         for (const item of items) {
-            await store.updateProductStock(item.id, item.quantity);
+            await store.updateProductStock(item.id, item.quantity, item.size || null);
         }
 
         // Creer la session Stripe Checkout

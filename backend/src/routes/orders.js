@@ -61,7 +61,16 @@ router.post('/', optionalAuth, async (req, res) => {
                 });
             }
 
-            if (product.stock < item.quantity) {
+            // Verifier le stock par taille si applicable
+            if (item.size && product.sizeStock) {
+                const sizeStk = product.sizeStock[item.size] || 0;
+                if (sizeStk < item.quantity) {
+                    return res.status(400).json({
+                        success: false,
+                        error: `Stock insuffisant pour ${product.name} taille ${item.size}`
+                    });
+                }
+            } else if (product.stock < item.quantity) {
                 return res.status(400).json({
                     success: false,
                     error: `Stock insuffisant pour ${product.name}`
@@ -73,6 +82,7 @@ router.post('/', optionalAuth, async (req, res) => {
                 name: product.name,
                 price: product.price,
                 quantity: item.quantity,
+                size: item.size || null,
                 image: product.image
             });
 
@@ -111,9 +121,9 @@ router.post('/', optionalAuth, async (req, res) => {
         // Creer la commande
         const order = await store.createOrder(orderData);
 
-        // Mettre a jour le stock
+        // Mettre a jour le stock (par taille si applicable)
         for (const item of items) {
-            await store.updateProductStock(item.id, item.quantity);
+            await store.updateProductStock(item.id, item.quantity, item.size || null);
         }
 
         res.status(201).json({

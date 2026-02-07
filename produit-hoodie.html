@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COVE - Hoodie Essential</title>
+    <title>COVE - Hoodie Picnic</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,7 +36,7 @@
             <!-- Product Gallery -->
             <div class="product-gallery">
                 <div class="product-main-image">
-                    <img src="image/hoodie front.JPG" alt="Hoodie Essential" id="main-image">
+                    <img src="image/hoodie front.JPG" alt="Hoodie Picnic" id="main-image">
                 </div>
                 <div class="product-thumbnails">
                     <div class="thumbnail active" onclick="changeImage('image/hoodie front.JPG', this)">
@@ -50,10 +51,10 @@
             <!-- Product Info -->
             <div class="product-info">
                 <div class="product-breadcrumb">
-                    <a href="index.html">Accueil</a> / <a href="index.html#collection">Collection</a> / Hoodie Essential
+                    <a href="index.html">Accueil</a> / <a href="index.html#collection">Collection</a> / Hoodie Picnic
                 </div>
 
-                <h1 class="product-title">Hoodie Essential</h1>
+                <h1 class="product-title">Hoodie Picnic</h1>
                 <p class="product-price">120 EUR</p>
 
                 <div class="product-description">
@@ -91,7 +92,7 @@
                 </div>
 
                 <div class="product-actions">
-                    <button class="btn-add-to-cart" onclick="addToCart(2, 'Hoodie Essential', 120, 'image/hoodie front.JPG'); showNotification();">
+                    <button class="btn-add-to-cart" onclick="addToCart(2, 'Hoodie Picnic', 120, 'image/hoodie front.JPG', selectedSize);">
                         Ajouter au panier
                     </button>
                 </div>
@@ -118,7 +119,7 @@
                             <span class="accordion-icon">+</span>
                         </button>
                         <div class="accordion-content">
-                            <p>Le Hoodie Essential est la piece maitresse de la collection COVE. Fabrique dans un molleton epais et doux, il offre chaleur et confort tout au long de la journee.</p>
+                            <p>Le Hoodie Picnic est la piece maitresse de la collection COVE. Fabrique dans un molleton epais et doux, il offre chaleur et confort tout au long de la journee.</p>
                             <p>La coupe oversize permet une liberte de mouvement totale. La capuche doublee protege efficacement du froid. La poche kangourou est renforcee pour plus de durabilite.</p>
                             <p>Finitions premium : coutures doubles, cordons en coton cire, etiquette tissee COVE.</p>
                         </div>
@@ -211,6 +212,17 @@
             selectedSize = size;
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            // Reactiver/desactiver le bouton selon le stock de la taille
+            const addBtn = document.querySelector('.btn-add-to-cart');
+            if (btn.disabled) {
+                addBtn.disabled = true;
+                addBtn.textContent = 'Rupture de stock';
+                addBtn.classList.add('disabled');
+            } else {
+                addBtn.disabled = false;
+                addBtn.textContent = 'Ajouter au panier';
+                addBtn.classList.remove('disabled');
+            }
         }
 
         function toggleAccordion(header) {

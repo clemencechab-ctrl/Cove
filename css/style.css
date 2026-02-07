@@ -1871,6 +1871,12 @@ img {
     cursor: not-allowed;
 }
 
+.size-btn.size-unavailable {
+    opacity: 0.3;
+    text-decoration: line-through;
+    cursor: not-allowed;
+}
+
 /* Extra Info */
 .product-extra-info {
     display: flex;

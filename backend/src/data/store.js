@@ -33,16 +33,47 @@ module.exports = {
         return products.filter(p => p.category === category);
     },
 
-    updateProductStock: async (id, quantity) => {
+    updateProductStock: async (id, quantity, size = null) => {
         const snapshot = await productsRef.once('value');
         const data = snapshot.val();
         if (!data) return null;
-        const products = Array.isArray(data) ? data : Object.values(data);
-        const index = products.findIndex(p => p && p.id === parseInt(id));
-        if (index === -1) return null;
-        products[index].stock -= quantity;
-        await productsRef.child(String(index)).update({ stock: products[index].stock });
-        return products[index];
+
+        let foundKey = null;
+        let foundProduct = null;
+
+        if (Array.isArray(data)) {
+            const index = data.findIndex(p => p && p.id === parseInt(id));
+            if (index === -1) return null;
+            foundKey = String(index);
+            foundProduct = data[index];
+        } else {
+            for (const [key, val] of Object.entries(data)) {
+                if (val && val.id === parseInt(id)) {
+                    foundKey = key;
+                    foundProduct = val;
+                    break;
+                }
+            }
+        }
+
+        if (!foundKey) return null;
+
+        // Stock par taille si applicable
+        if (size && foundProduct.sizeStock) {
+            const currentSizeStock = foundProduct.sizeStock[size] || 0;
+            const newSizeStock = currentSizeStock - quantity;
+            await productsRef.child(foundKey).child('sizeStock').child(size).set(newSizeStock);
+            // Aussi mettre a jour le stock global
+            const newStock = (foundProduct.stock || 0) - quantity;
+            await productsRef.child(foundKey).update({ stock: newStock });
+            foundProduct.sizeStock[size] = newSizeStock;
+            foundProduct.stock = newStock;
+        } else {
+            foundProduct.stock -= quantity;
+            await productsRef.child(foundKey).update({ stock: foundProduct.stock });
+        }
+
+        return foundProduct;
     },
 
     // Orders

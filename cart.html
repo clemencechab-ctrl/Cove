@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" translate="no">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COVE - Panier</title>
     <link rel="stylesheet" href="css/style.css">
@@ -224,18 +225,18 @@
                         <img src="${item.image}" alt="${item.name}">
                     </div>
                     <div class="cart-item-details">
-                        <h4>${item.name}</h4>
+                        <h4>${item.name}${item.size ? ` — Taille ${item.size}` : ''}</h4>
                         <p class="cart-item-price">${item.price} EUR</p>
                     </div>
                     <div class="cart-item-quantity">
-                        <button onclick="updateQuantity(${item.id}, -1)">-</button>
+                        <button onclick="updateQuantity(${item.id}, -1, ${item.size ? `'${item.size}'` : 'null'})">-</button>
                         <span>${item.quantity}</span>
-                        <button onclick="updateQuantity(${item.id}, 1)">+</button>
+                        <button onclick="updateQuantity(${item.id}, 1, ${item.size ? `'${item.size}'` : 'null'})">+</button>
                     </div>
                     <div class="cart-item-total">
                         ${item.price * item.quantity} EUR
                     </div>
-                    <button class="cart-item-remove" onclick="removeFromCart(${item.id})">
+                    <button class="cart-item-remove" onclick="removeFromCart(${item.id}, ${item.size ? `'${item.size}'` : 'null'})">
                         &times;
                     </button>
                 </div>
@@ -284,10 +285,11 @@
                 country: formData.get('country')
             };
 
-            // Préparer les items
+            // Préparer les items (avec taille si applicable)
             const items = cart.map(item => ({
                 id: item.id,
-                quantity: item.quantity
+                quantity: item.quantity,
+                size: item.size || null
             }));
 
             try {
