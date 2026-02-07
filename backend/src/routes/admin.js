@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
 const { authenticate, requireRole } = require('../middleware/auth');
+const { sendOrderStatusUpdate } = require('../utils/email');
 
 // Toutes les routes admin nécessitent une authentification et le rôle owner
 router.use(authenticate);
@@ -110,7 +111,160 @@ router.put('/orders/:id/status', async (req, res) => {
             });
         }
 
+        // Envoyer email de notification pour les statuts pertinents
+        if (['confirmed', 'shipped', 'delivered', 'cancelled'].includes(status) && order.customer?.email) {
+            sendOrderStatusUpdate(order, status);
+        }
+
         res.json({ success: true, order });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============ CRUD Produits ============
+
+// GET /api/admin/products - Liste tous les produits
+router.get('/products', async (req, res) => {
+    try {
+        const products = await store.getProducts();
+        res.json({
+            success: true,
+            count: products.length,
+            products
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// POST /api/admin/products - Creer un produit
+router.post('/products', async (req, res) => {
+    try {
+        const { name, price, category, description, image, stock } = req.body;
+
+        if (!name || price === undefined || !category) {
+            return res.status(400).json({
+                success: false,
+                error: 'Nom, prix et categorie sont requis'
+            });
+        }
+
+        if (typeof price !== 'number' || price < 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Le prix doit etre un nombre positif'
+            });
+        }
+
+        const product = await store.createProduct({
+            name,
+            price,
+            category,
+            description: description || '',
+            image: image || '',
+            stock: stock !== undefined ? parseInt(stock) : 0
+        });
+
+        res.status(201).json({ success: true, product });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// PUT /api/admin/products/:id - Modifier un produit
+router.put('/products/:id', async (req, res) => {
+    try {
+        const { name, price, category, description, image, stock } = req.body;
+
+        const updates = {};
+        if (name !== undefined) updates.name = name;
+        if (price !== undefined) {
+            if (typeof price !== 'number' || price < 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Le prix doit etre un nombre positif'
+                });
+            }
+            updates.price = price;
+        }
+        if (category !== undefined) updates.category = category;
+        if (description !== undefined) updates.description = description;
+        if (image !== undefined) updates.image = image;
+        if (stock !== undefined) updates.stock = parseInt(stock);
+
+        const product = await store.updateProduct(req.params.id, updates);
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                error: 'Produit non trouve'
+            });
+        }
+
+        res.json({ success: true, product });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// DELETE /api/admin/products/:id - Supprimer un produit
+router.delete('/products/:id', async (req, res) => {
+    try {
+        const product = await store.deleteProduct(req.params.id);
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                error: 'Produit non trouve'
+            });
+        }
+
+        res.json({ success: true, message: 'Produit supprime', product });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============ Messages de contact ============
+
+// GET /api/admin/messages - Liste tous les messages de contact
+router.get('/messages', async (req, res) => {
+    try {
+        const messages = await store.getContactMessages();
+        res.json({
+            success: true,
+            count: messages.length,
+            messages
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// PUT /api/admin/messages/:id/status - Marquer un message comme lu/traite
+router.put('/messages/:id/status', async (req, res) => {
+    try {
+        const { status } = req.body;
+
+        const validStatuses = ['new', 'read', 'replied', 'archived'];
+        if (!status || !validStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                error: `Statut invalide. Valeurs acceptees: ${validStatuses.join(', ')}`
+            });
+        }
+
+        const message = await store.updateContactMessageStatus(req.params.id, status);
+
+        if (!message) {
+            return res.status(404).json({
+                success: false,
+                error: 'Message non trouve'
+            });
+        }
+
+        res.json({ success: true, message });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }

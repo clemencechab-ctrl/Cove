@@ -3,7 +3,10 @@ const { db } = require('../config/firebase');
 const productsRef = db.ref('products');
 const ordersRef = db.ref('orders');
 const counterRef = db.ref('orderCounter');
+const productCounterRef = db.ref('productCounter');
 const usersRef = db.ref('users');
+const contactMessagesRef = db.ref('contactMessages');
+const contactCounterRef = db.ref('contactCounter');
 
 module.exports = {
     // Products
@@ -181,6 +184,18 @@ module.exports = {
         return lastLogin;
     },
 
+    updateUser: async (uid, updates) => {
+        const allowed = ['firstName', 'lastName', 'phone', 'shippingAddress'];
+        const filtered = {};
+        for (const key of allowed) {
+            if (updates[key] !== undefined) filtered[key] = updates[key];
+        }
+        filtered.updatedAt = new Date().toISOString();
+        await usersRef.child(uid).update(filtered);
+        const snapshot = await usersRef.child(uid).once('value');
+        return snapshot.val();
+    },
+
     updateOrderPayment: async (id, paymentData) => {
         const snapshot = await ordersRef.once('value');
         const data = snapshot.val();
@@ -206,5 +221,132 @@ module.exports = {
         };
         await ordersRef.child(foundKey).update(updates);
         return { ...foundOrder, ...updates };
+    },
+
+    // Contact Messages
+    createContactMessage: async (messageData) => {
+        const newCounter = await contactCounterRef.transaction(current => (current || 0) + 1);
+        const counterVal = newCounter.snapshot.val();
+
+        const message = {
+            id: counterVal,
+            ...messageData,
+            status: 'new',
+            createdAt: new Date().toISOString()
+        };
+
+        await contactMessagesRef.push(message);
+        return message;
+    },
+
+    getContactMessages: async () => {
+        const snapshot = await contactMessagesRef.once('value');
+        const data = snapshot.val();
+        if (!data) return [];
+        return Object.entries(data).map(([key, val]) => ({ ...val, _key: key }))
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    },
+
+    updateContactMessageStatus: async (id, status) => {
+        const snapshot = await contactMessagesRef.once('value');
+        const data = snapshot.val();
+        if (!data) return null;
+
+        let foundKey = null;
+        let foundMessage = null;
+        for (const [key, val] of Object.entries(data)) {
+            if (val.id === parseInt(id)) {
+                foundKey = key;
+                foundMessage = val;
+                break;
+            }
+        }
+
+        if (!foundKey) return null;
+
+        const updates = {
+            status,
+            updatedAt: new Date().toISOString()
+        };
+        await contactMessagesRef.child(foundKey).update(updates);
+        return { ...foundMessage, ...updates };
+    },
+
+    // Product CRUD
+    createProduct: async (productData) => {
+        const newCounter = await productCounterRef.transaction(current => (current || 100) + 1);
+        const counterVal = newCounter.snapshot.val();
+
+        const product = {
+            id: counterVal,
+            ...productData,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        await productsRef.child(String(counterVal)).set(product);
+        return product;
+    },
+
+    updateProduct: async (id, updates) => {
+        const snapshot = await productsRef.once('value');
+        const data = snapshot.val();
+        if (!data) return null;
+
+        let foundKey = null;
+        let foundProduct = null;
+
+        if (Array.isArray(data)) {
+            const index = data.findIndex(p => p && p.id === parseInt(id));
+            if (index === -1) return null;
+            foundKey = String(index);
+            foundProduct = data[index];
+        } else {
+            for (const [key, val] of Object.entries(data)) {
+                if (val && val.id === parseInt(id)) {
+                    foundKey = key;
+                    foundProduct = val;
+                    break;
+                }
+            }
+        }
+
+        if (!foundKey) return null;
+
+        const updatedData = {
+            ...updates,
+            updatedAt: new Date().toISOString()
+        };
+        await productsRef.child(foundKey).update(updatedData);
+        return { ...foundProduct, ...updatedData };
+    },
+
+    deleteProduct: async (id) => {
+        const snapshot = await productsRef.once('value');
+        const data = snapshot.val();
+        if (!data) return null;
+
+        let foundKey = null;
+        let foundProduct = null;
+
+        if (Array.isArray(data)) {
+            const index = data.findIndex(p => p && p.id === parseInt(id));
+            if (index === -1) return null;
+            foundKey = String(index);
+            foundProduct = data[index];
+        } else {
+            for (const [key, val] of Object.entries(data)) {
+                if (val && val.id === parseInt(id)) {
+                    foundKey = key;
+                    foundProduct = val;
+                    break;
+                }
+            }
+        }
+
+        if (!foundKey) return null;
+
+        await productsRef.child(foundKey).remove();
+        return foundProduct;
     }
 };

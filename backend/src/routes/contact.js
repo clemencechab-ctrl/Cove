@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const store = require('../data/store');
 const { sendContactNotification } = require('../utils/email');
-
-// Stocker les messages en mémoire (pour le mode démo)
-const messages = [];
+const { authenticate, requireRole } = require('../middleware/auth');
 
 // POST /api/contact - Envoyer un message de contact
 router.post('/', async (req, res) => {
@@ -27,17 +26,13 @@ router.post('/', async (req, res) => {
             });
         }
 
-        // Stocker le message
-        const contactMessage = {
-            id: Date.now(),
+        // Stocker le message dans Firebase
+        const contactMessage = await store.createContactMessage({
             name,
             email,
             subject: subject || 'Sans sujet',
-            message,
-            createdAt: new Date().toISOString(),
-            status: 'new'
-        };
-        messages.push(contactMessage);
+            message
+        });
 
         // Envoyer les emails via le module centralise
         const emailSent = await sendContactNotification({ name, email, subject, message });
@@ -53,13 +48,18 @@ router.post('/', async (req, res) => {
     }
 });
 
-// GET /api/contact/messages - Liste des messages (admin)
-router.get('/messages', (req, res) => {
-    res.json({
-        success: true,
-        count: messages.length,
-        messages: messages.reverse()
-    });
+// GET /api/contact/messages - Liste des messages (admin only)
+router.get('/messages', authenticate, requireRole('owner'), async (req, res) => {
+    try {
+        const messages = await store.getContactMessages();
+        res.json({
+            success: true,
+            count: messages.length,
+            messages
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 module.exports = router;

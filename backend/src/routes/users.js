@@ -11,7 +11,7 @@ const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY;
 // POST /api/users/register
 router.post('/register', async (req, res) => {
     try {
-        const { email, password, role } = req.body;
+        const { email, password } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({ error: 'Email et mot de passe requis' });
@@ -21,8 +21,8 @@ router.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'Le mot de passe doit contenir au moins 6 caractères' });
         }
 
-        const allowedRoles = ['client', 'owner'];
-        const userRole = allowedRoles.includes(role) ? role : 'client';
+        // Toujours forcer le role client (securite)
+        const userRole = 'client';
 
         // Create user in Firebase Auth
         const userRecord = await admin.auth().createUser({
@@ -146,6 +146,37 @@ router.get('/me', authenticate, async (req, res) => {
     } catch (error) {
         console.error('Get profile error:', error.message);
         res.status(500).json({ error: 'Erreur lors de la récupération du profil' });
+    }
+});
+
+// PUT /api/users/me (protected)
+router.put('/me', authenticate, async (req, res) => {
+    try {
+        const { firstName, lastName, phone, shippingAddress } = req.body;
+
+        const updates = {};
+        if (firstName !== undefined) updates.firstName = String(firstName).trim();
+        if (lastName !== undefined) updates.lastName = String(lastName).trim();
+        if (phone !== undefined) updates.phone = String(phone).trim();
+        if (shippingAddress !== undefined) {
+            updates.shippingAddress = {
+                address: String(shippingAddress.address || '').trim(),
+                city: String(shippingAddress.city || '').trim(),
+                postalCode: String(shippingAddress.postalCode || '').trim(),
+                country: String(shippingAddress.country || '').trim()
+            };
+        }
+
+        const updatedProfile = await store.updateUser(req.user.uid, updates);
+
+        res.json({
+            success: true,
+            message: 'Profil mis à jour',
+            user: { uid: req.user.uid, ...updatedProfile }
+        });
+    } catch (error) {
+        console.error('Update profile error:', error.message);
+        res.status(500).json({ error: 'Erreur lors de la mise à jour du profil' });
     }
 });
 

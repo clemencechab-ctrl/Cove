@@ -247,6 +247,114 @@ const api = {
             console.error('API Error:', error);
             return { success: false, error: error.message };
         }
+    },
+
+    // Admin - Products
+    async getAdminProducts() {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/products`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async createProduct(productData) {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/products`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(productData)
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async updateProduct(id, productData) {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/products/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(productData)
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async deleteProduct(id) {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/products/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Admin - Messages de contact
+    async getAdminMessages() {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/messages`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async updateMessageStatus(id, status) {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/messages/${id}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status })
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
     }
 };
 
