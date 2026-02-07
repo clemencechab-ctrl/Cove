@@ -727,6 +727,33 @@ img {
     background: #ddd;
 }
 
+.btn-add-cart:disabled {
+    background: #555;
+    color: #999;
+    cursor: not-allowed;
+}
+
+.shop-card.out-of-stock .shop-card-image img {
+    opacity: 0.5;
+}
+
+.shop-card.out-of-stock .shop-card-overlay {
+    opacity: 1;
+}
+
+.stock-badge {
+    display: block;
+    text-align: center;
+    background: #cc0000;
+    color: #fff;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
 .shop-card-info {
     text-align: center;
 }
@@ -1835,6 +1862,13 @@ img {
 
 .btn-add-to-cart:hover {
     background: var(--color-text-muted);
+}
+
+.btn-add-to-cart.disabled,
+.btn-add-to-cart:disabled {
+    background: #555;
+    color: #999;
+    cursor: not-allowed;
 }
 
 /* Extra Info */
