@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
-const { sendOrderConfirmation } = require('../utils/email');
+const { sendOrderConfirmation, sendOrderNotificationToOwner } = require('../utils/email');
 
 // Initialiser Stripe si la cle est configuree
 let stripe = null;
@@ -32,10 +32,63 @@ const optionalAuth = async (req, res, next) => {
     next();
 };
 
+// POST /api/checkout/validate-promo - Valider un code promo
+router.post('/validate-promo', async (req, res) => {
+    try {
+        const { code, subtotal } = req.body;
+
+        if (!code) {
+            return res.status(400).json({ success: false, error: 'Code promo requis' });
+        }
+
+        const promo = await store.getPromoCodeByCode(code);
+
+        if (!promo) {
+            return res.status(404).json({ success: false, error: 'Code promo invalide' });
+        }
+
+        if (!promo.active) {
+            return res.status(400).json({ success: false, error: 'Ce code promo n\'est plus actif' });
+        }
+
+        if (promo.maxUses > 0 && promo.currentUses >= promo.maxUses) {
+            return res.status(400).json({ success: false, error: 'Ce code promo a atteint sa limite d\'utilisation' });
+        }
+
+        if (promo.minOrder > 0 && subtotal < promo.minOrder) {
+            return res.status(400).json({
+                success: false,
+                error: `Commande minimum de ${promo.minOrder} EUR requise pour ce code`
+            });
+        }
+
+        // Calculer la reduction
+        let discountAmount = 0;
+        if (promo.type === 'percentage') {
+            discountAmount = Math.round((subtotal * promo.value / 100) * 100) / 100;
+        } else {
+            discountAmount = Math.min(promo.value, subtotal);
+        }
+
+        res.json({
+            success: true,
+            discount: {
+                code: promo.code,
+                type: promo.type,
+                value: promo.value,
+                amount: discountAmount
+            }
+        });
+    } catch (error) {
+        console.error('Validate promo error:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // POST /api/checkout/create-session - Creer une session Stripe Checkout
 router.post('/create-session', optionalAuth, async (req, res) => {
     try {
-        const { items, customer, shipping } = req.body;
+        const { items, customer, shipping, promoCode } = req.body;
 
         // Validation
         if (!items || items.length === 0) {
@@ -75,8 +128,30 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             subtotal += product.price * item.quantity;
         }
 
+        // Valider et appliquer le code promo si fourni
+        let discountAmount = 0;
+        let appliedPromo = null;
+
+        if (promoCode) {
+            const promo = await store.getPromoCodeByCode(promoCode);
+            if (promo && promo.active) {
+                const withinUsageLimit = promo.maxUses === 0 || promo.currentUses < promo.maxUses;
+                const meetsMinOrder = promo.minOrder === 0 || subtotal >= promo.minOrder;
+
+                if (withinUsageLimit && meetsMinOrder) {
+                    if (promo.type === 'percentage') {
+                        discountAmount = Math.round((subtotal * promo.value / 100) * 100) / 100;
+                    } else {
+                        discountAmount = Math.min(promo.value, subtotal);
+                    }
+                    appliedPromo = promo;
+                }
+            }
+        }
+
         // Ajouter les frais de livraison si necessaire
-        if (subtotal < 100) {
+        const subtotalAfterDiscount = subtotal - discountAmount;
+        if (subtotalAfterDiscount < 100) {
             lineItems.push({
                 price_data: {
                     currency: 'eur',
@@ -104,6 +179,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
                 });
             }
 
+            const shippingCost = subtotalAfterDiscount >= 100 ? 0 : 5.90;
             const orderData = {
                 customer: {
                     email: customer?.email || 'demo@cove.com',
@@ -119,8 +195,10 @@ router.post('/create-session', optionalAuth, async (req, res) => {
                 },
                 items: orderItems,
                 subtotal,
-                shippingCost: subtotal >= 100 ? 0 : 5.90,
-                total: subtotal + (subtotal >= 100 ? 0 : 5.90)
+                discountAmount,
+                promoCode: appliedPromo ? appliedPromo.code : null,
+                shippingCost,
+                total: subtotalAfterDiscount + shippingCost
             };
 
             // Associer à l'utilisateur connecté si disponible
@@ -141,7 +219,14 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             });
 
             // Envoyer email de confirmation (mode demo)
-            sendOrderConfirmation({ ...order, ...orderData, status: 'paid' });
+            const fullOrder = { ...order, ...orderData, status: 'paid' };
+            sendOrderConfirmation(fullOrder);
+            sendOrderNotificationToOwner(fullOrder);
+
+            // Incrementer l'utilisation du code promo
+            if (appliedPromo) {
+                await store.incrementPromoCodeUses(appliedPromo.code);
+            }
 
             return res.json({
                 success: true,
@@ -151,7 +236,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
                     orderNumber: order.orderNumber,
                     total: order.total
                 },
-                redirectUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/cart.html?success=true&order=${order.orderNumber}`
+                redirectUrl: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/success.html?success=true&order=${order.orderNumber}`
             });
         }
 
@@ -169,6 +254,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             });
         }
 
+        const stripeShippingCost = subtotalAfterDiscount >= 100 ? 0 : 5.90;
         const orderData = {
             customer: {
                 email: customer?.email || '',
@@ -184,8 +270,10 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             },
             items: orderItems,
             subtotal,
-            shippingCost: subtotal >= 100 ? 0 : 5.90,
-            total: subtotal + (subtotal >= 100 ? 0 : 5.90)
+            discountAmount,
+            promoCode: appliedPromo ? appliedPromo.code : null,
+            shippingCost: stripeShippingCost,
+            total: subtotalAfterDiscount + stripeShippingCost
         };
 
         if (req.user) {
@@ -194,24 +282,42 @@ router.post('/create-session', optionalAuth, async (req, res) => {
 
         const order = await store.createOrder(orderData);
 
+        // Incrementer l'utilisation du code promo
+        if (appliedPromo) {
+            await store.incrementPromoCodeUses(appliedPromo.code);
+        }
+
         // Decrementer le stock (par taille si applicable)
         for (const item of items) {
             await store.updateProductStock(item.id, item.quantity, item.size || null);
         }
 
         // Creer la session Stripe Checkout
-        const session = await stripe.checkout.sessions.create({
+        const sessionParams = {
             payment_method_types: ['card'],
             line_items: lineItems,
             mode: 'payment',
-            success_url: `${process.env.FRONTEND_URL}/cart.html?success=true&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.FRONTEND_URL}/cart.html?canceled=true`,
+            success_url: `${process.env.FRONTEND_URL}/success.html?success=true&session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${process.env.FRONTEND_URL}/success.html?canceled=true`,
             customer_email: customer?.email,
             metadata: {
                 orderId: String(order.id),
                 orderNumber: order.orderNumber
             }
-        });
+        };
+
+        // Appliquer la reduction via un coupon Stripe si applicable
+        if (discountAmount > 0 && appliedPromo) {
+            const coupon = await stripe.coupons.create({
+                amount_off: Math.round(discountAmount * 100),
+                currency: 'eur',
+                duration: 'once',
+                name: `Reduction ${appliedPromo.code}`
+            });
+            sessionParams.discounts = [{ coupon: coupon.id }];
+        }
+
+        const session = await stripe.checkout.sessions.create(sessionParams);
 
         res.json({
             success: true,

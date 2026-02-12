@@ -92,9 +92,10 @@
                 </div>
 
                 <div class="product-actions">
-                    <button class="btn-add-to-cart" onclick="addToCart(1, 'T-shirt Cove', 65, 'image/t shirt front.JPG', selectedSize);">
+                    <button class="btn-add-to-cart" onclick="handleAddToCart(1, 'T-shirt Cove', 65, 'image/t shirt front.JPG')">
                         Ajouter au panier
                     </button>
+                    <div id="size-error" class="size-error"></div>
                 </div>
 
                 <div class="product-extra-info">
@@ -240,6 +241,17 @@
             document.querySelectorAll('.accordion-item:not(.active) .accordion-icon').forEach(icon => {
                 icon.textContent = '+';
             });
+        }
+
+        function handleAddToCart(id, name, price, image) {
+            const errorEl = document.getElementById('size-error');
+            if (!selectedSize) {
+                errorEl.textContent = 'Veuillez selectionner une taille';
+                errorEl.style.display = 'block';
+                return;
+            }
+            errorEl.style.display = 'none';
+            addToCart(id, name, price, image, selectedSize);
         }
 
         function showNotification() {

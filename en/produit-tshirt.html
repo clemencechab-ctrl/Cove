@@ -92,9 +92,10 @@
                 </div>
 
                 <div class="product-actions">
-                    <button class="btn-add-to-cart" onclick="addToCart(1, 'T-shirt Cove', 65, '../image/t shirt front.JPG', selectedSize);">
+                    <button class="btn-add-to-cart" onclick="handleAddToCart(1, 'T-shirt Cove', 65, '../image/t shirt front.JPG')">
                         Add to cart
                     </button>
+                    <div id="size-error" class="size-error"></div>
                 </div>
 
                 <div class="product-extra-info">
@@ -211,6 +212,16 @@
             selectedSize = size;
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            const addBtn = document.querySelector('.btn-add-to-cart');
+            if (btn.disabled) {
+                addBtn.disabled = true;
+                addBtn.textContent = 'Out of stock';
+                addBtn.classList.add('disabled');
+            } else {
+                addBtn.disabled = false;
+                addBtn.textContent = 'Add to cart';
+                addBtn.classList.remove('disabled');
+            }
         }
 
         function toggleAccordion(header) {
@@ -229,6 +240,17 @@
             document.querySelectorAll('.accordion-item:not(.active) .accordion-icon').forEach(icon => {
                 icon.textContent = '+';
             });
+        }
+
+        function handleAddToCart(id, name, price, image) {
+            const errorEl = document.getElementById('size-error');
+            if (!selectedSize) {
+                errorEl.textContent = 'Please select a size';
+                errorEl.style.display = 'block';
+                return;
+            }
+            errorEl.style.display = 'none';
+            addToCart(id, name, price, image, selectedSize);
         }
 
         function showNotification() {

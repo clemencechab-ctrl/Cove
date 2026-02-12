@@ -39,7 +39,7 @@ async function sendOrderConfirmation(order) {
     try {
         const itemsHtml = order.items.map(item => `
             <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}${item.size ? ' — ' + item.size : ''}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity).toFixed(2)} &euro;</td>
             </tr>
@@ -207,8 +207,78 @@ async function sendContactNotification(contactData) {
     }
 }
 
+// Email de notification au proprietaire pour nouvelle commande
+async function sendOrderNotificationToOwner(order) {
+    try {
+        const ownerEmail = process.env.OWNER_EMAIL || process.env.EMAIL_USER || getFromAddress();
+
+        const itemsHtml = order.items.map(item => `
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}${item.size ? ' — ' + item.size : ''}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity).toFixed(2)} &euro;</td>
+            </tr>
+        `).join('');
+
+        const shippingAddress = order.shipping
+            ? `${order.shipping.address || ''}, ${order.shipping.postalCode || ''} ${order.shipping.city || ''}, ${order.shipping.country || 'FR'}`
+            : 'Non renseignee';
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">COVE — Nouvelle commande</h1>
+                <p>Une nouvelle commande vient d'etre passee !</p>
+
+                <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                    <p><strong>Commande :</strong> ${order.orderNumber}</p>
+                    <p><strong>Client :</strong> ${order.customer.firstName} ${order.customer.lastName}</p>
+                    <p><strong>Email :</strong> ${order.customer.email}</p>
+                    <p><strong>Telephone :</strong> ${order.customer.phone || 'Non renseigne'}</p>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 8px; text-align: left;">Produit</th>
+                            <th style="padding: 8px; text-align: center;">Qte</th>
+                            <th style="padding: 8px; text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+
+                <div style="text-align: right; margin: 20px 0;">
+                    <p>Sous-total : ${(order.subtotal || 0).toFixed(2)} &euro;</p>
+                    ${order.discountAmount ? `<p>Reduction : -${order.discountAmount.toFixed(2)} &euro;</p>` : ''}
+                    <p>Livraison : ${(order.shippingCost || 0).toFixed(2)} &euro;</p>
+                    <p style="font-size: 1.2em; font-weight: bold;">Total : ${(order.total || 0).toFixed(2)} &euro;</p>
+                </div>
+
+                <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                    <h3 style="margin-top: 0;">Adresse de livraison</h3>
+                    <p>${shippingAddress}</p>
+                </div>
+            </div>
+        `;
+
+        await sendMail({
+            from: getFromAddress(),
+            to: ownerEmail,
+            subject: `[COVE] Nouvelle commande #${order.orderNumber} — ${(order.total || 0).toFixed(2)} EUR`,
+            html
+        });
+
+        console.log(`Email notification proprietaire envoye pour commande ${order.orderNumber}`);
+    } catch (error) {
+        console.error(`Erreur envoi email notification proprietaire commande ${order.orderNumber}:`, error.message);
+    }
+}
+
 module.exports = {
     sendOrderConfirmation,
     sendOrderStatusUpdate,
-    sendContactNotification
+    sendContactNotification,
+    sendOrderNotificationToOwner
 };

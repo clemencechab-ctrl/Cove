@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
-const { sendOrderConfirmation } = require('../utils/email');
+const { sendOrderConfirmation, sendOrderNotificationToOwner } = require('../utils/email');
 
 // POST /api/webhooks/stripe
 router.post('/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -38,6 +38,7 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
                     const order = await store.getOrderById(orderId);
                     if (order) {
                         sendOrderConfirmation(order);
+                        sendOrderNotificationToOwner(order);
                     }
                 } catch (err) {
                     console.error(`Webhook: Failed to update order ${orderNumber}:`, err.message);
