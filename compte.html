@@ -54,6 +54,27 @@
                data-required="Veuillez remplir tous les champs."
                data-invalid="Email ou mot de passe incorrect."></p>
             <button type="submit" class="btn-primary">Se connecter</button>
+            <div class="auth-divider"><span>ou</span></div>
+            <button type="button" class="btn-google" id="btn-google-signin">
+                <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                Se connecter avec Google
+            </button>
+            <a href="#" class="forgot-password-link" id="forgot-password-link">Mot de passe oublie ?</a>
+        </form>
+
+        <!-- Forgot Password Form -->
+        <form class="auth-form" id="forgot-password-form">
+            <p class="forgot-password-text">Entrez votre adresse email, vous recevrez un lien pour reinitialiser votre mot de passe.</p>
+            <div class="form-group">
+                <label for="forgot-email">Email</label>
+                <input type="email" id="forgot-email" required placeholder="votre@email.com">
+            </div>
+            <p class="auth-error" id="forgot-error"
+               data-required="Veuillez entrer votre email."></p>
+            <p class="auth-success" id="forgot-success"
+               data-sent="Un lien de reinitialisation a ete envoye a votre adresse email."></p>
+            <button type="submit" class="btn-primary">Envoyer le lien</button>
+            <a href="#" class="forgot-password-link" id="back-to-login">Retour a la connexion</a>
         </form>
 
         <form class="auth-form" id="register-form">
@@ -109,6 +130,16 @@
         </div>
     </section>
 
+    <!-- Order Detail Modal -->
+    <div class="order-detail-modal" id="order-detail-modal">
+        <div class="order-detail-content">
+            <button class="order-detail-close" onclick="closeOrderDetail()">&times;</button>
+            <div id="order-detail-body">
+                <p style="text-align:center; color: var(--color-text-muted);">Chargement...</p>
+            </div>
+        </div>
+    </div>
+
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-brand">
@@ -148,6 +179,9 @@
             <p>&copy; 2026 COVE. Tous droits reserves.</p>
         </div>
     </footer>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/cart.js"></script>
@@ -189,7 +223,7 @@
                 `).join('');
 
                 return `
-                    <div class="order-card">
+                    <div class="order-card clickable" onclick="showOrderDetail('${order.orderNumber}')">
                         <div class="order-header">
                             <div class="order-info">
                                 <span class="order-number">${order.orderNumber}</span>
@@ -208,6 +242,171 @@
                 `;
             }).join('');
         }
+
+        const detailStatusLabels = {
+            pending: 'En attente',
+            paid: 'Paye',
+            confirmed: 'Confirmee',
+            processing: 'En preparation',
+            shipped: 'Expediee',
+            delivered: 'Livree',
+            cancelled: 'Annulee'
+        };
+
+        async function showOrderDetail(orderNumber) {
+            const modal = document.getElementById('order-detail-modal');
+            const body = document.getElementById('order-detail-body');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            body.innerHTML = '<p style="text-align:center; color: var(--color-text-muted);">Chargement...</p>';
+
+            const result = await api.getOrder(orderNumber);
+            if (!result.success || !result.order) {
+                body.innerHTML = '<p style="text-align:center; color: #e74c3c;">Impossible de charger les details.</p>';
+                return;
+            }
+
+            const order = result.order;
+            const date = order.createdAt ? new Date(order.createdAt).toLocaleDateString('fr-FR', {
+                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            }) : '-';
+
+            // Status timeline
+            const history = order.statusHistory || [];
+            const timelineHtml = history.length > 0
+                ? history.map((entry, i) => {
+                    const d = entry.date ? new Date(entry.date).toLocaleDateString('fr-FR', {
+                        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    }) : '';
+                    const isCurrent = i === history.length - 1;
+                    return `
+                        <div class="timeline-item ${isCurrent ? 'current' : ''}">
+                            <span class="timeline-status">${detailStatusLabels[entry.status] || entry.status}</span>
+                            <span class="timeline-date">${d}</span>
+                            ${entry.comment ? `<span class="timeline-comment">${entry.comment}</span>` : ''}
+                        </div>
+                    `;
+                }).join('')
+                : `<div class="timeline-item current"><span class="timeline-status">${detailStatusLabels[order.status] || order.status}</span></div>`;
+
+            // Items
+            const itemsHtml = (order.items || []).map(item => `
+                <div class="detail-item-row">
+                    <span class="detail-item-name">${item.name}</span>
+                    ${item.size ? `<span class="detail-item-size">Taille ${item.size}</span>` : ''}
+                    <span class="detail-item-qty">x${item.quantity}</span>
+                    <span class="detail-item-price">${(item.price * item.quantity).toFixed(2)} EUR</span>
+                </div>
+            `).join('');
+
+            // Address
+            const shipping = order.shipping || {};
+            const customer = order.customer || {};
+            const addressHtml = (shipping.address || customer.email) ? `
+                <div class="detail-address">
+                    ${customer.firstName || customer.lastName ? `<p>${customer.firstName || ''} ${customer.lastName || ''}</p>` : ''}
+                    ${shipping.address ? `<p>${shipping.address}</p>` : ''}
+                    ${shipping.postalCode || shipping.city ? `<p>${shipping.postalCode || ''} ${shipping.city || ''}</p>` : ''}
+                    ${shipping.country ? `<p>${shipping.country}</p>` : ''}
+                    ${customer.email ? `<p>${customer.email}</p>` : ''}
+                    ${customer.phone ? `<p>${customer.phone}</p>` : ''}
+                </div>
+            ` : '<p style="color:var(--color-text-muted);">Non disponible</p>';
+
+            // Totals
+            const subtotal = (order.items || []).reduce((sum, i) => sum + (i.price * i.quantity), 0);
+            const discount = order.discount || 0;
+            const total = order.total || subtotal;
+            const totalsHtml = `
+                <div class="detail-totals">
+                    <div class="detail-total-row"><span>Sous-total</span><span>${subtotal.toFixed(2)} EUR</span></div>
+                    ${discount > 0 ? `<div class="detail-total-row discount"><span>Reduction</span><span>-${discount.toFixed(2)} EUR</span></div>` : ''}
+                    <div class="detail-total-row"><span>Livraison</span><span>Gratuite</span></div>
+                    <div class="detail-total-row final"><span>Total</span><span>${total.toFixed(2)} EUR</span></div>
+                </div>
+            `;
+
+            // Tracking
+            const trackingHtml = order.trackingNumber ? `
+                <div class="order-detail-section">
+                    <h3>Suivi du colis</h3>
+                    <div class="tracking-info">
+                        <p><strong>N° de suivi :</strong> ${order.trackingNumber}</p>
+                        <a href="https://www.laposte.fr/outils/suivre-vos-envois?code=${order.trackingNumber}" target="_blank" class="btn-tracking-link">Suivre sur La Poste</a>
+                    </div>
+                </div>
+            ` : '';
+
+            // Cancel/Return buttons
+            const canCancel = ['pending', 'confirmed', 'processing'].includes(order.status);
+            const canReturn = ['shipped', 'delivered'].includes(order.status);
+            const cancelReturnHtml = (canCancel || canReturn) ? `
+                <div class="order-detail-section">
+                    <h3>${canCancel ? 'Annulation' : 'Retour'}</h3>
+                    <div class="cancel-return-form">
+                        <textarea id="cancel-reason" class="cancel-reason-input" placeholder="Raison de votre demande..." rows="3"></textarea>
+                        <button class="btn-cancel-request" onclick="requestCancelReturn('${order.id}', '${canCancel ? 'cancel' : 'return'}')">
+                            ${canCancel ? 'Demander l\'annulation' : 'Demander un retour'}
+                        </button>
+                    </div>
+                </div>
+            ` : '';
+
+            body.innerHTML = `
+                <h2>Commande ${order.orderNumber}</h2>
+                <p class="order-detail-date">${date}</p>
+
+                <div class="order-detail-section">
+                    <h3>Suivi du statut</h3>
+                    <div class="status-timeline">${timelineHtml}</div>
+                </div>
+
+                ${trackingHtml}
+
+                <div class="order-detail-section">
+                    <h3>Articles</h3>
+                    ${itemsHtml}
+                </div>
+
+                <div class="order-detail-section">
+                    <h3>Adresse de livraison</h3>
+                    ${addressHtml}
+                </div>
+
+                <div class="order-detail-section">
+                    <h3>Total</h3>
+                    ${totalsHtml}
+                </div>
+
+                ${cancelReturnHtml}
+            `;
+        }
+
+        async function requestCancelReturn(orderId, type) {
+            const reason = document.getElementById('cancel-reason').value.trim();
+            if (!reason) { alert('Veuillez indiquer une raison.'); return; }
+            const btn = document.querySelector('.btn-cancel-request');
+            btn.disabled = true;
+            btn.textContent = 'Envoi...';
+            const result = await api.requestCancellation(orderId, type, reason);
+            if (result.success) {
+                alert(type === 'cancel' ? 'Demande d\'annulation envoyee !' : 'Demande de retour envoyee !');
+                closeOrderDetail();
+            } else {
+                alert('Erreur: ' + (result.error || 'Impossible d\'envoyer la demande'));
+                btn.disabled = false;
+                btn.textContent = type === 'cancel' ? 'Demander l\'annulation' : 'Demander un retour';
+            }
+        }
+
+        function closeOrderDetail() {
+            document.getElementById('order-detail-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('order-detail-modal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('order-detail-modal')) closeOrderDetail();
+        });
 
         document.addEventListener('DOMContentLoaded', function() {
             auth.init();

@@ -49,7 +49,12 @@ const api = {
 
     async getOrder(orderNumber) {
         try {
-            const response = await fetch(`${API_URL}/orders/${orderNumber}`);
+            const token = localStorage.getItem('coveToken');
+            const headers = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            const response = await fetch(`${API_URL}/orders/${orderNumber}`, { headers });
             const data = await response.json();
             return data;
         } catch (error) {
@@ -75,7 +80,7 @@ const api = {
     },
 
     // Checkout
-    async checkout(items, customer, shipping) {
+    async checkout(items, customer, shipping, promoCode = null) {
         try {
             const token = localStorage.getItem('coveToken');
             const headers = {
@@ -85,10 +90,13 @@ const api = {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
+            const body = { items, customer, shipping };
+            if (promoCode) body.promoCode = promoCode;
+
             const response = await fetch(`${API_URL}/checkout/create-session`, {
                 method: 'POST',
                 headers,
-                body: JSON.stringify({ items, customer, shipping })
+                body: JSON.stringify(body)
             });
             const data = await response.json();
             return data;
@@ -106,6 +114,24 @@ const api = {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ sessionId, orderNumber })
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Promo codes
+    async validatePromoCode(code, subtotal) {
+        try {
+            const response = await fetch(`${API_URL}/checkout/validate-promo`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code, subtotal })
             });
             const data = await response.json();
             return data;
@@ -142,6 +168,23 @@ const api = {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async forgotPassword(email) {
+        try {
+            const response = await fetch(`${API_URL}/users/forgot-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email })
             });
             const data = await response.json();
             return data;
@@ -192,6 +235,80 @@ const api = {
             return data;
         } catch (error) {
             return { status: 'offline', error: error.message };
+        }
+    },
+
+    // Tracking
+    async setOrderTracking(orderId, trackingNumber) {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/orders/${orderId}/tracking`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ trackingNumber })
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async getTrackingStatus(orderId) {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/orders/${orderId}/tracking-status`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Cancel/Return request
+    async requestCancellation(orderId, type, reason) {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/orders/${orderId}/cancel-request`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ type, reason })
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Google Auth
+    async googleAuth(idToken) {
+        try {
+            const response = await fetch(`${API_URL}/users/google-auth`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ idToken })
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
         }
     },
 
@@ -348,6 +465,59 @@ const api = {
                     'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({ status })
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Admin - Promo Codes
+    async getAdminPromoCodes() {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/promo-codes`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async createPromoCode(promoData) {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/promo-codes`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(promoData)
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async deletePromoCode(id) {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/promo-codes/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
             const data = await response.json();
             return data;

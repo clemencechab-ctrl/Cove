@@ -7,6 +7,8 @@ const productCounterRef = db.ref('productCounter');
 const usersRef = db.ref('users');
 const contactMessagesRef = db.ref('contactMessages');
 const contactCounterRef = db.ref('contactCounter');
+const promoCodesRef = db.ref('promoCodes');
+const promoCounterRef = db.ref('promoCounter');
 
 module.exports = {
     // Products
@@ -176,6 +178,31 @@ module.exports = {
         const updates = {
             status,
             statusHistory,
+            updatedAt: new Date().toISOString()
+        };
+        await ordersRef.child(foundKey).update(updates);
+        return { ...foundOrder, ...updates };
+    },
+
+    updateOrderTracking: async (id, trackingNumber) => {
+        const snapshot = await ordersRef.once('value');
+        const data = snapshot.val();
+        if (!data) return null;
+
+        let foundKey = null;
+        let foundOrder = null;
+        for (const [key, val] of Object.entries(data)) {
+            if (val.id === parseInt(id)) {
+                foundKey = key;
+                foundOrder = val;
+                break;
+            }
+        }
+
+        if (!foundKey) return null;
+
+        const updates = {
+            trackingNumber,
             updatedAt: new Date().toISOString()
         };
         await ordersRef.child(foundKey).update(updates);
@@ -379,5 +406,74 @@ module.exports = {
 
         await productsRef.child(foundKey).remove();
         return foundProduct;
+    },
+
+    // Promo Codes
+    createPromoCode: async (data) => {
+        const newCounter = await promoCounterRef.transaction(current => (current || 0) + 1);
+        const counterVal = newCounter.snapshot.val();
+
+        const promoCode = {
+            id: counterVal,
+            code: data.code.toUpperCase(),
+            type: data.type, // 'percentage' or 'fixed'
+            value: data.value,
+            minOrder: data.minOrder || 0,
+            maxUses: data.maxUses || 0, // 0 = unlimited
+            currentUses: 0,
+            active: true,
+            createdAt: new Date().toISOString()
+        };
+
+        await promoCodesRef.push(promoCode);
+        return promoCode;
+    },
+
+    getPromoCodes: async () => {
+        const snapshot = await promoCodesRef.once('value');
+        const data = snapshot.val();
+        if (!data) return [];
+        return Object.entries(data).map(([key, val]) => ({ ...val, _key: key }));
+    },
+
+    getPromoCodeByCode: async (code) => {
+        const snapshot = await promoCodesRef.once('value');
+        const data = snapshot.val();
+        if (!data) return null;
+        for (const [key, val] of Object.entries(data)) {
+            if (val.code === code.toUpperCase()) {
+                return { ...val, _key: key };
+            }
+        }
+        return null;
+    },
+
+    incrementPromoCodeUses: async (code) => {
+        const snapshot = await promoCodesRef.once('value');
+        const data = snapshot.val();
+        if (!data) return null;
+
+        for (const [key, val] of Object.entries(data)) {
+            if (val.code === code.toUpperCase()) {
+                const newUses = (val.currentUses || 0) + 1;
+                await promoCodesRef.child(key).update({ currentUses: newUses });
+                return { ...val, currentUses: newUses };
+            }
+        }
+        return null;
+    },
+
+    deletePromoCode: async (id) => {
+        const snapshot = await promoCodesRef.once('value');
+        const data = snapshot.val();
+        if (!data) return null;
+
+        for (const [key, val] of Object.entries(data)) {
+            if (val.id === parseInt(id)) {
+                await promoCodesRef.child(key).remove();
+                return val;
+            }
+        }
+        return null;
     }
 };

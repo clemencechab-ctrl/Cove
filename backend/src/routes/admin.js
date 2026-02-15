@@ -15,7 +15,7 @@ router.get('/stats', async (req, res) => {
         const users = await store.getAllUsers();
 
         const totalOrders = orders.length;
-        const totalRevenue = orders.reduce((sum, o) => sum + (o.total || 0), 0);
+        const totalRevenue = Math.round(orders.reduce((sum, o) => sum + (o.total || 0), 0) * 100) / 100;
         const totalClients = users.filter(u => u.role === 'client').length;
 
         res.json({
@@ -51,6 +51,7 @@ router.get('/clients', async (req, res) => {
                         status: o.status,
                         total: o.total,
                         items: o.items,
+                        trackingNumber: o.trackingNumber || null,
                         createdAt: o.createdAt
                     }));
 
@@ -122,6 +123,38 @@ router.put('/orders/:id/status', async (req, res) => {
     }
 });
 
+// PUT /api/admin/orders/:id/tracking - Ajouter un numero de suivi
+router.put('/orders/:id/tracking', async (req, res) => {
+    try {
+        const { trackingNumber } = req.body;
+
+        if (!trackingNumber || !trackingNumber.trim()) {
+            return res.status(400).json({
+                success: false,
+                error: 'Numero de suivi requis'
+            });
+        }
+
+        const order = await store.updateOrderTracking(req.params.id, trackingNumber.trim());
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                error: 'Commande non trouvee'
+            });
+        }
+
+        // Envoyer email de notification avec le numero de suivi
+        if (order.customer?.email) {
+            sendOrderStatusUpdate({ ...order, trackingNumber: trackingNumber.trim() }, 'shipped');
+        }
+
+        res.json({ success: true, order });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // ============ CRUD Produits ============
 
 // GET /api/admin/products - Liste tous les produits
@@ -141,7 +174,7 @@ router.get('/products', async (req, res) => {
 // POST /api/admin/products - Creer un produit
 router.post('/products', async (req, res) => {
     try {
-        const { name, price, category, description, image, stock } = req.body;
+        const { name, price, category, description, image, stock, sizeStock } = req.body;
 
         if (!name || price === undefined || !category) {
             return res.status(400).json({
@@ -163,7 +196,8 @@ router.post('/products', async (req, res) => {
             category,
             description: description || '',
             image: image || '',
-            stock: stock !== undefined ? parseInt(stock) : 0
+            stock: stock !== undefined ? parseInt(stock) : 0,
+            sizeStock: sizeStock || {}
         });
 
         res.status(201).json({ success: true, product });
@@ -175,7 +209,7 @@ router.post('/products', async (req, res) => {
 // PUT /api/admin/products/:id - Modifier un produit
 router.put('/products/:id', async (req, res) => {
     try {
-        const { name, price, category, description, image, stock } = req.body;
+        const { name, price, category, description, image, stock, sizeStock } = req.body;
 
         const updates = {};
         if (name !== undefined) updates.name = name;
@@ -192,6 +226,7 @@ router.put('/products/:id', async (req, res) => {
         if (description !== undefined) updates.description = description;
         if (image !== undefined) updates.image = image;
         if (stock !== undefined) updates.stock = parseInt(stock);
+        if (sizeStock !== undefined) updates.sizeStock = sizeStock;
 
         const product = await store.updateProduct(req.params.id, updates);
 
@@ -265,6 +300,96 @@ router.put('/messages/:id/status', async (req, res) => {
         }
 
         res.json({ success: true, message });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ============ Codes Promo ============
+
+// GET /api/admin/promo-codes - Liste tous les codes promo
+router.get('/promo-codes', async (req, res) => {
+    try {
+        const promoCodes = await store.getPromoCodes();
+        res.json({
+            success: true,
+            count: promoCodes.length,
+            promoCodes
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// POST /api/admin/promo-codes - Creer un code promo
+router.post('/promo-codes', async (req, res) => {
+    try {
+        const { code, type, value, minOrder, maxUses } = req.body;
+
+        if (!code || !type || value === undefined) {
+            return res.status(400).json({
+                success: false,
+                error: 'Code, type et valeur sont requis'
+            });
+        }
+
+        if (!['percentage', 'fixed'].includes(type)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Type doit etre "percentage" ou "fixed"'
+            });
+        }
+
+        if (typeof value !== 'number' || value <= 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'La valeur doit etre un nombre positif'
+            });
+        }
+
+        if (type === 'percentage' && value > 100) {
+            return res.status(400).json({
+                success: false,
+                error: 'Le pourcentage ne peut pas depasser 100'
+            });
+        }
+
+        // Verifier que le code n'existe pas deja
+        const existing = await store.getPromoCodeByCode(code);
+        if (existing) {
+            return res.status(400).json({
+                success: false,
+                error: 'Ce code promo existe deja'
+            });
+        }
+
+        const promoCode = await store.createPromoCode({
+            code,
+            type,
+            value,
+            minOrder: minOrder || 0,
+            maxUses: maxUses || 0
+        });
+
+        res.status(201).json({ success: true, promoCode });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// DELETE /api/admin/promo-codes/:id - Supprimer un code promo
+router.delete('/promo-codes/:id', async (req, res) => {
+    try {
+        const promoCode = await store.deletePromoCode(req.params.id);
+
+        if (!promoCode) {
+            return res.status(404).json({
+                success: false,
+                error: 'Code promo non trouve'
+            });
+        }
+
+        res.json({ success: true, message: 'Code promo supprime', promoCode });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }

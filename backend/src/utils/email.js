@@ -115,7 +115,9 @@ async function sendOrderStatusUpdate(order, newStatus) {
             shipped: {
                 subject: `COVE — Votre commande #${order.orderNumber} a ete expediee`,
                 title: 'Commande expediee',
-                message: 'Votre commande a ete expediee ! Vous la recevrez bientot.'
+                message: order.trackingNumber
+                    ? `Votre commande a ete expediee ! Numero de suivi : <strong>${order.trackingNumber}</strong><br><a href="https://www.laposte.fr/outils/suivre-vos-envois?code=${order.trackingNumber}" style="color: #333;">Suivre mon colis sur La Poste</a>`
+                    : 'Votre commande a ete expediee ! Vous la recevrez bientot.'
             },
             delivered: {
                 subject: `COVE — Votre commande #${order.orderNumber} a ete livree`,
@@ -276,9 +278,68 @@ async function sendOrderNotificationToOwner(order) {
     }
 }
 
+// Email de demande d'annulation ou de retour
+async function sendCancelReturnRequest(order, type, reason, customerEmail) {
+    try {
+        const ownerEmail = process.env.OWNER_EMAIL || process.env.EMAIL_USER || getFromAddress();
+        const typeLabel = type === 'cancel' ? 'annulation' : 'retour';
+        const typeLabelCap = type === 'cancel' ? 'Annulation' : 'Retour';
+        const customerName = order.customer ? `${order.customer.firstName || ''} ${order.customer.lastName || ''}`.trim() : customerEmail;
+
+        // Email au proprietaire
+        await sendMail({
+            from: getFromAddress(),
+            to: ownerEmail,
+            replyTo: customerEmail,
+            subject: `[COVE] Demande de ${typeLabel} — Commande #${order.orderNumber}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">COVE</h1>
+                    <h2>Demande de ${typeLabel}</h2>
+                    <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                        <p><strong>Commande :</strong> ${order.orderNumber}</p>
+                        <p><strong>Client :</strong> ${customerName}</p>
+                        <p><strong>Email :</strong> ${customerEmail}</p>
+                        <p><strong>Type :</strong> ${typeLabelCap}</p>
+                    </div>
+                    <div style="background: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #ffc107;">
+                        <p><strong>Raison :</strong></p>
+                        <p>${reason.replace(/\n/g, '<br>')}</p>
+                    </div>
+                    <p>Merci de traiter cette demande dans les plus brefs delais.</p>
+                </div>
+            `
+        });
+
+        // Confirmation au client
+        await sendMail({
+            from: getFromAddress(),
+            to: customerEmail,
+            subject: `COVE — Votre demande de ${typeLabel} pour la commande #${order.orderNumber}`,
+            html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">COVE</h1>
+                    <h2>Demande de ${typeLabel} recue</h2>
+                    <p>Bonjour${order.customer?.firstName ? ' ' + order.customer.firstName : ''},</p>
+                    <p>Nous avons bien recu votre demande de ${typeLabel} pour la commande <strong>${order.orderNumber}</strong>.</p>
+                    <p>Notre equipe va etudier votre demande et vous recontactera dans les plus brefs delais.</p>
+                    <p>A bientot,<br>L'equipe COVE</p>
+                </div>
+            `
+        });
+
+        console.log(`Email demande ${typeLabel} envoye pour commande ${order.orderNumber}`);
+        return true;
+    } catch (error) {
+        console.error(`Erreur envoi email ${type} commande ${order.orderNumber}:`, error.message);
+        return false;
+    }
+}
+
 module.exports = {
     sendOrderConfirmation,
     sendOrderStatusUpdate,
     sendContactNotification,
-    sendOrderNotificationToOwner
+    sendOrderNotificationToOwner,
+    sendCancelReturnRequest
 };

@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
-const { authenticate } = require('../middleware/auth');
-const { sendOrderStatusUpdate } = require('../utils/email');
+const { authenticate, requireRole } = require('../middleware/auth');
+const { sendOrderStatusUpdate, sendCancelReturnRequest } = require('../utils/email');
 
 // Middleware optionnel pour récupérer l'utilisateur si connecté
 const optionalAuth = async (req, res, next) => {
@@ -157,6 +157,7 @@ router.get('/my-orders', authenticate, async (req, res) => {
                 total: o.total,
                 items: o.items,
                 createdAt: o.createdAt,
+                trackingNumber: o.trackingNumber || null,
                 statusHistory: o.statusHistory || []
             }))
         });
@@ -165,8 +166,109 @@ router.get('/my-orders', authenticate, async (req, res) => {
     }
 });
 
-// GET /api/orders/customer/:email - Commandes d'un client
-router.get('/customer/:email', async (req, res) => {
+// POST /api/orders/:id/cancel-request - Demande d'annulation ou de retour
+router.post('/:id/cancel-request', authenticate, async (req, res) => {
+    try {
+        const { type, reason } = req.body;
+
+        if (!type || !['cancel', 'return'].includes(type)) {
+            return res.status(400).json({ success: false, error: 'Type invalide (cancel ou return)' });
+        }
+        if (!reason || !reason.trim()) {
+            return res.status(400).json({ success: false, error: 'Raison requise' });
+        }
+
+        const order = await store.getOrderById(req.params.id);
+        if (!order) {
+            return res.status(404).json({ success: false, error: 'Commande non trouvee' });
+        }
+
+        // Verifier que la commande appartient a l'utilisateur
+        if (order.userId !== req.user.uid && order.customer?.email !== req.user.email) {
+            return res.status(403).json({ success: false, error: 'Acces refuse' });
+        }
+
+        // Verifier le statut selon le type
+        const cancelStatuses = ['pending', 'confirmed', 'processing'];
+        const returnStatuses = ['shipped', 'delivered'];
+
+        if (type === 'cancel' && !cancelStatuses.includes(order.status)) {
+            return res.status(400).json({ success: false, error: 'Cette commande ne peut pas etre annulee' });
+        }
+        if (type === 'return' && !returnStatuses.includes(order.status)) {
+            return res.status(400).json({ success: false, error: 'Cette commande ne peut pas faire l\'objet d\'un retour' });
+        }
+
+        // Envoyer email
+        await sendCancelReturnRequest(order, type, reason.trim(), req.user.email);
+
+        res.json({ success: true, message: 'Demande envoyee avec succes' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// GET /api/orders/:id/tracking-status - Suivi La Poste
+router.get('/:id/tracking-status', authenticate, async (req, res) => {
+    try {
+        const order = await store.getOrderById(req.params.id);
+        if (!order) {
+            return res.status(404).json({ success: false, error: 'Commande non trouvee' });
+        }
+
+        if (!order.trackingNumber) {
+            return res.status(400).json({ success: false, error: 'Aucun numero de suivi' });
+        }
+
+        const apiKey = process.env.LAPOSTE_API_KEY;
+        if (!apiKey) {
+            return res.json({
+                success: true,
+                trackingNumber: order.trackingNumber,
+                trackingUrl: `https://www.laposte.fr/outils/suivre-vos-envois?code=${order.trackingNumber}`,
+                events: [],
+                message: 'API La Poste non configuree'
+            });
+        }
+
+        const fetch = require('node-fetch');
+        const response = await fetch(
+            `https://api.laposte.fr/suivi/v2/idships/${order.trackingNumber}`,
+            { headers: { 'X-Okapi-Key': apiKey, 'Accept': 'application/json' } }
+        );
+
+        if (!response.ok) {
+            return res.json({
+                success: true,
+                trackingNumber: order.trackingNumber,
+                trackingUrl: `https://www.laposte.fr/outils/suivre-vos-envois?code=${order.trackingNumber}`,
+                events: [],
+                message: 'Impossible de recuperer le suivi'
+            });
+        }
+
+        const data = await response.json();
+        const shipment = data.shipment || {};
+        const events = (shipment.event || []).map(e => ({
+            date: e.date,
+            label: e.label,
+            status: e.code
+        }));
+
+        res.json({
+            success: true,
+            trackingNumber: order.trackingNumber,
+            trackingUrl: `https://www.laposte.fr/outils/suivre-vos-envois?code=${order.trackingNumber}`,
+            status: shipment.isFinal ? 'delivered' : 'in_transit',
+            events
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// GET /api/orders/customer/:email - Commandes d'un client (admin only)
+router.get('/customer/:email', authenticate, requireRole('owner'), async (req, res) => {
     try {
         const orders = await store.getOrdersByEmail(req.params.email);
 
@@ -180,8 +282,8 @@ router.get('/customer/:email', async (req, res) => {
     }
 });
 
-// GET /api/orders/:orderNumber - Detail d'une commande
-router.get('/:orderNumber', async (req, res) => {
+// GET /api/orders/:orderNumber - Detail d'une commande (auth requise)
+router.get('/:orderNumber', authenticate, async (req, res) => {
     try {
         const order = await store.getOrderByNumber(req.params.orderNumber);
 
@@ -190,6 +292,13 @@ router.get('/:orderNumber', async (req, res) => {
                 success: false,
                 error: 'Commande non trouvee'
             });
+        }
+
+        // Verifier que l'utilisateur est admin ou proprietaire de la commande
+        const isAdmin = req.user.role === 'owner' || req.user.role === 'admin';
+        const isOrderOwner = order.userId === req.user.uid || order.customer?.email === req.user.email;
+        if (!isAdmin && !isOrderOwner) {
+            return res.status(403).json({ success: false, error: 'Acces refuse' });
         }
 
         res.json({ success: true, order });

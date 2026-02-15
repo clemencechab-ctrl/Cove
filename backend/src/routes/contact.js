@@ -4,6 +4,12 @@ const store = require('../data/store');
 const { sendContactNotification } = require('../utils/email');
 const { authenticate, requireRole } = require('../middleware/auth');
 
+// Echapper HTML pour eviter XSS
+function escapeHtml(str) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // POST /api/contact - Envoyer un message de contact
 router.post('/', async (req, res) => {
     try {
@@ -26,12 +32,17 @@ router.post('/', async (req, res) => {
             });
         }
 
+        // Sanitiser les champs texte contre XSS
+        const safeName = escapeHtml(name);
+        const safeSubject = escapeHtml(subject || 'Sans sujet');
+        const safeMessage = escapeHtml(message);
+
         // Stocker le message dans Firebase
         const contactMessage = await store.createContactMessage({
-            name,
+            name: safeName,
             email,
-            subject: subject || 'Sans sujet',
-            message
+            subject: safeSubject,
+            message: safeMessage
         });
 
         // Envoyer les emails via le module centralise

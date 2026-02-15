@@ -36,7 +36,7 @@
         <p class="legal-subtitle">Tableau de bord en temps reel</p>
     </section>
 
-    <!-- Access Denied (visible si non autorise) -->
+    <!-- Access Denied -->
     <section class="admin-section" id="access-denied" style="display: none;">
         <div class="access-denied-content">
             <h2>Acces refuse</h2>
@@ -45,33 +45,177 @@
         </div>
     </section>
 
-    <!-- Admin Content (visible si autorise) -->
+    <!-- Admin Content -->
     <div id="admin-content" style="display: none;">
-        <!-- Stats -->
-        <section class="admin-section">
-            <div id="admin-stats" class="admin-stats">
-                <div class="stat-card">
-                    <span class="stat-value" id="stat-total-orders">-</span>
-                    <span class="stat-label">Commandes</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-value" id="stat-total-revenue">-</span>
-                    <span class="stat-label">Chiffre d'affaires</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-value" id="stat-total-clients">-</span>
-                    <span class="stat-label">Clients</span>
-                </div>
-            </div>
-        </section>
+        <!-- Logout -->
+        <div style="text-align: right; padding: 0 2rem;">
+            <button class="btn-logout" id="admin-logout">Se deconnecter</button>
+        </div>
 
-        <!-- Clients -->
-        <section class="admin-section">
-            <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Clients &amp; Commandes</h2>
-            <div id="admin-clients" class="admin-clients">
-                <p style="text-align:center; color: var(--color-text-muted);">Chargement...</p>
-            </div>
-        </section>
+        <!-- Admin Tabs -->
+        <div class="admin-tabs">
+            <button class="admin-tab active" data-tab="tab-dashboard">Tableau de bord</button>
+            <button class="admin-tab" data-tab="tab-products">Produits</button>
+            <button class="admin-tab" data-tab="tab-promos">Codes Promo</button>
+            <button class="admin-tab" data-tab="tab-messages">Messages</button>
+        </div>
+
+        <!-- Tab: Dashboard -->
+        <div id="tab-dashboard" class="admin-tab-content active">
+            <section class="admin-section">
+                <div id="admin-stats" class="admin-stats">
+                    <div class="stat-card">
+                        <span class="stat-value" id="stat-total-orders">-</span>
+                        <span class="stat-label">Commandes</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="stat-total-revenue">-</span>
+                        <span class="stat-label">Chiffre d'affaires</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-value" id="stat-total-clients">-</span>
+                        <span class="stat-label">Clients</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="admin-section">
+                <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Clients &amp; Commandes</h2>
+                <!-- Filter Bar -->
+                <div class="admin-filter-bar">
+                    <input type="text" id="filter-search" class="admin-filter-input" placeholder="Rechercher par email ou numero...">
+                    <select id="filter-status" class="admin-filter-select">
+                        <option value="">Tous les statuts</option>
+                        <option value="pending">En attente</option>
+                        <option value="paid">Paye</option>
+                        <option value="confirmed">Confirmee</option>
+                        <option value="processing">En preparation</option>
+                        <option value="shipped">Expediee</option>
+                        <option value="delivered">Livree</option>
+                        <option value="cancelled">Annulee</option>
+                    </select>
+                </div>
+                <div id="admin-clients" class="admin-clients">
+                    <p style="text-align:center; color: var(--color-text-muted);">Chargement...</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Tab: Products -->
+        <div id="tab-products" class="admin-tab-content">
+            <section class="admin-section">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+                    <h2 class="section-title" style="margin:0;">Produits</h2>
+                    <button class="btn-primary" onclick="openProductModal()">Ajouter un produit</button>
+                </div>
+                <div id="admin-products-list" class="admin-products-list">
+                    <p style="text-align:center; color: var(--color-text-muted);">Chargement...</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Tab: Promo Codes -->
+        <div id="tab-promos" class="admin-tab-content">
+            <section class="admin-section">
+                <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Codes Promo</h2>
+                <!-- Create Promo Form -->
+                <div class="admin-promo-form">
+                    <h3>Creer un code promo</h3>
+                    <div class="promo-form-grid">
+                        <div class="form-group">
+                            <label>Code</label>
+                            <input type="text" id="promo-code" placeholder="ex: COVE20" style="text-transform:uppercase">
+                        </div>
+                        <div class="form-group">
+                            <label>Type</label>
+                            <select id="promo-type">
+                                <option value="percentage">Pourcentage (%)</option>
+                                <option value="fixed">Montant fixe (EUR)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Valeur</label>
+                            <input type="number" id="promo-value" min="0" step="1" placeholder="20">
+                        </div>
+                        <div class="form-group">
+                            <label>Commande min. (EUR)</label>
+                            <input type="number" id="promo-min-order" min="0" step="1" placeholder="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Utilisations max.</label>
+                            <input type="number" id="promo-max-uses" min="0" step="1" placeholder="0 = illimite" value="0">
+                        </div>
+                        <div class="form-group" style="display:flex; align-items:flex-end;">
+                            <button class="btn-primary" onclick="createPromo()" style="width:100%;">Creer</button>
+                        </div>
+                    </div>
+                    <p id="promo-form-message" class="admin-form-message"></p>
+                </div>
+                <!-- Promo List -->
+                <div id="admin-promos-list" class="admin-promos-list">
+                    <p style="text-align:center; color: var(--color-text-muted);">Chargement...</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Tab: Messages -->
+        <div id="tab-messages" class="admin-tab-content">
+            <section class="admin-section">
+                <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Messages de contact</h2>
+                <div id="admin-messages-list" class="admin-messages-list">
+                    <p style="text-align:center; color: var(--color-text-muted);">Chargement...</p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="admin-modal" id="product-modal">
+        <div class="admin-modal-content">
+            <button class="admin-modal-close" onclick="closeProductModal()">&times;</button>
+            <h2 id="product-modal-title">Ajouter un produit</h2>
+            <form id="product-form" onsubmit="saveProduct(event)">
+                <input type="hidden" id="product-edit-id">
+                <div class="form-group">
+                    <label>Nom</label>
+                    <input type="text" id="product-name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Prix (EUR)</label>
+                        <input type="number" id="product-price" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Categorie</label>
+                        <select id="product-category" required>
+                            <option value="tops">Tops</option>
+                            <option value="bottoms">Pantalons</option>
+                            <option value="outerwear">Vestes</option>
+                            <option value="accessories">Accessoires</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="product-description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>URL de l'image</label>
+                    <input type="text" id="product-image" placeholder="image/monproduit.jpg">
+                </div>
+                <div class="form-group">
+                    <label>Stock par taille</label>
+                    <div class="size-stock-grid">
+                        <div><label>S</label><input type="number" id="stock-s" min="0" value="0"></div>
+                        <div><label>M</label><input type="number" id="stock-m" min="0" value="0"></div>
+                        <div><label>L</label><input type="number" id="stock-l" min="0" value="0"></div>
+                        <div><label>XL</label><input type="number" id="stock-xl" min="0" value="0"></div>
+                    </div>
+                </div>
+                <p id="product-form-message" class="admin-form-message"></p>
+                <button type="submit" class="btn-primary" style="width:100%; margin-top:1rem;">Enregistrer</button>
+            </form>
+        </div>
     </div>
 
     <!-- Footer -->
@@ -128,27 +272,37 @@
             cancelled: { label: 'Annulee', class: 'status-cancelled' }
         };
 
-        // Verifier l'acces admin
+        const messageStatusLabels = {
+            new: { label: 'Nouveau', class: 'msg-status-new' },
+            read: { label: 'Lu', class: 'msg-status-read' },
+            replied: { label: 'Repondu', class: 'msg-status-replied' },
+            archived: { label: 'Archive', class: 'msg-status-archived' }
+        };
+
+        const categoryLabels = {
+            tops: 'Tops', bottoms: 'Pantalons', outerwear: 'Vestes', accessories: 'Accessoires'
+        };
+
+        // ============ Tabs ============
+        document.querySelectorAll('.admin-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ============ Admin Access ============
         async function checkAdminAccess() {
             const token = localStorage.getItem('coveToken');
             const userStr = localStorage.getItem('coveUser');
-
-            if (!token || !userStr) {
-                showAccessDenied();
-                return false;
-            }
-
+            if (!token || !userStr) { showAccessDenied(); return false; }
             try {
                 const user = JSON.parse(userStr);
-                if (user.role !== 'owner') {
-                    showAccessDenied();
-                    return false;
-                }
+                if (user.role !== 'owner') { showAccessDenied(); return false; }
                 return true;
-            } catch (e) {
-                showAccessDenied();
-                return false;
-            }
+            } catch (e) { showAccessDenied(); return false; }
         }
 
         function showAccessDenied() {
@@ -161,10 +315,9 @@
             document.getElementById('admin-content').style.display = 'block';
         }
 
-        // Charger les statistiques
+        // ============ Dashboard ============
         async function loadStats() {
             const result = await api.getAdminStats();
-
             if (result.success) {
                 document.getElementById('stat-total-orders').textContent = result.stats.totalOrders;
                 document.getElementById('stat-total-revenue').textContent = result.stats.totalRevenue + ' EUR';
@@ -172,7 +325,8 @@
             }
         }
 
-        // Charger les clients
+        let allClientsData = [];
+
         async function loadClients() {
             const container = document.getElementById('admin-clients');
             const result = await api.getAdminClients();
@@ -182,38 +336,32 @@
                 return;
             }
 
-            if (result.clients.length === 0) {
+            allClientsData = result.clients;
+            renderClients(result.clients);
+        }
+
+        function renderClients(clients) {
+            const container = document.getElementById('admin-clients');
+
+            if (clients.length === 0) {
                 container.innerHTML = '<p style="text-align:center; color: var(--color-text-muted);">Aucun client pour le moment.</p>';
                 return;
             }
 
-            container.innerHTML = result.clients.map(client => {
+            container.innerHTML = clients.map(client => {
                 const lastLogin = client.lastLogin
-                    ? new Date(client.lastLogin).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    })
+                    ? new Date(client.lastLogin).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
                     : 'Jamais';
-
                 const createdAt = client.createdAt
-                    ? new Date(client.createdAt).toLocaleDateString('fr-FR', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                    })
+                    ? new Date(client.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
                     : '-';
 
                 const ordersHtml = client.orders.length > 0
                     ? client.orders.map(order => {
                         const status = statusLabels[order.status] || { label: order.status, class: '' };
                         const orderDate = new Date(order.createdAt).toLocaleDateString('fr-FR');
-                        const itemsList = order.items.map(i => `${i.name} x${i.quantity}`).join(', ');
-
                         return `
-                            <div class="order-row">
+                            <div class="order-row" data-status="${order.status}" data-order-number="${order.orderNumber}">
                                 <div class="order-info">
                                     <span class="order-number">${order.orderNumber}</span>
                                     <span class="order-date">${orderDate}</span>
@@ -230,6 +378,10 @@
                                         <option value="cancelled">Annuler</option>
                                     </select>
                                 </div>
+                                <div class="order-tracking">
+                                    <input type="text" class="tracking-input" id="tracking-${order.id}" placeholder="N° suivi La Poste" value="${order.trackingNumber || ''}" />
+                                    <button class="btn-admin-action btn-tracking" onclick="setTracking('${order.id}', this)">Suivi</button>
+                                </div>
                                 <div class="order-items">
                                     ${order.items.map(i => `<span class="order-item-pill">${i.name} x${i.quantity}</span>`).join('')}
                                 </div>
@@ -239,7 +391,7 @@
                     : '<p style="color: var(--color-text-muted); font-size: 0.9rem;">Aucune commande</p>';
 
                 return `
-                    <div class="client-card">
+                    <div class="client-card" data-email="${client.email}">
                         <div class="client-header">
                             <div>
                                 <div class="client-name">${client.email}</div>
@@ -256,42 +408,370 @@
                                 <span class="last-login-value">${lastLogin}</span>
                             </div>
                         </div>
-                        <div class="client-orders">
-                            ${ordersHtml}
-                        </div>
+                        <div class="client-orders">${ordersHtml}</div>
                     </div>
                 `;
             }).join('');
         }
 
-        // Mettre a jour le statut d'une commande
+        // ============ Filters (Phase 4) ============
+        function applyFilters() {
+            const search = document.getElementById('filter-search').value.toLowerCase().trim();
+            const statusFilter = document.getElementById('filter-status').value;
+
+            document.querySelectorAll('.client-card').forEach(card => {
+                const email = (card.dataset.email || '').toLowerCase();
+                const orders = card.querySelectorAll('.order-row');
+                let hasVisibleOrder = false;
+
+                if (orders.length === 0) {
+                    // Client without orders
+                    const matchSearch = !search || email.includes(search);
+                    const matchStatus = !statusFilter;
+                    card.style.display = (matchSearch && matchStatus) ? '' : 'none';
+                    return;
+                }
+
+                orders.forEach(row => {
+                    const orderNum = (row.dataset.orderNumber || '').toLowerCase();
+                    const orderStatus = row.dataset.status;
+                    const matchSearch = !search || email.includes(search) || orderNum.includes(search);
+                    const matchStatus = !statusFilter || orderStatus === statusFilter;
+                    row.style.display = (matchSearch && matchStatus) ? '' : 'none';
+                    if (matchSearch && matchStatus) hasVisibleOrder = true;
+                });
+
+                const matchEmail = !search || email.includes(search);
+                card.style.display = (matchEmail && (hasVisibleOrder || !statusFilter)) ? '' : 'none';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('filter-search');
+            const statusSelect = document.getElementById('filter-status');
+            if (searchInput) searchInput.addEventListener('input', applyFilters);
+            if (statusSelect) statusSelect.addEventListener('change', applyFilters);
+        });
+
+        // ============ Order Status ============
         async function updateStatus(select) {
             const orderId = select.dataset.orderId;
             const status = select.value;
-
             if (!status) return;
 
             select.disabled = true;
             const result = await api.updateOrderStatus(orderId, status);
 
             if (result.success) {
-                // Recharger les clients pour mettre a jour l'affichage
                 await loadClients();
+                applyFilters();
             } else {
                 alert('Erreur: ' + (result.error || 'Impossible de mettre a jour le statut'));
                 select.value = '';
             }
-
             select.disabled = false;
         }
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', async () => {
-            const hasAccess = await checkAdminAccess();
+        // ============ Tracking ============
+        async function setTracking(orderId, btn) {
+            const input = document.getElementById('tracking-' + orderId);
+            const trackingNumber = input.value.trim();
+            if (!trackingNumber) { alert('Veuillez entrer un numero de suivi'); return; }
+            btn.disabled = true;
+            const result = await api.setOrderTracking(orderId, trackingNumber);
+            if (result.success) {
+                btn.textContent = 'OK';
+                setTimeout(() => { btn.textContent = 'Suivi'; btn.disabled = false; }, 2000);
+            } else {
+                alert('Erreur: ' + (result.error || 'Impossible de sauvegarder'));
+                btn.disabled = false;
+            }
+        }
 
+        // ============ Products (Phase 1) ============
+        async function loadProducts() {
+            const container = document.getElementById('admin-products-list');
+            const result = await api.getAdminProducts();
+
+            if (!result.success) {
+                container.innerHTML = '<p style="text-align:center; color: #e74c3c;">Erreur de chargement</p>';
+                return;
+            }
+
+            if (!result.products || result.products.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color: var(--color-text-muted);">Aucun produit.</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Nom</th>
+                            <th>Prix</th>
+                            <th>Categorie</th>
+                            <th>Stock (S/M/L/XL)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${result.products.map(p => {
+                            const ss = p.sizeStock || {};
+                            const stockStr = `${ss.S || 0} / ${ss.M || 0} / ${ss.L || 0} / ${ss.XL || 0}`;
+                            const totalStock = (ss.S || 0) + (ss.M || 0) + (ss.L || 0) + (ss.XL || 0);
+                            const cat = categoryLabels[p.category] || p.category;
+                            const imgSrc = p.image || 'https://via.placeholder.com/60';
+                            return `
+                                <tr>
+                                    <td><img src="${imgSrc}" alt="${p.name}" class="admin-product-thumb"></td>
+                                    <td>${p.name}</td>
+                                    <td>${p.price} EUR</td>
+                                    <td>${cat}</td>
+                                    <td>${stockStr} <span style="color:var(--color-text-muted);">(${totalStock})</span></td>
+                                    <td>
+                                        <button class="btn-admin-action" onclick="editProduct('${p.id}')">Modifier</button>
+                                        <button class="btn-admin-action btn-admin-danger" onclick="deleteProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}')">Supprimer</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function openProductModal(product = null) {
+            document.getElementById('product-modal').classList.add('active');
+            document.getElementById('product-form-message').textContent = '';
+            if (product) {
+                document.getElementById('product-modal-title').textContent = 'Modifier le produit';
+                document.getElementById('product-edit-id').value = product.id;
+                document.getElementById('product-name').value = product.name || '';
+                document.getElementById('product-price').value = product.price || '';
+                document.getElementById('product-category').value = product.category || 'tops';
+                document.getElementById('product-description').value = product.description || '';
+                document.getElementById('product-image').value = product.image || '';
+                const ss = product.sizeStock || {};
+                document.getElementById('stock-s').value = ss.S || 0;
+                document.getElementById('stock-m').value = ss.M || 0;
+                document.getElementById('stock-l').value = ss.L || 0;
+                document.getElementById('stock-xl').value = ss.XL || 0;
+            } else {
+                document.getElementById('product-modal-title').textContent = 'Ajouter un produit';
+                document.getElementById('product-edit-id').value = '';
+                document.getElementById('product-form').reset();
+                document.getElementById('stock-s').value = 0;
+                document.getElementById('stock-m').value = 0;
+                document.getElementById('stock-l').value = 0;
+                document.getElementById('stock-xl').value = 0;
+            }
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.remove('active');
+        }
+
+        async function editProduct(id) {
+            const result = await api.getAdminProducts();
+            if (result.success) {
+                const product = result.products.find(p => p.id === id);
+                if (product) openProductModal(product);
+            }
+        }
+
+        async function saveProduct(e) {
+            e.preventDefault();
+            const msgEl = document.getElementById('product-form-message');
+            const editId = document.getElementById('product-edit-id').value;
+
+            const data = {
+                name: document.getElementById('product-name').value.trim(),
+                price: parseFloat(document.getElementById('product-price').value),
+                category: document.getElementById('product-category').value,
+                description: document.getElementById('product-description').value.trim(),
+                image: document.getElementById('product-image').value.trim(),
+                sizeStock: {
+                    S: parseInt(document.getElementById('stock-s').value) || 0,
+                    M: parseInt(document.getElementById('stock-m').value) || 0,
+                    L: parseInt(document.getElementById('stock-l').value) || 0,
+                    XL: parseInt(document.getElementById('stock-xl').value) || 0
+                }
+            };
+
+            let result;
+            if (editId) {
+                result = await api.updateProduct(editId, data);
+            } else {
+                result = await api.createProduct(data);
+            }
+
+            if (result.success) {
+                closeProductModal();
+                await loadProducts();
+            } else {
+                msgEl.textContent = result.error || 'Erreur lors de la sauvegarde';
+                msgEl.className = 'admin-form-message error';
+            }
+        }
+
+        async function deleteProduct(id, name) {
+            if (!confirm(`Supprimer le produit "${name}" ?`)) return;
+            const result = await api.deleteProduct(id);
+            if (result.success) {
+                await loadProducts();
+            } else {
+                alert('Erreur: ' + (result.error || 'Impossible de supprimer'));
+            }
+        }
+
+        // ============ Promo Codes (Phase 2) ============
+        async function loadPromos() {
+            const container = document.getElementById('admin-promos-list');
+            const result = await api.getAdminPromoCodes();
+
+            if (!result.success) {
+                container.innerHTML = '<p style="text-align:center; color: #e74c3c;">Erreur de chargement</p>';
+                return;
+            }
+
+            if (!result.promoCodes || result.promoCodes.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color: var(--color-text-muted);">Aucun code promo.</p>';
+                return;
+            }
+
+            container.innerHTML = result.promoCodes.map(promo => {
+                const typeLabel = promo.type === 'percentage' ? `${promo.value}%` : `${promo.value} EUR`;
+                const usesLabel = promo.maxUses > 0 ? `${promo.usedCount || 0}/${promo.maxUses}` : `${promo.usedCount || 0}/illimite`;
+                return `
+                    <div class="promo-card">
+                        <div class="promo-card-info">
+                            <span class="promo-card-code">${promo.code}</span>
+                            <span class="promo-card-value">${typeLabel}</span>
+                            <span class="promo-card-meta">Min: ${promo.minOrder || 0} EUR | Utilisations: ${usesLabel}</span>
+                        </div>
+                        <button class="btn-admin-action btn-admin-danger" onclick="deletePromo('${promo.id}', '${promo.code}')">Supprimer</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function createPromo() {
+            const msgEl = document.getElementById('promo-form-message');
+            const data = {
+                code: document.getElementById('promo-code').value.trim().toUpperCase(),
+                type: document.getElementById('promo-type').value,
+                value: parseFloat(document.getElementById('promo-value').value),
+                minOrder: parseFloat(document.getElementById('promo-min-order').value) || 0,
+                maxUses: parseInt(document.getElementById('promo-max-uses').value) || 0
+            };
+
+            if (!data.code || !data.value) {
+                msgEl.textContent = 'Code et valeur sont requis';
+                msgEl.className = 'admin-form-message error';
+                return;
+            }
+
+            const result = await api.createPromoCode(data);
+            if (result.success) {
+                msgEl.textContent = 'Code promo cree !';
+                msgEl.className = 'admin-form-message success';
+                document.getElementById('promo-code').value = '';
+                document.getElementById('promo-value').value = '';
+                await loadPromos();
+            } else {
+                msgEl.textContent = result.error || 'Erreur de creation';
+                msgEl.className = 'admin-form-message error';
+            }
+        }
+
+        async function deletePromo(id, code) {
+            if (!confirm(`Supprimer le code "${code}" ?`)) return;
+            const result = await api.deletePromoCode(id);
+            if (result.success) {
+                await loadPromos();
+            } else {
+                alert('Erreur: ' + (result.error || 'Impossible de supprimer'));
+            }
+        }
+
+        // ============ Messages (Phase 2) ============
+        async function loadMessages() {
+            const container = document.getElementById('admin-messages-list');
+            const result = await api.getAdminMessages();
+
+            if (!result.success) {
+                container.innerHTML = '<p style="text-align:center; color: #e74c3c;">Erreur de chargement</p>';
+                return;
+            }
+
+            if (!result.messages || result.messages.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color: var(--color-text-muted);">Aucun message.</p>';
+                return;
+            }
+
+            container.innerHTML = result.messages.map(msg => {
+                const statusInfo = messageStatusLabels[msg.status] || { label: msg.status, class: '' };
+                const date = msg.createdAt ? new Date(msg.createdAt).toLocaleDateString('fr-FR', {
+                    day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                }) : '-';
+
+                return `
+                    <div class="message-card" onclick="toggleMessage(this)">
+                        <div class="message-card-header">
+                            <div class="message-card-info">
+                                <span class="message-card-name">${msg.name || 'Anonyme'}</span>
+                                <span class="message-card-email">${msg.email || ''}</span>
+                                <span class="message-card-date">${date}</span>
+                            </div>
+                            <div class="message-card-right">
+                                <span class="message-status-badge ${statusInfo.class}">${statusInfo.label}</span>
+                                <select class="status-select" onclick="event.stopPropagation()" onchange="updateMessageStatus('${msg.id}', this.value, this)">
+                                    <option value="">Changer...</option>
+                                    <option value="read">Lu</option>
+                                    <option value="replied">Repondu</option>
+                                    <option value="archived">Archiver</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="message-card-subject">${msg.subject || 'Sans sujet'}</div>
+                        <div class="message-card-body">${msg.message || ''}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleMessage(card) {
+            card.classList.toggle('expanded');
+        }
+
+        async function updateMessageStatus(id, status, select) {
+            if (!status) return;
+            select.disabled = true;
+            const result = await api.updateMessageStatus(id, status);
+            if (result.success) {
+                await loadMessages();
+            } else {
+                alert('Erreur: ' + (result.error || 'Impossible de mettre a jour'));
+            }
+            select.disabled = false;
+        }
+
+        // ============ Logout ============
+        function adminLogout() {
+            localStorage.removeItem('coveToken');
+            localStorage.removeItem('coveUser');
+            window.location.href = 'compte.html';
+        }
+
+        // ============ Init ============
+        document.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('admin-logout').addEventListener('click', adminLogout);
+
+            const hasAccess = await checkAdminAccess();
             if (hasAccess) {
                 showAdminContent();
-                await Promise.all([loadStats(), loadClients()]);
+                await Promise.all([loadStats(), loadClients(), loadProducts(), loadPromos(), loadMessages()]);
             }
         });
     </script>

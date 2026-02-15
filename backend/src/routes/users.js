@@ -130,6 +130,81 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// POST /api/users/forgot-password
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({ success: false, error: 'Email requis' });
+        }
+
+        // Use Firebase Auth REST API to send password reset email
+        const resetRes = await fetch(
+            `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${FIREBASE_API_KEY}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    requestType: 'PASSWORD_RESET',
+                    email
+                })
+            }
+        );
+
+        const resetData = await resetRes.json();
+
+        if (!resetRes.ok) {
+            // Don't reveal if email exists or not for security
+            return res.json({ success: true, message: 'Si cet email existe, un lien de reinitialisation a ete envoye.' });
+        }
+
+        res.json({ success: true, message: 'Si cet email existe, un lien de reinitialisation a ete envoye.' });
+    } catch (error) {
+        console.error('Forgot password error:', error.message);
+        // Don't reveal errors for security
+        res.json({ success: true, message: 'Si cet email existe, un lien de reinitialisation a ete envoye.' });
+    }
+});
+
+// POST /api/users/google-auth - Authentification via Google
+router.post('/google-auth', async (req, res) => {
+    try {
+        const { idToken } = req.body;
+
+        if (!idToken) {
+            return res.status(400).json({ error: 'Token requis' });
+        }
+
+        // Verifier le Firebase ID token
+        const decoded = await admin.auth().verifyIdToken(idToken);
+        const uid = decoded.uid;
+        const email = decoded.email;
+
+        // Creer ou recuperer l'utilisateur en base
+        let userProfile = await store.getUserByUid(uid);
+
+        if (!userProfile) {
+            // Nouveau utilisateur via Google - toujours client
+            userProfile = await store.createUser(uid, {
+                email,
+                role: 'client'
+            });
+        } else {
+            await store.updateLastLogin(uid);
+        }
+
+        res.json({
+            message: 'Connexion Google reussie',
+            user: { uid, ...userProfile },
+            idToken
+        });
+    } catch (error) {
+        console.error('Google auth error:', error.message);
+        res.status(401).json({ error: 'Token Google invalide' });
+    }
+});
+
 // GET /api/users/me (protected)
 router.get('/me', authenticate, async (req, res) => {
     try {

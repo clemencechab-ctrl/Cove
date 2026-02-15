@@ -2262,6 +2262,91 @@ img {
     opacity: 1;
 }
 
+/* Shop Size Selector (overlay) */
+.shop-size-selector {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.shop-size-btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid #666;
+    background: transparent;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.shop-size-btn:hover {
+    border-color: #fff;
+}
+
+.shop-size-btn.active {
+    border-color: #fff;
+    background: #fff;
+    color: #000;
+}
+
+.shop-size-btn:disabled,
+.shop-size-btn.size-unavailable {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Shop Toolbar (search + sort) */
+.shop-toolbar {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+#shop-search {
+    padding: 0.7rem 1rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 0.85rem;
+    width: 250px;
+    transition: var(--transition);
+}
+
+#shop-search::placeholder {
+    color: var(--color-text-muted);
+}
+
+#shop-search:focus {
+    outline: none;
+    border-color: var(--color-text);
+}
+
+#shop-sort {
+    padding: 0.7rem 1rem;
+    background: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#shop-sort:focus {
+    outline: none;
+    border-color: var(--color-text);
+}
+
+#shop-sort option {
+    background: #111;
+    color: var(--color-text);
+}
+
 
 /* ==========================================
    Language Selector
@@ -3627,4 +3712,183 @@ img {
         gap: 1rem;
         align-items: flex-start;
     }
+}
+
+/* ==========================================
+   Payment Badges
+   ========================================== */
+.payment-badges {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.payment-badge {
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.02em;
+}
+
+/* ==========================================
+   Tracking (Admin)
+   ========================================== */
+.order-tracking {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    align-items: center;
+}
+
+.tracking-input {
+    flex: 1;
+    padding: 0.4rem 0.6rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-size: 0.85rem;
+    border-radius: 4px;
+}
+
+.tracking-input:focus {
+    outline: none;
+    border-color: var(--color-text-muted);
+}
+
+.btn-tracking {
+    white-space: nowrap;
+}
+
+/* ==========================================
+   Tracking (Client - compte)
+   ========================================== */
+.tracking-info {
+    background: rgba(255,255,255,0.05);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+}
+
+.tracking-info p {
+    margin-bottom: 0.75rem;
+}
+
+.btn-tracking-link {
+    display: inline-block;
+    padding: 0.5rem 1.25rem;
+    background: var(--color-text);
+    color: var(--color-bg);
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-tracking-link:hover {
+    opacity: 0.85;
+}
+
+/* ==========================================
+   Cancel / Return Request
+   ========================================== */
+.cancel-return-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.cancel-reason-input {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.cancel-reason-input:focus {
+    outline: none;
+    border-color: var(--color-text-muted);
+}
+
+.btn-cancel-request {
+    padding: 0.6rem 1.25rem;
+    background: transparent;
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: var(--transition);
+    align-self: flex-start;
+}
+
+.btn-cancel-request:hover {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.btn-cancel-request:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ==========================================
+   Google Auth Button
+   ========================================== */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    margin: 1.25rem 0;
+    gap: 1rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.auth-divider span {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-google {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: #ffffff;
+    color: #333333;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-main);
+}
+
+.btn-google:hover {
+    background: #f7f8f8;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.btn-google svg {
+    flex-shrink: 0;
 }

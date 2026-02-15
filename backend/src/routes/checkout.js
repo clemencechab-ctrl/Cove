@@ -294,7 +294,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
 
         // Creer la session Stripe Checkout
         const sessionParams = {
-            payment_method_types: ['card'],
+            automatic_payment_methods: { enabled: true },
             line_items: lineItems,
             mode: 'payment',
             success_url: `${process.env.FRONTEND_URL}/success.html?success=true&session_id={CHECKOUT_SESSION_ID}`,

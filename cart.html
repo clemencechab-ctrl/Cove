@@ -63,6 +63,12 @@
                 <button class="btn-checkout" id="checkout-btn" onclick="proceedToCheckout()">
                     Passer la commande
                 </button>
+                <div class="payment-badges">
+                    <span class="payment-badge">Visa</span>
+                    <span class="payment-badge">Mastercard</span>
+                    <span class="payment-badge">Apple Pay</span>
+                    <span class="payment-badge">Google Pay</span>
+                </div>
                 <a href="index.html#collection" class="btn-continue">Continuer mes achats</a>
             </div>
         </div>
@@ -127,6 +133,15 @@
                 </div>
 
                 <div class="checkout-section">
+                    <h3>Code promo</h3>
+                    <div class="promo-code-row">
+                        <input type="text" id="promo-code-input" placeholder="Entrer un code promo">
+                        <button type="button" class="btn-apply-promo" onclick="applyPromoCode()">Appliquer</button>
+                    </div>
+                    <div id="promo-message" class="promo-message"></div>
+                </div>
+
+                <div class="checkout-section">
                     <h3>Paiement</h3>
                     <p class="payment-info">Paiement securise par Stripe</p>
                     <div id="card-element">
@@ -138,8 +153,18 @@
                 </div>
 
                 <div class="checkout-total">
-                    <span>Total a payer:</span>
-                    <span id="checkout-total">0 EUR</span>
+                    <div class="checkout-total-row">
+                        <span>Sous-total:</span>
+                        <span id="checkout-subtotal">0 EUR</span>
+                    </div>
+                    <div class="checkout-total-row promo-discount-row" id="checkout-discount-row" style="display: none;">
+                        <span>Reduction (<span id="checkout-promo-code"></span>):</span>
+                        <span id="checkout-discount">-0 EUR</span>
+                    </div>
+                    <div class="checkout-total-row checkout-total-final">
+                        <span>Total a payer:</span>
+                        <span id="checkout-total">0 EUR</span>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-pay">Confirmer et payer</button>
@@ -246,7 +271,73 @@
             const total = getCartTotal();
             document.getElementById('subtotal').textContent = total + ' EUR';
             document.getElementById('total').textContent = total + ' EUR';
-            document.getElementById('checkout-total').textContent = total + ' EUR';
+            document.getElementById('checkout-subtotal').textContent = total + ' EUR';
+            updateCheckoutTotal();
+        }
+
+        // Promo code state
+        let appliedPromo = null;
+
+        function updateCheckoutTotal() {
+            const subtotal = getCartTotal();
+            let total = subtotal;
+
+            if (appliedPromo) {
+                total = subtotal - appliedPromo.amount;
+                if (total < 0) total = 0;
+                document.getElementById('checkout-discount-row').style.display = 'flex';
+                document.getElementById('checkout-promo-code').textContent = appliedPromo.code;
+                document.getElementById('checkout-discount').textContent = '-' + appliedPromo.amount.toFixed(2) + ' EUR';
+            } else {
+                document.getElementById('checkout-discount-row').style.display = 'none';
+            }
+
+            document.getElementById('checkout-total').textContent = total.toFixed(2) + ' EUR';
+        }
+
+        async function applyPromoCode() {
+            const input = document.getElementById('promo-code-input');
+            const messageEl = document.getElementById('promo-message');
+            const code = input.value.trim();
+
+            if (!code) {
+                messageEl.textContent = 'Veuillez entrer un code promo';
+                messageEl.className = 'promo-message promo-error';
+                return;
+            }
+
+            const subtotal = getCartTotal();
+            const result = await api.validatePromoCode(code, subtotal);
+
+            if (result.success) {
+                appliedPromo = result.discount;
+                messageEl.textContent = result.discount.type === 'percentage'
+                    ? `Code ${result.discount.code} applique : -${result.discount.value}%`
+                    : `Code ${result.discount.code} applique : -${result.discount.amount.toFixed(2)} EUR`;
+                messageEl.className = 'promo-message promo-success';
+                input.disabled = true;
+                updateCheckoutTotal();
+            } else {
+                appliedPromo = null;
+                messageEl.textContent = result.error || 'Code promo invalide';
+                messageEl.className = 'promo-message promo-error';
+                updateCheckoutTotal();
+            }
+        }
+
+        function resetPromoCode() {
+            appliedPromo = null;
+            const input = document.getElementById('promo-code-input');
+            if (input) {
+                input.value = '';
+                input.disabled = false;
+            }
+            const messageEl = document.getElementById('promo-message');
+            if (messageEl) {
+                messageEl.textContent = '';
+                messageEl.className = 'promo-message';
+            }
+            updateCheckoutTotal();
         }
 
         // Proceed to checkout
@@ -260,6 +351,7 @@
         function closeCheckout() {
             document.getElementById('checkout-modal').classList.remove('active');
             document.body.style.overflow = '';
+            resetPromoCode();
         }
 
         // Submit order
@@ -294,7 +386,8 @@
 
             try {
                 // Appeler l'API backend
-                const result = await api.checkout(items, customer, shipping);
+                const promoCode = appliedPromo ? appliedPromo.code : null;
+                const result = await api.checkout(items, customer, shipping, promoCode);
 
                 if (result.success) {
                     // Si Stripe est configuré, rediriger vers Stripe
@@ -306,6 +399,7 @@
                     // Mode démo - afficher la confirmation
                     document.getElementById('order-number').textContent = result.order.orderNumber;
                     closeCheckout();
+                    resetPromoCode();
                     document.getElementById('confirmation-modal').classList.add('active');
                     clearCart();
                     renderCart();
