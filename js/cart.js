@@ -207,10 +207,30 @@ async function checkStock() {
                             overlay.prepend(badge);
                         }
                     }
+                    // Desactiver les tailles en rupture sur les cartes shop
+                    if (product.sizeStock) {
+                        card.querySelectorAll('.shop-size-btn').forEach(sBtn => {
+                            const sz = sBtn.textContent.trim();
+                            if (product.sizeStock[sz] !== undefined && product.sizeStock[sz] <= 0) {
+                                sBtn.disabled = true;
+                                sBtn.classList.add('size-unavailable');
+                            }
+                        });
+                    }
                 } else {
                     card.classList.remove('out-of-stock');
                     if (btn) {
                         btn.disabled = false;
+                    }
+                    // Desactiver les tailles en rupture sur les cartes shop
+                    if (product.sizeStock) {
+                        card.querySelectorAll('.shop-size-btn').forEach(sBtn => {
+                            const sz = sBtn.textContent.trim();
+                            if (product.sizeStock[sz] !== undefined && product.sizeStock[sz] <= 0) {
+                                sBtn.disabled = true;
+                                sBtn.classList.add('size-unavailable');
+                            }
+                        });
                     }
                 }
             }

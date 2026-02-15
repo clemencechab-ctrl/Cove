@@ -54,12 +54,18 @@
             <p class="section-subtitle">Automne / Hiver 2026</p>
         </div>
         <div class="shop-grid">
-            <article class="shop-card" data-category="tops">
+            <article class="shop-card" data-category="tops" data-id="1" data-name="T-shirt Cove" data-price="65" data-image="image/t shirt front.JPG">
                 <a href="produit-tshirt.html" class="shop-card-link">
                     <div class="shop-card-image">
                         <img src="image/t shirt front.JPG" alt="T-shirt Cove">
-                        <div class="shop-card-overlay">
-                            <button class="btn-quick-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart(1, 'T-shirt Cove', 65, 'image/t shirt front.JPG'); showQuickNotification();">Ajouter au panier</button>
+                        <div class="shop-card-overlay" onclick="event.preventDefault(); event.stopPropagation();">
+                            <div class="shop-size-selector">
+                                <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
+                                <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">M</button>
+                                <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">L</button>
+                                <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
+                            </div>
+                            <button class="btn-add-cart" onclick="shopAddToCart(this)">Ajouter au panier</button>
                         </div>
                     </div>
                     <div class="shop-card-info">
@@ -68,12 +74,18 @@
                     </div>
                 </a>
             </article>
-            <article class="shop-card" data-category="tops">
+            <article class="shop-card" data-category="tops" data-id="2" data-name="Hoodie Picnic" data-price="120" data-image="image/hoodie front.JPG">
                 <a href="produit-hoodie.html" class="shop-card-link">
                     <div class="shop-card-image">
                         <img src="image/hoodie front.JPG" alt="Hoodie Picnic">
-                        <div class="shop-card-overlay">
-                            <button class="btn-quick-add" onclick="event.preventDefault(); event.stopPropagation(); addToCart(2, 'Hoodie Picnic', 120, 'image/hoodie front.JPG'); showQuickNotification();">Ajouter au panier</button>
+                        <div class="shop-card-overlay" onclick="event.preventDefault(); event.stopPropagation();">
+                            <div class="shop-size-selector">
+                                <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
+                                <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">M</button>
+                                <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">L</button>
+                                <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
+                            </div>
+                            <button class="btn-add-cart" onclick="shopAddToCart(this)">Ajouter au panier</button>
                         </div>
                     </div>
                     <div class="shop-card-info">
@@ -160,12 +172,29 @@
     </footer>
     <script src="js/cart.js"></script>
     <script>
-        function showQuickNotification() {
-            var notification = document.getElementById('quick-notification');
-            notification.classList.add('show');
-            setTimeout(function() {
-                notification.classList.remove('show');
-            }, 2500);
+        function shopSelectSize(btn) {
+            event.preventDefault();
+            event.stopPropagation();
+            const selector = btn.closest('.shop-size-selector');
+            selector.querySelectorAll('.shop-size-btn').forEach(b => b.classList.remove('active'));
+            if (!btn.disabled) btn.classList.add('active');
+        }
+
+        function shopAddToCart(btn) {
+            event.preventDefault();
+            event.stopPropagation();
+            const card = btn.closest('.shop-card');
+            const activeSize = card.querySelector('.shop-size-btn.active');
+            if (!activeSize) {
+                showNotification('Veuillez choisir une taille');
+                return;
+            }
+            const id = parseInt(card.dataset.id);
+            const name = card.dataset.name;
+            const price = parseFloat(card.dataset.price);
+            const image = card.dataset.image;
+            const size = activeSize.textContent.trim();
+            addToCart(id, name, price, image, size);
         }
     </script>
 </body>
