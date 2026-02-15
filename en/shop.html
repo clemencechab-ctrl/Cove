@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="fr" translate="no">
+<html lang="en" translate="no">
 <head>
     <meta charset="UTF-8">
     <meta name="google" content="notranslate">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COVE - Boutique</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>COVE - Shop</title>
+    <link rel="stylesheet" href="../css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,18 +15,18 @@
     <header class="header">
         <nav class="nav">
             <div class="nav-left">
-                <a href="shop.html" class="nav-link active">Boutique</a>
+                <a href="shop.html" class="nav-link active">Shop</a>
                 <a href="index.html#lookbook" class="nav-link">Lookbook</a>
             </div>
             <div class="logo">
-                <a href="index.html">COVE</a>
+                <a href="index.html"><img src="../image/logo-cove.png" alt="COVE"></a>
             </div>
             <div class="nav-right">
                 <a href="admin.html" class="nav-link">Administration</a>
                 <a href="contact.html" class="nav-link">Contact</a>
-                <a href="compte.html" class="nav-link">Compte</a>
+                <a href="compte.html" class="nav-link">Account</a>
                 <a href="cart.html" class="nav-link cart-link">
-                    Panier (<span id="cart-count">0</span>)
+                    Cart (<span id="cart-count">0</span>)
                 </a>
             </div>
         </nav>
@@ -34,35 +34,35 @@
 
     <!-- Shop Hero -->
     <section class="shop-hero">
-        <h1 class="shop-title">Boutique</h1>
-        <p class="shop-subtitle">Collection Automne / Hiver 2026</p>
+        <h1 class="shop-title">Shop</h1>
+        <p class="shop-subtitle">Fall / Winter 2026 Collection</p>
     </section>
 
     <!-- Products Section -->
     <section class="shop-section">
         <div class="shop-toolbar">
-            <input id="shop-search" type="text" placeholder="Rechercher...">
+            <input id="shop-search" type="text" placeholder="Search...">
             <select id="shop-sort">
-                <option value="">Tri par defaut</option>
-                <option value="price-asc">Prix croissant</option>
-                <option value="price-desc">Prix decroissant</option>
-                <option value="name-az">Nom A-Z</option>
+                <option value="">Default sort</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name-az">Name A-Z</option>
             </select>
         </div>
 
         <div class="shop-filters">
-            <button class="filter-btn active" data-filter="all">Tout</button>
+            <button class="filter-btn active" data-filter="all">All</button>
             <button class="filter-btn" data-filter="tops">Tops</button>
-            <button class="filter-btn" data-filter="bottoms">Pantalons</button>
-            <button class="filter-btn" data-filter="outerwear">Vestes</button>
-            <button class="filter-btn" data-filter="accessories">Accessoires</button>
+            <button class="filter-btn" data-filter="bottoms">Pants</button>
+            <button class="filter-btn" data-filter="outerwear">Jackets</button>
+            <button class="filter-btn" data-filter="accessories">Accessories</button>
         </div>
 
         <div class="shop-grid">
             <!-- Product 1 -->
-            <article class="shop-card" data-category="tops" data-id="1" data-name="T-shirt Cove" data-price="65" data-image="image/t-shirt-chat-drole-2.webp">
+            <article class="shop-card" data-category="tops" data-id="1" data-name="T-shirt Cove" data-price="65" data-image="../image/t-shirt-chat-drole-2.webp">
                 <div class="shop-card-image">
-                    <img src="image/t-shirt-chat-drole-2.webp" alt="T-shirt Cove">
+                    <img src="../image/t-shirt-chat-drole-2.webp" alt="T-shirt Cove">
                     <div class="shop-card-overlay">
                         <div class="shop-size-selector">
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
@@ -71,7 +71,7 @@
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
                         </div>
                         <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Ajouter au panier
+                            Add to cart
                         </button>
                     </div>
                 </div>
@@ -82,9 +82,9 @@
             </article>
 
             <!-- Product 2 -->
-            <article class="shop-card" data-category="tops" data-id="2" data-name="Hoodie Picnic" data-price="120" data-image="image/hoodie-front.JPG">
+            <article class="shop-card" data-category="tops" data-id="2" data-name="Hoodie Picnic" data-price="120" data-image="../image/hoodie-front.JPG">
                 <div class="shop-card-image">
-                    <img src="image/hoodie-front.JPG" alt="Hoodie Picnic">
+                    <img src="../image/hoodie-front.JPG" alt="Hoodie Picnic">
                     <div class="shop-card-overlay">
                         <div class="shop-size-selector">
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
@@ -93,7 +93,7 @@
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
                         </div>
                         <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Ajouter au panier
+                            Add to cart
                         </button>
                     </div>
                 </div>
@@ -115,7 +115,7 @@
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
                         </div>
                         <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Ajouter au panier
+                            Add to cart
                         </button>
                     </div>
                 </div>
@@ -137,7 +137,7 @@
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
                         </div>
                         <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Ajouter au panier
+                            Add to cart
                         </button>
                     </div>
                 </div>
@@ -159,7 +159,7 @@
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
                         </div>
                         <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Ajouter au panier
+                            Add to cart
                         </button>
                     </div>
                 </div>
@@ -181,7 +181,7 @@
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
                         </div>
                         <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Ajouter au panier
+                            Add to cart
                         </button>
                     </div>
                 </div>
@@ -203,7 +203,7 @@
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
                         </div>
                         <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Ajouter au panier
+                            Add to cart
                         </button>
                     </div>
                 </div>
@@ -225,7 +225,7 @@
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
                         </div>
                         <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Ajouter au panier
+                            Add to cart
                         </button>
                     </div>
                 </div>
@@ -241,44 +241,44 @@
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-brand">
-                <span class="footer-logo">COVE</span>
-                <p class="footer-tagline">Streetwear Premium</p>
+                <img src="../image/logo-cove.png" alt="COVE" class="footer-logo-img">
+                <p class="footer-tagline">Premium Streetwear</p>
                 <p class="footer-credit">made by Clemence</p>
                 <div class="language-selector">
-                    <span>Langue</span>
+                    <span>Language</span>
                     <div class="language-options">
-                        <a href="shop.html" class="active">FR</a>
-                        <a href="en/shop.html">EN</a>
+                        <a href="../shop.html">FR</a>
+                        <a href="shop.html" class="active">EN</a>
                     </div>
                 </div>
             </div>
             <div class="footer-links">
                 <div class="footer-column">
                     <h4>Navigation</h4>
-                    <a href="shop.html">Boutique</a>
+                    <a href="index.html#collection">Collection</a>
                     <a href="index.html#lookbook">Lookbook</a>
-                    <a href="index.html#about">About</a>
+                    <a href="about.html">About</a>
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
-                    <a href="contact.html">Nous contacter</a>
-                    <a href="#">Instagram</a>
-                    <a href="#">TikTok</a>
+                    <a href="contact.html">Contact us</a>
+                    <a href="https://www.instagram.com/covestudio.off/" target="_blank">Instagram</a>
+                    <a href="https://www.tiktok.com/@covestudio.off" target="_blank">TikTok</a>
                 </div>
                 <div class="footer-column">
                     <h4>Legal</h4>
-                    <a href="#">CGV</a>
-                    <a href="#">Mentions legales</a>
-                    <a href="#">Confidentialite</a>
+                    <a href="cgv.html">Terms of Sale</a>
+                    <a href="mentions-legales.html">Legal Notice</a>
+                    <a href="confidentialite.html">Privacy Policy</a>
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 COVE. Tous droits reserves.</p>
+            <p>&copy; 2026 COVE. All rights reserved.</p>
         </div>
     </footer>
 
-    <script src="js/cart.js"></script>
+    <script src="../js/cart.js"></script>
     <script>
         // Size selection in shop overlay
         function shopSelectSize(btn) {
@@ -295,7 +295,7 @@
             const selector = card.querySelector('.shop-size-selector');
             const activeSize = selector.querySelector('.shop-size-btn.active');
             if (!activeSize) {
-                showNotification('Veuillez choisir une taille');
+                showNotification('Please select a size');
                 return;
             }
             const id = parseInt(card.dataset.id);
