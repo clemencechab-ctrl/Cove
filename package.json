@@ -1,0 +1,25 @@
+{
+  "name": "cove",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./node_modules/@playwright/test/cli.js test",
+    "test:headed": "node ./node_modules/@playwright/test/cli.js test --headed",
+    "test:report": "node ./node_modules/@playwright/test/cli.js show-report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clemencechab-ctrl/Cove.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/clemencechab-ctrl/Cove/issues"
+  },
+  "homepage": "https://github.com/clemencechab-ctrl/Cove#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}
