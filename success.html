@@ -103,7 +103,7 @@
             const orderParam = params.get('order');
 
             if (success === 'true') {
-                document.getElementById('success-section').style.display = 'block';
+                document.getElementById('success-section').style.display = 'flex';
 
                 let orderNumber = orderParam || '';
 
@@ -125,7 +125,7 @@
                 clearCart();
                 updateCartCount();
             } else if (canceled === 'true') {
-                document.getElementById('cancel-section').style.display = 'block';
+                document.getElementById('cancel-section').style.display = 'flex';
             } else {
                 window.location.href = 'index.html';
             }

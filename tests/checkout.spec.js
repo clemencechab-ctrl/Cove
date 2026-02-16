@@ -21,7 +21,7 @@ test.describe('Checkout / Paiement', () => {
 
   test('Panier affiche correctement avant checkout', async ({ page }) => {
     await expect(page.locator('.cart-item').first()).toContainText('T-shirt Cove');
-    await expect(page.locator('#total')).toContainText('30');
+    await expect(page.locator('#total')).toContainText('35.90');
     await expect(page.locator('#checkout-btn')).toBeVisible();
     await expect(page.locator('#checkout-btn')).toBeEnabled();
   });

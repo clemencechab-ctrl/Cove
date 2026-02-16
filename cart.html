@@ -268,10 +268,13 @@
             `).join('');
 
             // Update totals
-            const total = getCartTotal();
-            document.getElementById('subtotal').textContent = total + ' EUR';
-            document.getElementById('total').textContent = total + ' EUR';
-            document.getElementById('checkout-subtotal').textContent = total + ' EUR';
+            const subtotal = getCartTotal();
+            const shippingCost = subtotal >= 100 ? 0 : 5.90;
+            const total = subtotal + shippingCost;
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2) + ' EUR';
+            document.getElementById('shipping').textContent = shippingCost === 0 ? 'Gratuite' : shippingCost.toFixed(2) + ' EUR';
+            document.getElementById('total').textContent = total.toFixed(2) + ' EUR';
+            document.getElementById('checkout-subtotal').textContent = subtotal.toFixed(2) + ' EUR';
             updateCheckoutTotal();
         }
 
@@ -292,6 +295,8 @@
                 document.getElementById('checkout-discount-row').style.display = 'none';
             }
 
+            const shippingCost = total >= 100 ? 0 : 5.90;
+            total = total + shippingCost;
             document.getElementById('checkout-total').textContent = total.toFixed(2) + ' EUR';
         }
 

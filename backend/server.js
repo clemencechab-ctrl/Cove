@@ -42,10 +42,10 @@ app.use(cors({
     credentials: true
 }));
 
-// Rate limiting general (100 req / 15 min)
+// Rate limiting general (1000 req / 15 min)
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 100,
+    max: 1000,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Trop de requetes, veuillez reessayer plus tard' }

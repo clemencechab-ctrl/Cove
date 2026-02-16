@@ -3,6 +3,9 @@ const router = express.Router();
 const store = require('../data/store');
 const { sendOrderConfirmation, sendOrderNotificationToOwner } = require('../utils/email');
 
+// URL publique pour les images (GitHub Pages)
+const PUBLIC_URL = process.env.PUBLIC_URL || 'https://clemencechab-ctrl.github.io/Cove';
+
 // Initialiser Stripe si la cle est configuree
 let stripe = null;
 if (process.env.STRIPE_SECRET_KEY) {
@@ -118,7 +121,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
                     product_data: {
                         name: product.name,
                         description: product.description,
-                        images: product.image.startsWith('http') ? [product.image] : []
+                        images: product.image.startsWith('http') ? [product.image] : [`${PUBLIC_URL}/${product.image}`]
                     },
                     unit_amount: Math.round(product.price * 100)
                 },
@@ -294,7 +297,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
 
         // Creer la session Stripe Checkout
         const sessionParams = {
-            automatic_payment_methods: { enabled: true },
+            payment_method_types: ['card'],
             line_items: lineItems,
             mode: 'payment',
             success_url: `${process.env.FRONTEND_URL}/success.html?success=true&session_id={CHECKOUT_SESSION_ID}`,
@@ -364,9 +367,19 @@ router.post('/verify', async (req, res) => {
 
         // Backup idempotent du webhook : mettre a jour la commande si payee
         if (session.payment_status === 'paid' && session.metadata?.orderId) {
+            const order = await store.getOrderById(session.metadata.orderId);
+            const alreadyPaid = order && order.status === 'paid';
+
             await store.updateOrderPayment(session.metadata.orderId, {
                 paymentIntentId: session.payment_intent
             });
+
+            // Envoyer les emails si pas deja envoyes (premiere verification)
+            if (!alreadyPaid && order) {
+                const fullOrder = { ...order, status: 'paid' };
+                sendOrderConfirmation(fullOrder);
+                sendOrderNotificationToOwner(fullOrder);
+            }
         }
 
         const stripeOrderNumber = session.metadata?.orderNumber || null;

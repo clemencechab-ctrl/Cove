@@ -1,5 +1,13 @@
 const nodemailer = require('nodemailer');
 
+// URL publique pour les images produits
+const PUBLIC_URL = process.env.PUBLIC_URL || 'https://clemencechab-ctrl.github.io/Cove';
+
+function getImageUrl(image) {
+    if (!image) return '';
+    return image.startsWith('http') ? image : `${PUBLIC_URL}/${image}`;
+}
+
 // Creer le transporter si les variables sont configurees
 function createTransporter() {
     if (process.env.EMAIL_HOST && process.env.EMAIL_USER) {
@@ -39,6 +47,9 @@ async function sendOrderConfirmation(order) {
     try {
         const itemsHtml = order.items.map(item => `
             <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; width: 60px;">
+                    ${item.image ? `<img src="${getImageUrl(item.image)}" alt="${item.name}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 4px;">` : ''}
+                </td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}${item.size ? ' — ' + item.size : ''}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity).toFixed(2)} &euro;</td>
@@ -59,6 +70,7 @@ async function sendOrderConfirmation(order) {
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                     <thead>
                         <tr style="background: #f5f5f5;">
+                            <th style="padding: 8px; text-align: left;"></th>
                             <th style="padding: 8px; text-align: left;">Produit</th>
                             <th style="padding: 8px; text-align: center;">Qte</th>
                             <th style="padding: 8px; text-align: right;">Total</th>
@@ -216,6 +228,9 @@ async function sendOrderNotificationToOwner(order) {
 
         const itemsHtml = order.items.map(item => `
             <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; width: 60px;">
+                    ${item.image ? `<img src="${getImageUrl(item.image)}" alt="${item.name}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 4px;">` : ''}
+                </td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}${item.size ? ' — ' + item.size : ''}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity).toFixed(2)} &euro;</td>
@@ -241,6 +256,7 @@ async function sendOrderNotificationToOwner(order) {
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                     <thead>
                         <tr style="background: #f5f5f5;">
+                            <th style="padding: 8px; text-align: left;"></th>
                             <th style="padding: 8px; text-align: left;">Produit</th>
                             <th style="padding: 8px; text-align: center;">Qte</th>
                             <th style="padding: 8px; text-align: right;">Total</th>
