@@ -34,7 +34,7 @@ test.describe('Navigation + Panier', () => {
 
     await expect(page).toHaveTitle(/T-shirt Cove/);
     await expect(page.locator('.product-title')).toContainText('T-shirt Cove');
-    await expect(page.locator('.product-price')).toContainText('65 EUR');
+    await expect(page.locator('.product-price')).toContainText('30 EUR');
 
     await expect(page.locator('.size-btn').first()).toBeVisible();
     const sizeButtons = page.locator('.size-btn');
@@ -62,7 +62,7 @@ test.describe('Navigation + Panier', () => {
       const cart = [{
         id: 1,
         name: 'T-shirt Cove',
-        price: 65,
+        price: 30,
         image: 'image/t-shirt-front.JPG',
         size: 'L',
         quantity: 1
@@ -75,7 +75,7 @@ test.describe('Navigation + Panier', () => {
     await expect(page.locator('.cart-item').first()).toBeVisible();
     await expect(page.locator('.cart-item').first()).toContainText('T-shirt Cove');
     await expect(page.locator('.cart-item').first()).toContainText('Taille L');
-    await expect(page.locator('#total')).toContainText('65');
+    await expect(page.locator('#total')).toContainText('30');
     await expect(page.locator('#checkout-btn')).toBeVisible();
   });
 
@@ -102,6 +102,6 @@ test.describe('Navigation + Panier', () => {
 
     await expect(page.locator('#cart-items')).toBeVisible();
     await expect(page.locator('.cart-item').first()).toContainText('T-shirt Cove');
-    await expect(page.locator('#total')).toContainText('65');
+    await expect(page.locator('#total')).toContainText('30');
   });
 });

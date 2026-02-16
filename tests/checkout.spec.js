@@ -9,7 +9,7 @@ test.describe('Checkout / Paiement', () => {
       const cart = [{
         id: 1,
         name: 'T-shirt Cove',
-        price: 65,
+        price: 30,
         image: 'image/t-shirt-front.JPG',
         size: 'M',
         quantity: 1
@@ -21,7 +21,7 @@ test.describe('Checkout / Paiement', () => {
 
   test('Panier affiche correctement avant checkout', async ({ page }) => {
     await expect(page.locator('.cart-item').first()).toContainText('T-shirt Cove');
-    await expect(page.locator('#total')).toContainText('65');
+    await expect(page.locator('#total')).toContainText('30');
     await expect(page.locator('#checkout-btn')).toBeVisible();
     await expect(page.locator('#checkout-btn')).toBeEnabled();
   });
@@ -40,7 +40,7 @@ test.describe('Checkout / Paiement', () => {
     await expect(page.locator('#postalCode')).toBeVisible();
     await expect(page.locator('#country')).toBeVisible();
 
-    await expect(page.locator('#checkout-subtotal')).toContainText('65');
+    await expect(page.locator('#checkout-subtotal')).toContainText('30');
   });
 
   test('Fermer la modale de checkout', async ({ page }) => {

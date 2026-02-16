@@ -36,7 +36,7 @@ test.describe('Responsive / Mobile', () => {
       const cart = [{
         id: 1,
         name: 'T-shirt Cove',
-        price: 65,
+        price: 30,
         image: 'image/t-shirt-front.JPG',
         size: 'M',
         quantity: 1
@@ -47,7 +47,7 @@ test.describe('Responsive / Mobile', () => {
 
     await expect(page.locator('.cart-item').first()).toBeVisible();
     await expect(page.locator('.cart-item').first()).toContainText('T-shirt Cove');
-    await expect(page.locator('#total')).toContainText('65');
+    await expect(page.locator('#total')).toContainText('30');
     await expect(page.locator('#checkout-btn')).toBeVisible();
   });
 
