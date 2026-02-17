@@ -51,10 +51,10 @@ const generalLimiter = rateLimit({
     message: { error: 'Trop de requetes, veuillez reessayer plus tard' }
 });
 
-// Rate limiting strict pour auth (10 req / 15 min)
+// Rate limiting strict pour auth (20 req / 15 min)
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 10,
+    max: 20,
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Trop de tentatives, veuillez reessayer plus tard' }
