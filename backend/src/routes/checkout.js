@@ -6,6 +6,18 @@ const { sendOrderConfirmation, sendOrderNotificationToOwner } = require('../util
 // URL publique pour les images (GitHub Pages)
 const PUBLIC_URL = process.env.PUBLIC_URL || 'https://clemencechab-ctrl.github.io/Cove';
 
+// Versions carrees optimisees pour Stripe (640x640)
+const STRIPE_IMAGES = {
+    'image/t-shirt-front.JPG': 'image/t-shirt-front-stripe.jpg',
+    'image/hoodie-front.JPG': 'image/hoodie-front-stripe.jpg'
+};
+
+function getStripeImage(image) {
+    if (image.startsWith('http')) return image;
+    const stripeVersion = STRIPE_IMAGES[image] || image;
+    return `${PUBLIC_URL}/${stripeVersion}`;
+}
+
 // Initialiser Stripe si la cle est configuree
 let stripe = null;
 if (process.env.STRIPE_SECRET_KEY) {
@@ -121,7 +133,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
                     product_data: {
                         name: product.name,
                         description: product.description,
-                        images: product.image.startsWith('http') ? [product.image] : [`${PUBLIC_URL}/${product.image}`]
+                        images: [getStripeImage(product.image)]
                     },
                     unit_amount: Math.round(product.price * 100)
                 },
