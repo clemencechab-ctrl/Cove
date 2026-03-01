@@ -51,7 +51,7 @@ router.post('/', async (req, res) => {
 
         res.json({
             success: true,
-            message: 'Message envoye avec succes',
+            message: 'Message envoyé avec succès',
             emailSent
         });
     } catch (error) {

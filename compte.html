@@ -31,7 +31,7 @@
 
     <section class="auth-hero">
         <h1 class="auth-title">Mon Compte</h1>
-        <p class="auth-subtitle">Connectez-vous ou creez votre compte</p>
+        <p class="auth-subtitle">Connectez-vous ou créez votre compte</p>
     </section>
 
     <!-- Auth Section (visible si non connecte) -->
@@ -59,12 +59,12 @@
                 <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
                 Se connecter avec Google
             </button>
-            <a href="#" class="forgot-password-link" id="forgot-password-link">Mot de passe oublie ?</a>
+            <a href="#" class="forgot-password-link" id="forgot-password-link">Mot de passe oublié ?</a>
         </form>
 
         <!-- Forgot Password Form -->
         <form class="auth-form" id="forgot-password-form">
-            <p class="forgot-password-text">Entrez votre adresse email, vous recevrez un lien pour reinitialiser votre mot de passe.</p>
+            <p class="forgot-password-text">Entrez votre adresse email, vous recevrez un lien pour réinitialiser votre mot de passe.</p>
             <div class="form-group">
                 <label for="forgot-email">Email</label>
                 <input type="email" id="forgot-email" required placeholder="votre@email.com">
@@ -72,9 +72,9 @@
             <p class="auth-error" id="forgot-error"
                data-required="Veuillez entrer votre email."></p>
             <p class="auth-success" id="forgot-success"
-               data-sent="Un lien de reinitialisation a ete envoye a votre adresse email."></p>
+               data-sent="Un lien de réinitialisation a été envoyé a votre adresse email."></p>
             <button type="submit" class="btn-primary">Envoyer le lien</button>
-            <a href="#" class="forgot-password-link" id="back-to-login">Retour a la connexion</a>
+            <a href="#" class="forgot-password-link" id="back-to-login">Retour à la connexion</a>
         </form>
 
         <form class="auth-form" id="register-form">
@@ -84,7 +84,7 @@
             </div>
             <div class="form-group">
                 <label for="register-password">Mot de passe</label>
-                <input type="password" id="register-password" required placeholder="Minimum 6 caracteres">
+                <input type="password" id="register-password" required placeholder="Minimum 6 caractères">
             </div>
             <div class="form-group">
                 <label for="register-confirm">Confirmer le mot de passe</label>
@@ -93,7 +93,7 @@
             <p class="auth-error" id="register-error"
                data-required="Veuillez remplir tous les champs."
                data-mismatch="Les mots de passe ne correspondent pas."
-               data-short="Le mot de passe doit contenir au moins 6 caracteres."
+               data-short="Le mot de passe doit contenir au moins 6 caractères."
                data-fail="Erreur lors de l'inscription."></p>
             <button type="submit" class="btn-primary">S'inscrire</button>
         </form>
@@ -111,15 +111,15 @@
                 <span class="profile-value" id="profile-role">-</span>
             </div>
             <div class="profile-item">
-                <span class="profile-label">Date de creation</span>
+                <span class="profile-label">Date de création</span>
                 <span class="profile-value" id="profile-created">-</span>
             </div>
             <div class="profile-item">
-                <span class="profile-label">Derniere connexion</span>
+                <span class="profile-label">Dernière connexion</span>
                 <span class="profile-value" id="profile-login">-</span>
             </div>
         </div>
-        <button class="btn-logout" id="btn-logout">Se deconnecter</button>
+        <button class="btn-logout" id="btn-logout">Se déconnecter</button>
 
         <!-- Section Commandes -->
         <div class="orders-section">
@@ -170,13 +170,13 @@
                 <div class="footer-column">
                     <h4>Legal</h4>
                     <a href="cgv.html">CGV</a>
-                    <a href="mentions-legales.html">Mentions legales</a>
-                    <a href="confidentialite.html">Confidentialite</a>
+                    <a href="mentions-legales.html">Mentions légales</a>
+                    <a href="confidentialite.html">Confidentialité</a>
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 COVE. Tous droits reserves.</p>
+            <p>&copy; 2026 COVE. Tous droits réservés.</p>
         </div>
     </footer>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -199,11 +199,12 @@
 
             const statusLabels = {
                 pending: { label: 'En attente', class: 'status-pending' },
-                confirmed: { label: 'Confirmee', class: 'status-confirmed' },
-                processing: { label: 'En preparation', class: 'status-processing' },
-                shipped: { label: 'Expediee', class: 'status-shipped' },
-                delivered: { label: 'Livree', class: 'status-delivered' },
-                cancelled: { label: 'Annulee', class: 'status-cancelled' }
+                confirmed: { label: 'Confirmée', class: 'status-confirmed' },
+                processing: { label: 'En préparation', class: 'status-processing' },
+                label_printed: { label: 'Bordereau imprimé', class: 'status-processing' },
+                shipped: { label: 'Expédiée', class: 'status-shipped' },
+                delivered: { label: 'Livrée', class: 'status-delivered' },
+                cancelled: { label: 'Annulée', class: 'status-cancelled' }
             };
 
             ordersList.innerHTML = result.orders.map(order => {
@@ -245,9 +246,10 @@
 
         const detailStatusLabels = {
             pending: 'En attente',
-            paid: 'Paye',
+            paid: 'Payé',
             confirmed: 'Confirmee',
             processing: 'En preparation',
+            label_printed: 'Bordereau imprimé',
             shipped: 'Expediee',
             delivered: 'Livree',
             cancelled: 'Annulee'
@@ -390,7 +392,7 @@
             btn.textContent = 'Envoi...';
             const result = await api.requestCancellation(orderId, type, reason);
             if (result.success) {
-                alert(type === 'cancel' ? 'Demande d\'annulation envoyee !' : 'Demande de retour envoyee !');
+                alert(type === 'cancel' ? 'Demande d\'annulation envoyée !' : 'Demande de retour envoyée !');
                 closeOrderDetail();
             } else {
                 alert('Erreur: ' + (result.error || 'Impossible d\'envoyer la demande'));

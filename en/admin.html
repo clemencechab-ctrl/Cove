@@ -90,6 +90,7 @@
                         <option value="paid">Paid</option>
                         <option value="confirmed">Confirmed</option>
                         <option value="processing">Processing</option>
+                        <option value="label_printed">Label Printed</option>
                         <option value="shipped">Shipped</option>
                         <option value="delivered">Delivered</option>
                         <option value="cancelled">Cancelled</option>
@@ -265,6 +266,7 @@
             paid: { label: 'Paid', class: 'status-confirmed' },
             confirmed: { label: 'Confirmed', class: 'status-confirmed' },
             processing: { label: 'Processing', class: 'status-processing' },
+            label_printed: { label: 'Label Printed', class: 'status-processing' },
             shipped: { label: 'Shipped', class: 'status-shipped' },
             delivered: { label: 'Delivered', class: 'status-delivered' },
             cancelled: { label: 'Cancelled', class: 'status-cancelled' }
@@ -362,6 +364,7 @@
                                         <option value="">Change status...</option>
                                         <option value="confirmed">Confirm</option>
                                         <option value="processing">Processing</option>
+                                        <option value="label_printed">Label Printed</option>
                                         <option value="shipped">Ship</option>
                                         <option value="delivered">Delivered</option>
                                         <option value="cancelled">Cancel</option>
@@ -370,6 +373,8 @@
                                 <div class="order-tracking">
                                     <input type="text" class="tracking-input" id="tracking-${order.id}" placeholder="Tracking number" value="${order.trackingNumber || ''}" />
                                     <button class="btn-admin-action btn-tracking" onclick="setTracking('${order.id}', this)">Track</button>
+                                    <button class="btn-admin-action" onclick="generateColissimoLabel('${order.id}', this)" style="background:#6366f1; color:#fff;">Colissimo</button>
+                                    ${order.labelFile ? `<a href="/api/admin/labels/${order.labelFile}" class="btn-admin-action" style="text-decoration:none; background:#8b5cf6; color:#fff;" target="_blank">PDF</a>` : ''}
                                 </div>
                                 <div class="order-items">
                                     ${order.items.map(i => `<span class="order-item-pill">${i.name} x${i.quantity}</span>`).join('')}
@@ -474,6 +479,46 @@
                 alert('Error: ' + (result.error || 'Unable to save'));
                 btn.disabled = false;
             }
+        }
+
+        // ============ Colissimo ============
+        async function generateColissimoLabel(orderId, btn) {
+            if (!confirm('Generate a Colissimo label for this order?')) return;
+            btn.disabled = true;
+            btn.textContent = 'Generating...';
+
+            const result = await api.generateColissimoLabel(orderId);
+
+            if (result.success) {
+                if (result.labelUrl) {
+                    const token = localStorage.getItem('coveToken');
+                    const resp = await fetch(result.labelUrl, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const blob = await resp.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = result.labelUrl.split('/').pop();
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
+
+                const trackingInput = document.getElementById('tracking-' + orderId);
+                if (trackingInput && result.trackingNumber) {
+                    trackingInput.value = result.trackingNumber;
+                }
+
+                await loadClients();
+                applyFilters();
+            } else {
+                alert('Colissimo error: ' + (result.error || 'Unable to generate label'));
+            }
+
+            btn.textContent = 'Colissimo';
+            btn.disabled = false;
         }
 
         // ============ Products ============

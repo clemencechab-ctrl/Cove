@@ -106,14 +106,14 @@ const api = {
         }
     },
 
-    async verifyPayment(sessionId, orderNumber) {
+    async verifyPayment(orderNumber) {
         try {
             const response = await fetch(`${API_URL}/checkout/verify`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ sessionId, orderNumber })
+                body: JSON.stringify({ orderNumber })
             });
             const data = await response.json();
             return data;
@@ -303,6 +303,24 @@ const api = {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ idToken })
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Colissimo - Generer etiquette
+    async generateColissimoLabel(orderId) {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/orders/${orderId}/generate-label`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
             const data = await response.json();
             return data;

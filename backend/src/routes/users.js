@@ -156,14 +156,14 @@ router.post('/forgot-password', async (req, res) => {
 
         if (!resetRes.ok) {
             // Don't reveal if email exists or not for security
-            return res.json({ success: true, message: 'Si cet email existe, un lien de reinitialisation a ete envoye.' });
+            return res.json({ success: true, message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' });
         }
 
-        res.json({ success: true, message: 'Si cet email existe, un lien de reinitialisation a ete envoye.' });
+        res.json({ success: true, message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' });
     } catch (error) {
         console.error('Forgot password error:', error.message);
         // Don't reveal errors for security
-        res.json({ success: true, message: 'Si cet email existe, un lien de reinitialisation a ete envoye.' });
+        res.json({ success: true, message: 'Si cet email existe, un lien de réinitialisation a été envoyé.' });
     }
 });
 
@@ -195,7 +195,7 @@ router.post('/google-auth', async (req, res) => {
         }
 
         res.json({
-            message: 'Connexion Google reussie',
+            message: 'Connexion Google réussie',
             user: { uid, ...userProfile },
             idToken
         });

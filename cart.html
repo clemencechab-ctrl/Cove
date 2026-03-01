@@ -47,7 +47,7 @@
 
             <!-- Cart Summary -->
             <div class="cart-summary" id="cart-summary">
-                <h3>Recapitulatif</h3>
+                <h3>Récapitulatif</h3>
                 <div class="summary-row">
                     <span>Sous-total</span>
                     <span id="subtotal">0 EUR</span>
@@ -91,7 +91,7 @@
                     <h3>Informations de livraison</h3>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="firstName">Prenom</label>
+                            <label for="firstName">Prénom</label>
                             <input type="text" id="firstName" name="firstName" required>
                         </div>
                         <div class="form-group">
@@ -104,7 +104,7 @@
                         <input type="email" id="email" name="email" required>
                     </div>
                     <div class="form-group">
-                        <label for="phone">Telephone</label>
+                        <label for="phone">Téléphone</label>
                         <input type="tel" id="phone" name="phone" required>
                     </div>
                     <div class="form-group">
@@ -143,13 +143,7 @@
 
                 <div class="checkout-section">
                     <h3>Paiement</h3>
-                    <p class="payment-info">Paiement securise par Stripe</p>
-                    <div id="card-element">
-                        <!-- Stripe Card Element will be inserted here -->
-                    </div>
-                    <div class="payment-placeholder">
-                        <p>Mode demo - Aucun paiement reel</p>
-                    </div>
+                    <p class="payment-info">Paiement sécurisé</p>
                 </div>
 
                 <div class="checkout-total">
@@ -162,7 +156,7 @@
                         <span id="checkout-discount">-0 EUR</span>
                     </div>
                     <div class="checkout-total-row checkout-total-final">
-                        <span>Total a payer:</span>
+                        <span>Total à payer:</span>
                         <span id="checkout-total">0 EUR</span>
                     </div>
                 </div>
@@ -176,10 +170,10 @@
     <div class="confirmation-modal" id="confirmation-modal">
         <div class="confirmation-content">
             <div class="confirmation-icon">&#10003;</div>
-            <h2>Commande confirmee !</h2>
+            <h2>Commande confirmée !</h2>
             <p>Merci pour votre achat. Vous recevrez un email de confirmation.</p>
             <p class="order-number">Commande #<span id="order-number"></span></p>
-            <a href="index.html#collection" class="btn-primary">Retour a la collection</a>
+            <a href="index.html#collection" class="btn-primary">Retour à la collection</a>
         </div>
     </div>
 
@@ -214,13 +208,13 @@
                 <div class="footer-column">
                     <h4>Legal</h4>
                     <a href="cgv.html">CGV</a>
-                    <a href="mentions-legales.html">Mentions legales</a>
-                    <a href="confidentialite.html">Confidentialite</a>
+                    <a href="mentions-legales.html">Mentions légales</a>
+                    <a href="confidentialite.html">Confidentialité</a>
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 COVE. Tous droits reserves.</p>
+            <p>&copy; 2026 COVE. Tous droits réservés.</p>
         </div>
     </footer>
 
@@ -317,8 +311,8 @@
             if (result.success) {
                 appliedPromo = result.discount;
                 messageEl.textContent = result.discount.type === 'percentage'
-                    ? `Code ${result.discount.code} applique : -${result.discount.value}%`
-                    : `Code ${result.discount.code} applique : -${result.discount.amount.toFixed(2)} EUR`;
+                    ? `Code ${result.discount.code} appliqué : -${result.discount.value}%`
+                    : `Code ${result.discount.code} appliqué : -${result.discount.amount.toFixed(2)} EUR`;
                 messageEl.className = 'promo-message promo-success';
                 input.disabled = true;
                 updateCheckoutTotal();
@@ -390,36 +384,19 @@
             }));
 
             try {
-                // Appeler l'API backend
                 const promoCode = appliedPromo ? appliedPromo.code : null;
                 const result = await api.checkout(items, customer, shipping, promoCode);
 
                 if (result.success) {
-                    // Si Stripe est configuré, rediriger vers Stripe
-                    if (result.url) {
-                        window.location.href = result.url;
-                        return;
-                    }
-
-                    // Mode démo - afficher la confirmation
-                    document.getElementById('order-number').textContent = result.order.orderNumber;
-                    closeCheckout();
-                    resetPromoCode();
-                    document.getElementById('confirmation-modal').classList.add('active');
                     clearCart();
-                    renderCart();
+                    window.location.href = result.url;
+                    return;
                 } else {
                     alert('Erreur: ' + (result.error || 'Une erreur est survenue'));
                 }
             } catch (error) {
                 console.error('Checkout error:', error);
-                // Fallback mode local si le backend n'est pas disponible
-                const orderNumber = 'COVE-' + Date.now().toString(36).toUpperCase();
-                document.getElementById('order-number').textContent = orderNumber;
-                closeCheckout();
-                document.getElementById('confirmation-modal').classList.add('active');
-                clearCart();
-                renderCart();
+                alert('Une erreur est survenue. Veuillez réessayer.');
             }
 
             submitBtn.disabled = false;
@@ -433,46 +410,35 @@
             }
         });
 
-        // Gerer le retour Stripe
-        async function handleStripeReturn() {
+        // Gerer le retour depuis Shopify ou la page success
+        async function handlePaymentReturn() {
             const params = new URLSearchParams(window.location.search);
-            const sessionId = params.get('session_id');
             const success = params.get('success');
             const canceled = params.get('canceled');
             const orderParam = params.get('order');
 
-            // Nettoyer l'URL
             if (success || canceled) {
                 history.replaceState({}, '', window.location.pathname);
             }
 
-            if (success === 'true' && sessionId) {
-                try {
-                    const result = await api.verifyPayment(sessionId);
-                    if (result.success && result.paid) {
-                        document.getElementById('order-number').textContent = result.orderNumber || '';
-                        document.getElementById('confirmation-modal').classList.add('active');
-                        clearCart();
-                        renderCart();
-                    }
-                } catch (error) {
-                    console.error('Erreur verification paiement:', error);
+            if (success === 'true') {
+                const orderNumber = orderParam || localStorage.getItem('pendingOrderNumber') || '';
+                localStorage.removeItem('pendingOrderNumber');
+                if (orderNumber) {
+                    document.getElementById('order-number').textContent = orderNumber;
+                    document.getElementById('confirmation-modal').classList.add('active');
+                    clearCart();
+                    renderCart();
                 }
-            } else if (success === 'true' && orderParam) {
-                // Retour demo (pas de session_id)
-                document.getElementById('order-number').textContent = orderParam;
-                document.getElementById('confirmation-modal').classList.add('active');
-                clearCart();
-                renderCart();
             } else if (canceled === 'true') {
-                alert('Paiement annule. Votre panier a ete conserve.');
+                alert('Paiement annulé. Votre panier a été conservé.');
             }
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             renderCart();
-            handleStripeReturn();
+            handlePaymentReturn();
         });
     </script>
 </body>

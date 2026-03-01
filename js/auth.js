@@ -150,7 +150,7 @@ const auth = {
         }
 
         if (password.length < 6) {
-            errorEl.textContent = errorEl.dataset.short || 'Le mot de passe doit contenir au moins 6 caracteres.';
+            errorEl.textContent = errorEl.dataset.short || 'Le mot de passe doit contenir au moins 6 caractères.';
             return;
         }
 
@@ -178,7 +178,7 @@ const auth = {
 
         const result = await api.forgotPassword(email);
         if (result.success) {
-            successEl.textContent = successEl.dataset.sent || result.message || 'Un lien de reinitialisation a ete envoye a votre adresse email.';
+            successEl.textContent = successEl.dataset.sent || result.message || 'Un lien de réinitialisation a été envoyé à votre adresse email.';
         } else {
             errorEl.textContent = result.error || 'Une erreur est survenue.';
         }

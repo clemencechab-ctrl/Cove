@@ -33,14 +33,14 @@
     <!-- Admin Hero -->
     <section class="legal-hero">
         <h1 class="legal-title">Administration</h1>
-        <p class="legal-subtitle">Tableau de bord en temps reel</p>
+        <p class="legal-subtitle">Tableau de bord en temps réel</p>
     </section>
 
     <!-- Access Denied -->
     <section class="admin-section" id="access-denied" style="display: none;">
         <div class="access-denied-content">
-            <h2>Acces refuse</h2>
-            <p>Vous devez etre connecte en tant qu'administrateur pour acceder a cette page.</p>
+            <h2>Accès refusé</h2>
+            <p>Vous devez être connecté en tant qu'administrateur pour accéder à cette page.</p>
             <a href="compte.html" class="btn-primary">Se connecter</a>
         </div>
     </section>
@@ -49,7 +49,7 @@
     <div id="admin-content" style="display: none;">
         <!-- Logout -->
         <div style="text-align: right; padding: 0 2rem;">
-            <button class="btn-logout" id="admin-logout">Se deconnecter</button>
+            <button class="btn-logout" id="admin-logout">Se déconnecter</button>
         </div>
 
         <!-- Admin Tabs -->
@@ -87,12 +87,13 @@
                     <select id="filter-status" class="admin-filter-select">
                         <option value="">Tous les statuts</option>
                         <option value="pending">En attente</option>
-                        <option value="paid">Paye</option>
-                        <option value="confirmed">Confirmee</option>
-                        <option value="processing">En preparation</option>
-                        <option value="shipped">Expediee</option>
-                        <option value="delivered">Livree</option>
-                        <option value="cancelled">Annulee</option>
+                        <option value="paid">Payé</option>
+                        <option value="confirmed">Confirmée</option>
+                        <option value="processing">En préparation</option>
+                        <option value="label_printed">Bordereau imprimé</option>
+                        <option value="shipped">Expédiée</option>
+                        <option value="delivered">Livrée</option>
+                        <option value="cancelled">Annulée</option>
                     </select>
                 </div>
                 <div id="admin-clients" class="admin-clients">
@@ -120,7 +121,7 @@
                 <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Codes Promo</h2>
                 <!-- Create Promo Form -->
                 <div class="admin-promo-form">
-                    <h3>Creer un code promo</h3>
+                    <h3>Créer un code promo</h3>
                     <div class="promo-form-grid">
                         <div class="form-group">
                             <label>Code</label>
@@ -146,7 +147,7 @@
                             <input type="number" id="promo-max-uses" min="0" step="1" placeholder="0 = illimite" value="0">
                         </div>
                         <div class="form-group" style="display:flex; align-items:flex-end;">
-                            <button class="btn-primary" onclick="createPromo()" style="width:100%;">Creer</button>
+                            <button class="btn-primary" onclick="createPromo()" style="width:100%;">Créer</button>
                         </div>
                     </div>
                     <p id="promo-form-message" class="admin-form-message"></p>
@@ -186,7 +187,7 @@
                         <input type="number" id="product-price" min="0" step="0.01" required>
                     </div>
                     <div class="form-group">
-                        <label>Categorie</label>
+                        <label>Catégorie</label>
                         <select id="product-category" required>
                             <option value="tops">Tops</option>
                             <option value="bottoms">Pantalons</option>
@@ -249,13 +250,13 @@
                 <div class="footer-column">
                     <h4>Legal</h4>
                     <a href="cgv.html">CGV</a>
-                    <a href="mentions-legales.html">Mentions legales</a>
-                    <a href="confidentialite.html">Confidentialite</a>
+                    <a href="mentions-legales.html">Mentions légales</a>
+                    <a href="confidentialite.html">Confidentialité</a>
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 COVE. Tous droits reserves.</p>
+            <p>&copy; 2026 COVE. Tous droits réservés.</p>
         </div>
     </footer>
 
@@ -264,19 +265,20 @@
     <script>
         const statusLabels = {
             pending: { label: 'En attente', class: 'status-pending' },
-            paid: { label: 'Paye', class: 'status-confirmed' },
-            confirmed: { label: 'Confirmee', class: 'status-confirmed' },
-            processing: { label: 'En preparation', class: 'status-processing' },
-            shipped: { label: 'Expediee', class: 'status-shipped' },
-            delivered: { label: 'Livree', class: 'status-delivered' },
-            cancelled: { label: 'Annulee', class: 'status-cancelled' }
+            paid: { label: 'Payé', class: 'status-confirmed' },
+            confirmed: { label: 'Confirmée', class: 'status-confirmed' },
+            processing: { label: 'En préparation', class: 'status-processing' },
+            label_printed: { label: 'Bordereau imprimé', class: 'status-processing' },
+            shipped: { label: 'Expédiée', class: 'status-shipped' },
+            delivered: { label: 'Livrée', class: 'status-delivered' },
+            cancelled: { label: 'Annulée', class: 'status-cancelled' }
         };
 
         const messageStatusLabels = {
             new: { label: 'Nouveau', class: 'msg-status-new' },
             read: { label: 'Lu', class: 'msg-status-read' },
-            replied: { label: 'Repondu', class: 'msg-status-replied' },
-            archived: { label: 'Archive', class: 'msg-status-archived' }
+            replied: { label: 'Répondu', class: 'msg-status-replied' },
+            archived: { label: 'Archivé', class: 'msg-status-archived' }
         };
 
         const categoryLabels = {
@@ -372,15 +374,18 @@
                                     <select class="status-select" data-order-id="${order.id}" onchange="updateStatus(this)">
                                         <option value="">Changer statut...</option>
                                         <option value="confirmed">Confirmer</option>
-                                        <option value="processing">En preparation</option>
-                                        <option value="shipped">Expedier</option>
-                                        <option value="delivered">Livree</option>
+                                        <option value="processing">En préparation</option>
+                                        <option value="label_printed">Bordereau imprimé</option>
+                                        <option value="shipped">Expédier</option>
+                                        <option value="delivered">Livrée</option>
                                         <option value="cancelled">Annuler</option>
                                     </select>
                                 </div>
                                 <div class="order-tracking">
                                     <input type="text" class="tracking-input" id="tracking-${order.id}" placeholder="N° suivi La Poste" value="${order.trackingNumber || ''}" />
                                     <button class="btn-admin-action btn-tracking" onclick="setTracking('${order.id}', this)">Suivi</button>
+                                    <button class="btn-admin-action" onclick="generateColissimoLabel('${order.id}', this)" style="background:#6366f1; color:#fff;">Colissimo</button>
+                                    ${order.labelFile ? `<a href="/api/admin/labels/${order.labelFile}" class="btn-admin-action" style="text-decoration:none; background:#8b5cf6; color:#fff;" target="_blank">PDF</a>` : ''}
                                 </div>
                                 <div class="order-items">
                                     ${order.items.map(i => `<span class="order-item-pill">${i.name} x${i.quantity}</span>`).join('')}
@@ -404,7 +409,7 @@
                                 </div>
                             </div>
                             <div class="client-last-login">
-                                <span class="last-login-label">Derniere connexion</span>
+                                <span class="last-login-label">Dernière connexion</span>
                                 <span class="last-login-value">${lastLogin}</span>
                             </div>
                         </div>
@@ -466,7 +471,7 @@
                 await loadClients();
                 applyFilters();
             } else {
-                alert('Erreur: ' + (result.error || 'Impossible de mettre a jour le statut'));
+                alert('Erreur: ' + (result.error || 'Impossible de mettre à jour le statut'));
                 select.value = '';
             }
             select.disabled = false;
@@ -486,6 +491,49 @@
                 alert('Erreur: ' + (result.error || 'Impossible de sauvegarder'));
                 btn.disabled = false;
             }
+        }
+
+        // ============ Colissimo ============
+        async function generateColissimoLabel(orderId, btn) {
+            if (!confirm('Générer une étiquette Colissimo pour cette commande ?')) return;
+            btn.disabled = true;
+            btn.textContent = 'Génération...';
+
+            const result = await api.generateColissimoLabel(orderId);
+
+            if (result.success) {
+                // Telecharger le PDF automatiquement
+                if (result.labelUrl) {
+                    const token = localStorage.getItem('coveToken');
+                    const resp = await fetch(result.labelUrl, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const blob = await resp.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = result.labelUrl.split('/').pop();
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
+
+                // Remplir le champ tracking
+                const trackingInput = document.getElementById('tracking-' + orderId);
+                if (trackingInput && result.trackingNumber) {
+                    trackingInput.value = result.trackingNumber;
+                }
+
+                // Rafraichir la liste
+                await loadClients();
+                applyFilters();
+            } else {
+                alert('Erreur Colissimo: ' + (result.error || 'Impossible de générer l\'étiquette'));
+            }
+
+            btn.textContent = 'Colissimo';
+            btn.disabled = false;
         }
 
         // ============ Products (Phase 1) ============
@@ -510,7 +558,7 @@
                             <th>Image</th>
                             <th>Nom</th>
                             <th>Prix</th>
-                            <th>Categorie</th>
+                            <th>Catégorie</th>
                             <th>Stock (S/M/L/XL)</th>
                             <th>Actions</th>
                         </tr>
@@ -674,13 +722,13 @@
 
             const result = await api.createPromoCode(data);
             if (result.success) {
-                msgEl.textContent = 'Code promo cree !';
+                msgEl.textContent = 'Code promo créé !';
                 msgEl.className = 'admin-form-message success';
                 document.getElementById('promo-code').value = '';
                 document.getElementById('promo-value').value = '';
                 await loadPromos();
             } else {
-                msgEl.textContent = result.error || 'Erreur de creation';
+                msgEl.textContent = result.error || 'Erreur de création';
                 msgEl.className = 'admin-form-message error';
             }
         }
@@ -729,7 +777,7 @@
                                 <select class="status-select" onclick="event.stopPropagation()" onchange="updateMessageStatus('${msg.id}', this.value, this)">
                                     <option value="">Changer...</option>
                                     <option value="read">Lu</option>
-                                    <option value="replied">Repondu</option>
+                                    <option value="replied">Répondu</option>
                                     <option value="archived">Archiver</option>
                                 </select>
                             </div>
@@ -752,7 +800,7 @@
             if (result.success) {
                 await loadMessages();
             } else {
-                alert('Erreur: ' + (result.error || 'Impossible de mettre a jour'));
+                alert('Erreur: ' + (result.error || 'Impossible de mettre à jour'));
             }
             select.disabled = false;
         }

@@ -1,16 +1,18 @@
 var statusLabels = {
     pending: 'En attente',
-    paid: 'Paye',
+    paid: 'Payé',
     processing: 'En cours',
-    shipped: 'Expedie',
-    delivered: 'Livre',
-    cancelled: 'Annule'
+    label_printed: 'Bordereau imprimé',
+    shipped: 'Expédié',
+    delivered: 'Livré',
+    cancelled: 'Annulé'
 };
 
 var statusColors = {
     pending: '#f59e0b',
     paid: '#10b981',
     processing: '#3b82f6',
+    label_printed: '#6366f1',
     shipped: '#8b5cf6',
     delivered: '#22c55e',
     cancelled: '#ef4444'
@@ -24,6 +26,7 @@ if (isEnglish) {
         pending: 'Pending',
         paid: 'Paid',
         processing: 'Processing',
+        label_printed: 'Label Printed',
         shipped: 'Shipped',
         delivered: 'Delivered',
         cancelled: 'Cancelled'
@@ -160,13 +163,23 @@ function renderClients(orders) {
             html += '<span class="status-badge" style="background:' + statusColor + ';">' + statusLabel + '</span>';
             html += '<select class="status-select" data-order-id="' + order.id + '" onchange="changeStatus(this)">';
 
-            var allStatuses = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];
+            var allStatuses = ['pending', 'paid', 'processing', 'label_printed', 'shipped', 'delivered', 'cancelled'];
             allStatuses.forEach(function(s) {
                 var selected = s === order.status ? ' selected' : '';
                 html += '<option value="' + s + '"' + selected + '>' + (statusLabels[s] || s) + '</option>';
             });
 
             html += '</select>';
+            html += '</div>';
+
+            // Tracking + Colissimo
+            html += '<div class="order-tracking" style="display:flex; gap:0.5rem; align-items:center; margin-top:0.5rem;">';
+            html += '<input type="text" class="tracking-input" id="tracking-' + order.id + '" placeholder="' + (isEnglish ? 'Tracking number' : 'N° suivi La Poste') + '" value="' + (order.trackingNumber || '') + '" />';
+            html += '<button class="btn-admin-action btn-tracking" onclick="setTrackingFirebase(\'' + order.id + '\', this)">' + (isEnglish ? 'Track' : 'Suivi') + '</button>';
+            html += '<button class="btn-admin-action" onclick="generateColissimoLabelFirebase(\'' + order.id + '\', this)" style="background:#6366f1; color:#fff;">Colissimo</button>';
+            if (order.labelFile) {
+                html += '<a href="/api/admin/labels/' + order.labelFile + '" class="btn-admin-action" style="text-decoration:none; background:#8b5cf6; color:#fff;" target="_blank">PDF</a>';
+            }
             html += '</div>';
 
             // Order items
@@ -200,11 +213,87 @@ function changeStatus(selectEl) {
     .then(function(res) { return res.json(); })
     .then(function(data) {
         if (!data.success) {
-            alert(isEnglish ? 'Error updating status' : 'Erreur lors de la mise a jour du statut');
+            alert(isEnglish ? 'Error updating status' : 'Erreur lors de la mise à jour du statut');
         }
     })
     .catch(function() {
-        alert(isEnglish ? 'Network error' : 'Erreur reseau');
+        alert(isEnglish ? 'Network error' : 'Erreur réseau');
+    });
+}
+
+function setTrackingFirebase(orderId, btn) {
+    var input = document.getElementById('tracking-' + orderId);
+    var trackingNumber = input ? input.value.trim() : '';
+    if (!trackingNumber) {
+        alert(isEnglish ? 'Please enter a tracking number' : 'Veuillez entrer un numero de suivi');
+        return;
+    }
+    btn.disabled = true;
+    var token = localStorage.getItem('coveToken');
+    fetch('/api/admin/orders/' + orderId + '/tracking', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ trackingNumber: trackingNumber })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            btn.textContent = 'OK';
+            setTimeout(function() { btn.textContent = isEnglish ? 'Track' : 'Suivi'; btn.disabled = false; }, 2000);
+        } else {
+            alert((isEnglish ? 'Error: ' : 'Erreur: ') + (data.error || ''));
+            btn.disabled = false;
+        }
+    })
+    .catch(function() {
+        alert(isEnglish ? 'Network error' : 'Erreur réseau');
+        btn.disabled = false;
+    });
+}
+
+function generateColissimoLabelFirebase(orderId, btn) {
+    if (!confirm(isEnglish ? 'Generate a Colissimo label for this order?' : 'Générer une étiquette Colissimo pour cette commande ?')) return;
+    btn.disabled = true;
+    btn.textContent = isEnglish ? 'Generating...' : 'Génération...';
+    var token = localStorage.getItem('coveToken');
+
+    fetch('/api/admin/orders/' + orderId + '/generate-label', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            // Telecharger le PDF
+            if (data.labelUrl) {
+                fetch(data.labelUrl, { headers: { 'Authorization': 'Bearer ' + token } })
+                .then(function(resp) { return resp.blob(); })
+                .then(function(blob) {
+                    var url = URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = data.labelUrl.split('/').pop();
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                });
+            }
+            // Remplir le tracking
+            var input = document.getElementById('tracking-' + orderId);
+            if (input && data.trackingNumber) {
+                input.value = data.trackingNumber;
+            }
+        } else {
+            alert((isEnglish ? 'Colissimo error: ' : 'Erreur Colissimo: ') + (data.error || ''));
+        }
+        btn.textContent = 'Colissimo';
+        btn.disabled = false;
+    })
+    .catch(function() {
+        alert(isEnglish ? 'Network error' : 'Erreur réseau');
+        btn.textContent = 'Colissimo';
+        btn.disabled = false;
     });
 }
 

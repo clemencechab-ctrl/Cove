@@ -48,7 +48,7 @@ const generalLimiter = rateLimit({
     max: 1000,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: 'Trop de requetes, veuillez reessayer plus tard' }
+    message: { error: 'Trop de requêtes, veuillez réessayer plus tard' }
 });
 
 // Rate limiting strict pour auth (20 req / 15 min)
@@ -57,7 +57,7 @@ const authLimiter = rateLimit({
     max: 20,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { error: 'Trop de tentatives, veuillez reessayer plus tard' }
+    message: { error: 'Trop de tentatives, veuillez réessayer plus tard' }
 });
 
 app.use('/api/', generalLimiter);
@@ -88,7 +88,8 @@ app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
         message: 'COVE Backend is running',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        stripeConfigured: !!process.env.STRIPE_SECRET_KEY
     });
 });
 

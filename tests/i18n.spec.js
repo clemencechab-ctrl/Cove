@@ -50,7 +50,7 @@ test.describe('Internationalisation FR/EN', () => {
     await page.locator('.language-options a', { hasText: 'FR' }).click();
 
     await expect(page).toHaveURL(/index\.html/);
-    await expect(page.locator('.hero-title')).toContainText('PREMIERE COLLECTION');
+    await expect(page.locator('.hero-title')).toContainText('PREMIÈRE COLLECTION');
   });
 
   test('Panier partage entre les langues', async ({ page }) => {

@@ -22,7 +22,7 @@ test.describe('Navigation + Panier', () => {
     await expect(page.locator('.nav-link', { hasText: 'Compte' })).toBeVisible();
     await expect(page.locator('.nav-link', { hasText: 'Panier' })).toBeVisible();
 
-    await expect(page.locator('.hero-title')).toContainText('PREMIERE COLLECTION');
+    await expect(page.locator('.hero-title')).toContainText('PREMIÈRE COLLECTION');
     await expect(page.locator('#collection')).toBeVisible();
     await expect(page.locator('.shop-card').first()).toBeVisible();
   });

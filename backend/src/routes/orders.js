@@ -57,7 +57,7 @@ router.post('/', optionalAuth, async (req, res) => {
             if (!product) {
                 return res.status(400).json({
                     success: false,
-                    error: `Produit ${item.id} non trouve`
+                    error: `Produit ${item.id} non trouvé`
                 });
             }
 
@@ -128,7 +128,7 @@ router.post('/', optionalAuth, async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'Commande creee avec succes',
+            message: 'Commande créée avec succès',
             order: {
                 id: order.id,
                 orderNumber: order.orderNumber,
@@ -180,12 +180,12 @@ router.post('/:id/cancel-request', authenticate, async (req, res) => {
 
         const order = await store.getOrderById(req.params.id);
         if (!order) {
-            return res.status(404).json({ success: false, error: 'Commande non trouvee' });
+            return res.status(404).json({ success: false, error: 'Commande non trouvée' });
         }
 
         // Verifier que la commande appartient a l'utilisateur
         if (order.userId !== req.user.uid && order.customer?.email !== req.user.email) {
-            return res.status(403).json({ success: false, error: 'Acces refuse' });
+            return res.status(403).json({ success: false, error: 'Accès refusé' });
         }
 
         // Verifier le statut selon le type
@@ -193,7 +193,7 @@ router.post('/:id/cancel-request', authenticate, async (req, res) => {
         const returnStatuses = ['shipped', 'delivered'];
 
         if (type === 'cancel' && !cancelStatuses.includes(order.status)) {
-            return res.status(400).json({ success: false, error: 'Cette commande ne peut pas etre annulee' });
+            return res.status(400).json({ success: false, error: 'Cette commande ne peut pas être annulée' });
         }
         if (type === 'return' && !returnStatuses.includes(order.status)) {
             return res.status(400).json({ success: false, error: 'Cette commande ne peut pas faire l\'objet d\'un retour' });
@@ -202,7 +202,7 @@ router.post('/:id/cancel-request', authenticate, async (req, res) => {
         // Envoyer email
         await sendCancelReturnRequest(order, type, reason.trim(), req.user.email);
 
-        res.json({ success: true, message: 'Demande envoyee avec succes' });
+        res.json({ success: true, message: 'Demande envoyée avec succès' });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -213,7 +213,7 @@ router.get('/:id/tracking-status', authenticate, async (req, res) => {
     try {
         const order = await store.getOrderById(req.params.id);
         if (!order) {
-            return res.status(404).json({ success: false, error: 'Commande non trouvee' });
+            return res.status(404).json({ success: false, error: 'Commande non trouvée' });
         }
 
         if (!order.trackingNumber) {
@@ -243,7 +243,7 @@ router.get('/:id/tracking-status', authenticate, async (req, res) => {
                 trackingNumber: order.trackingNumber,
                 trackingUrl: `https://www.laposte.fr/outils/suivre-vos-envois?code=${order.trackingNumber}`,
                 events: [],
-                message: 'Impossible de recuperer le suivi'
+                message: 'Impossible de récupérer le suivi'
             });
         }
 
@@ -290,7 +290,7 @@ router.get('/:orderNumber', authenticate, async (req, res) => {
         if (!order) {
             return res.status(404).json({
                 success: false,
-                error: 'Commande non trouvee'
+                error: 'Commande non trouvée'
             });
         }
 
@@ -298,7 +298,7 @@ router.get('/:orderNumber', authenticate, async (req, res) => {
         const isAdmin = req.user.role === 'owner' || req.user.role === 'admin';
         const isOrderOwner = order.userId === req.user.uid || order.customer?.email === req.user.email;
         if (!isAdmin && !isOrderOwner) {
-            return res.status(403).json({ success: false, error: 'Acces refuse' });
+            return res.status(403).json({ success: false, error: 'Accès refusé' });
         }
 
         res.json({ success: true, order });
@@ -314,12 +314,12 @@ router.put('/:id/status', authenticate, async (req, res) => {
         if (req.user.role !== 'owner' && req.user.role !== 'admin') {
             return res.status(403).json({
                 success: false,
-                error: 'Acces refuse'
+                error: 'Accès refusé'
             });
         }
 
         const { status, comment } = req.body;
-        const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+        const validStatuses = ['pending', 'confirmed', 'processing', 'label_printed', 'shipped', 'delivered', 'cancelled'];
 
         if (!validStatuses.includes(status)) {
             return res.status(400).json({
@@ -333,7 +333,7 @@ router.put('/:id/status', authenticate, async (req, res) => {
         if (!order) {
             return res.status(404).json({
                 success: false,
-                error: 'Commande non trouvee'
+                error: 'Commande non trouvée'
             });
         }
 
@@ -344,7 +344,7 @@ router.put('/:id/status', authenticate, async (req, res) => {
 
         res.json({
             success: true,
-            message: 'Statut mis a jour',
+            message: 'Statut mis à jour',
             order: {
                 id: order.id,
                 orderNumber: order.orderNumber,

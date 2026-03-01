@@ -15,7 +15,7 @@ test.describe('Mot de passe oublie', () => {
     await page.goto('/compte.html');
 
     await expect(page.locator('#forgot-password-link')).toBeVisible();
-    await expect(page.locator('#forgot-password-link')).toContainText('Mot de passe oublie');
+    await expect(page.locator('#forgot-password-link')).toContainText('Mot de passe oublié');
   });
 
   test('Clic sur "Mot de passe oublie" affiche le formulaire', async ({ page }) => {

@@ -163,6 +163,7 @@ module.exports = {
             pending: 'En attente',
             confirmed: 'Confirmée',
             processing: 'En préparation',
+            label_printed: 'Bordereau imprimé',
             shipped: 'Expédiée',
             delivered: 'Livrée',
             cancelled: 'Annulée'
@@ -184,7 +185,7 @@ module.exports = {
         return { ...foundOrder, ...updates };
     },
 
-    updateOrderTracking: async (id, trackingNumber) => {
+    updateOrderTracking: async (id, trackingNumber, labelFile) => {
         const snapshot = await ordersRef.once('value');
         const data = snapshot.val();
         if (!data) return null;
@@ -205,6 +206,9 @@ module.exports = {
             trackingNumber,
             updatedAt: new Date().toISOString()
         };
+        if (labelFile) {
+            updates.labelFile = labelFile;
+        }
         await ordersRef.child(foundKey).update(updates);
         return { ...foundOrder, ...updates };
     },
@@ -252,6 +256,19 @@ module.exports = {
         await usersRef.child(uid).update(filtered);
         const snapshot = await usersRef.child(uid).once('value');
         return snapshot.val();
+    },
+
+    updateOrderStripeSession: async (id, sessionId) => {
+        const snapshot = await ordersRef.once('value');
+        const data = snapshot.val();
+        if (!data) return null;
+        for (const [key, val] of Object.entries(data)) {
+            if (val.id === parseInt(id)) {
+                await ordersRef.child(key).update({ stripeSessionId: sessionId });
+                return true;
+            }
+        }
+        return null;
     },
 
     updateOrderPayment: async (id, paymentData) => {

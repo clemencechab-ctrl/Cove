@@ -143,13 +143,7 @@
 
                 <div class="checkout-section">
                     <h3>Payment</h3>
-                    <p class="payment-info">Secure payment by Stripe</p>
-                    <div id="card-element">
-                        <!-- Stripe Card Element will be inserted here -->
-                    </div>
-                    <div class="payment-placeholder">
-                        <p>Demo mode - No real payment</p>
-                    </div>
+                    <p class="payment-info">Secure payment</p>
                 </div>
 
                 <div class="checkout-total">
@@ -392,28 +386,15 @@
                 const result = await api.checkout(items, customer, shipping, promoCode);
 
                 if (result.success) {
-                    if (result.url) {
-                        window.location.href = result.url;
-                        return;
-                    }
-
-                    document.getElementById('order-number').textContent = result.order.orderNumber;
-                    closeCheckout();
-                    resetPromoCode();
-                    document.getElementById('confirmation-modal').classList.add('active');
                     clearCart();
-                    renderCart();
+                    window.location.href = result.url;
+                    return;
                 } else {
                     alert('Error: ' + (result.error || 'An error occurred'));
                 }
             } catch (error) {
                 console.error('Checkout error:', error);
-                const orderNumber = 'COVE-' + Date.now().toString(36).toUpperCase();
-                document.getElementById('order-number').textContent = orderNumber;
-                closeCheckout();
-                document.getElementById('confirmation-modal').classList.add('active');
-                clearCart();
-                renderCart();
+                alert('An error occurred. Please try again.');
             }
 
             submitBtn.disabled = false;
@@ -427,37 +408,26 @@
             }
         });
 
-        // Handle Stripe return
-        async function handleStripeReturn() {
+        // Handle return from Shopify or success page
+        async function handlePaymentReturn() {
             const params = new URLSearchParams(window.location.search);
-            const sessionId = params.get('session_id');
             const success = params.get('success');
             const canceled = params.get('canceled');
             const orderParam = params.get('order');
 
-            // Clean URL
             if (success || canceled) {
                 history.replaceState({}, '', window.location.pathname);
             }
 
-            if (success === 'true' && sessionId) {
-                try {
-                    const result = await api.verifyPayment(sessionId);
-                    if (result.success && result.paid) {
-                        document.getElementById('order-number').textContent = result.orderNumber || '';
-                        document.getElementById('confirmation-modal').classList.add('active');
-                        clearCart();
-                        renderCart();
-                    }
-                } catch (error) {
-                    console.error('Payment verification error:', error);
+            if (success === 'true') {
+                const orderNumber = orderParam || localStorage.getItem('pendingOrderNumber') || '';
+                localStorage.removeItem('pendingOrderNumber');
+                if (orderNumber) {
+                    document.getElementById('order-number').textContent = orderNumber;
+                    document.getElementById('confirmation-modal').classList.add('active');
+                    clearCart();
+                    renderCart();
                 }
-            } else if (success === 'true' && orderParam) {
-                // Demo return (no session_id)
-                document.getElementById('order-number').textContent = orderParam;
-                document.getElementById('confirmation-modal').classList.add('active');
-                clearCart();
-                renderCart();
             } else if (canceled === 'true') {
                 alert('Payment canceled. Your cart has been kept.');
             }
@@ -466,7 +436,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             renderCart();
-            handleStripeReturn();
+            handlePaymentReturn();
         });
     </script>
 </body>

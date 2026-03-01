@@ -30,23 +30,34 @@
         </nav>
     </header>
 
-    <!-- Success Section -->
-    <section class="success-section" id="success-section" style="display: none;">
+    <!-- Section : paiement en attente -->
+    <section class="success-section" id="pending-section" style="display: none;">
         <div class="success-container">
-            <div class="confirmation-icon">&#10003;</div>
-            <h1>Commande confirmee !</h1>
-            <p>Merci pour votre achat. Vous recevrez un email de confirmation.</p>
-            <p class="order-number" id="order-number-display"></p>
-            <a href="index.html#collection" class="btn-primary">Retour a la collection</a>
+            <div class="pending-icon">&#9679;</div>
+            <h1>Paiement reçu</h1>
+            <p class="order-number" id="order-number-pending"></p>
+            <p class="payment-status" id="payment-status">Confirmation en cours…</p>
+            <a href="index.html#collection" class="btn-secondary" style="margin-top: 1rem;">Retour à la collection</a>
         </div>
     </section>
 
-    <!-- Cancel Section -->
+    <!-- Section : paiement confirmé -->
+    <section class="success-section" id="success-section" style="display: none;">
+        <div class="success-container">
+            <div class="confirmation-icon">&#10003;</div>
+            <h1>Commande confirmée !</h1>
+            <p>Merci pour votre achat. Vous recevrez un email de confirmation.</p>
+            <p class="order-number" id="order-number-display"></p>
+            <a href="index.html#collection" class="btn-primary">Retour à la collection</a>
+        </div>
+    </section>
+
+    <!-- Section : paiement annulé -->
     <section class="success-section" id="cancel-section" style="display: none;">
         <div class="success-container">
             <div class="cancel-icon">&#10007;</div>
-            <h1>Paiement annule</h1>
-            <p>Votre paiement a ete annule. Votre panier a ete conserve.</p>
+            <h1>Paiement annulé</h1>
+            <p>Votre paiement a été annulé. Votre panier a été conservé.</p>
             <a href="cart.html" class="btn-primary">Retour au panier</a>
         </div>
     </section>
@@ -82,53 +93,83 @@
                 <div class="footer-column">
                     <h4>Legal</h4>
                     <a href="cgv.html">CGV</a>
-                    <a href="mentions-legales.html">Mentions legales</a>
-                    <a href="confidentialite.html">Confidentialite</a>
+                    <a href="mentions-legales.html">Mentions légales</a>
+                    <a href="confidentialite.html">Confidentialité</a>
                 </div>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2026 COVE. Tous droits reserves.</p>
+            <p>&copy; 2026 COVE. Tous droits réservés.</p>
         </div>
     </footer>
 
     <script src="js/cart.js"></script>
     <script src="js/api.js"></script>
     <script>
+        let pollInterval = null;
+
+        function showConfirmed(orderNumber) {
+            if (pollInterval) clearInterval(pollInterval);
+            document.getElementById('pending-section').style.display = 'none';
+            document.getElementById('success-section').style.display = 'flex';
+            document.getElementById('order-number-display').textContent = 'Commande #' + orderNumber;
+        }
+
+        async function pollPaymentStatus(orderNumber) {
+            try {
+                const result = await api.verifyPayment(orderNumber);
+                if (result.success && result.paid) {
+                    showConfirmed(orderNumber);
+                }
+            } catch (e) {
+                // silencieux, on reessaiera au prochain poll
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const params = new URLSearchParams(window.location.search);
-            const success = params.get('success');
-            const canceled = params.get('canceled');
-            const sessionId = params.get('session_id');
             const orderParam = params.get('order');
+            const canceled = params.get('canceled');
 
-            if (success === 'true') {
-                document.getElementById('success-section').style.display = 'flex';
-
-                let orderNumber = orderParam || '';
-
-                if (sessionId) {
-                    try {
-                        const result = await api.verifyPayment(sessionId);
-                        if (result.success && result.paid) {
-                            orderNumber = result.orderNumber || orderNumber;
-                        }
-                    } catch (error) {
-                        console.error('Erreur verification paiement:', error);
-                    }
-                }
-
-                if (orderNumber) {
-                    document.getElementById('order-number-display').textContent = 'Commande #' + orderNumber;
-                }
-
-                clearCart();
-                updateCartCount();
-            } else if (canceled === 'true') {
+            if (canceled === 'true') {
                 document.getElementById('cancel-section').style.display = 'flex';
-            } else {
-                window.location.href = 'index.html';
+                return;
             }
+
+            if (!orderParam) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const orderNumber = orderParam;
+
+            // Verifier si la commande est deja payee (webhook deja arrive)
+            try {
+                const result = await api.verifyPayment(orderNumber);
+                if (result.success && result.paid) {
+                    updateCartCount();
+                    showConfirmed(orderNumber);
+                    return;
+                }
+            } catch (e) { /* continuer */ }
+
+            // Commande en attente de confirmation Stripe
+            document.getElementById('pending-section').style.display = 'flex';
+            document.getElementById('order-number-pending').textContent = 'Commande #' + orderNumber;
+
+            updateCartCount();
+
+            // Polling toutes les 4 secondes jusqu'a confirmation du paiement
+            pollInterval = setInterval(() => pollPaymentStatus(orderNumber), 4000);
+
+            // Arreter le polling apres 30 minutes
+            setTimeout(() => {
+                if (pollInterval) {
+                    clearInterval(pollInterval);
+                    document.getElementById('payment-status').textContent =
+                        'Délai expiré. Vérifiez vos emails ou contactez-nous.';
+                }
+            }, 30 * 60 * 1000);
         });
     </script>
 </body>

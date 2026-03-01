@@ -6,7 +6,7 @@ test.describe('Pages legales et informatives', () => {
   test('Page CGV accessible et contenu present', async ({ page }) => {
     await page.goto('/cgv.html');
 
-    await expect(page).toHaveTitle(/Conditions Generales/);
+    await expect(page).toHaveTitle(/Conditions Générales/);
     await expect(page.locator('.nav')).toBeVisible();
     await expect(page.locator('.footer')).toBeVisible();
     // Verifier qu'il y a du contenu textuel
@@ -18,7 +18,7 @@ test.describe('Pages legales et informatives', () => {
   test('Page Mentions legales accessible et contenu present', async ({ page }) => {
     await page.goto('/mentions-legales.html');
 
-    await expect(page).toHaveTitle(/Mentions Legales/);
+    await expect(page).toHaveTitle(/Mentions Légales/);
     await expect(page.locator('.nav')).toBeVisible();
     await expect(page.locator('.footer')).toBeVisible();
     const body = page.locator('body');
@@ -29,7 +29,7 @@ test.describe('Pages legales et informatives', () => {
   test('Page Confidentialite accessible et contenu present', async ({ page }) => {
     await page.goto('/confidentialite.html');
 
-    await expect(page).toHaveTitle(/Confidentialite/);
+    await expect(page).toHaveTitle(/Confidentialité/);
     await expect(page.locator('.nav')).toBeVisible();
     await expect(page.locator('.footer')).toBeVisible();
     const body = page.locator('body');
@@ -65,7 +65,7 @@ test.describe('Pages legales et informatives', () => {
     // Cliquer sur CGV dans le footer
     await page.locator('.footer a[href="cgv.html"]').click();
     await expect(page).toHaveURL(/cgv\.html/);
-    await expect(page).toHaveTitle(/Conditions Generales/);
+    await expect(page).toHaveTitle(/Conditions Générales/);
   });
 
   test('Navigation retour depuis une page legale', async ({ page }) => {

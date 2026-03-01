@@ -38,7 +38,7 @@ async function sendMail(mailOptions) {
     }
     console.log('[EMAIL DEMO] To:', mailOptions.to);
     console.log('[EMAIL DEMO] Subject:', mailOptions.subject);
-    console.log('[EMAIL DEMO] (Email non envoye - mode demo)');
+    console.log('[EMAIL DEMO] (Email non envoyé - mode demo)');
     return false;
 }
 
@@ -58,14 +58,14 @@ async function sendOrderConfirmation(order) {
 
         const shippingAddress = order.shipping
             ? `${order.shipping.address || ''}, ${order.shipping.postalCode || ''} ${order.shipping.city || ''}, ${order.shipping.country || 'FR'}`
-            : 'Non renseignee';
+            : 'Non renseignée';
 
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">COVE</h1>
                 <h2>Confirmation de commande</h2>
                 <p>Bonjour ${order.customer.firstName},</p>
-                <p>Merci pour votre commande ! Voici le recapitulatif :</p>
+                <p>Merci pour votre commande ! Voici le récapitulatif :</p>
 
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                     <thead>
@@ -92,8 +92,8 @@ async function sendOrderConfirmation(order) {
                     <p>${shippingAddress}</p>
                 </div>
 
-                <p>Vous recevrez un email lorsque votre commande sera expediee.</p>
-                <p>A bientot,<br>L'equipe COVE</p>
+                <p>Vous recevrez un email lorsque votre commande sera expédiée.</p>
+                <p>A bientôt,<br>L'équipe COVE</p>
             </div>
         `;
 
@@ -104,7 +104,7 @@ async function sendOrderConfirmation(order) {
             html
         });
 
-        console.log(`Email confirmation envoye pour commande ${order.orderNumber}`);
+        console.log(`Email confirmation envoyé pour commande ${order.orderNumber}`);
     } catch (error) {
         console.error(`Erreur envoi email confirmation commande ${order.orderNumber}:`, error.message);
     }
@@ -115,31 +115,36 @@ async function sendOrderStatusUpdate(order, newStatus) {
     try {
         const statusMessages = {
             confirmed: {
-                subject: `COVE — Votre commande #${order.orderNumber} est confirmee`,
-                title: 'Commande confirmee',
-                message: 'Votre commande a ete confirmee et sera bientot preparee.'
+                subject: `COVE — Votre commande #${order.orderNumber} est confirmée`,
+                title: 'Commande confirmée',
+                message: 'Votre commande a été confirmée et sera bientôt preparee.'
             },
             processing: {
-                subject: `COVE — Votre commande #${order.orderNumber} est en preparation`,
-                title: 'Commande en preparation',
+                subject: `COVE — Votre commande #${order.orderNumber} est en préparation`,
+                title: 'Commande en préparation',
                 message: 'Votre commande est en cours de preparation dans nos ateliers.'
             },
+            label_printed: {
+                subject: `COVE — Votre commande #${order.orderNumber} est prête à être expédiée`,
+                title: 'Bordereau imprimé',
+                message: 'Votre commande a été preparee et le bordereau d\'expedition a été imprimé. L\'expédition est imminente !'
+            },
             shipped: {
-                subject: `COVE — Votre commande #${order.orderNumber} a ete expediee`,
-                title: 'Commande expediee',
+                subject: `COVE — Votre commande #${order.orderNumber} a ete expédiée`,
+                title: 'Commande expédiée',
                 message: order.trackingNumber
-                    ? `Votre commande a ete expediee ! Numero de suivi : <strong>${order.trackingNumber}</strong><br><a href="https://www.laposte.fr/outils/suivre-vos-envois?code=${order.trackingNumber}" style="color: #333;">Suivre mon colis sur La Poste</a>`
-                    : 'Votre commande a ete expediee ! Vous la recevrez bientot.'
+                    ? `Votre commande a ete expédiée ! Numero de suivi : <strong>${order.trackingNumber}</strong><br><a href="https://www.laposte.fr/outils/suivre-vos-envois?code=${order.trackingNumber}" style="color: #333;">Suivre mon colis sur La Poste</a>`
+                    : 'Votre commande a ete expédiée ! Vous la recevrez bientôt.'
             },
             delivered: {
-                subject: `COVE — Votre commande #${order.orderNumber} a ete livree`,
-                title: 'Commande livree',
-                message: 'Votre commande a ete livree. Nous esperons que vous en serez satisfait(e) !'
+                subject: `COVE — Votre commande #${order.orderNumber} a été livrée`,
+                title: 'Commande livrée',
+                message: 'Votre commande a été livrée. Nous espérons que vous en serez satisfait(e) !'
             },
             cancelled: {
-                subject: `COVE — Votre commande #${order.orderNumber} a ete annulee`,
-                title: 'Commande annulee',
-                message: 'Votre commande a ete annulee. Si vous avez des questions, n\'hesitez pas a nous contacter.'
+                subject: `COVE — Votre commande #${order.orderNumber} a été annulée`,
+                title: 'Commande annulée',
+                message: 'Votre commande a été annulée. Si vous avez des questions, n\'hesitez pas a nous contacter.'
             }
         };
 
@@ -156,7 +161,7 @@ async function sendOrderStatusUpdate(order, newStatus) {
                     <p><strong>Commande :</strong> ${order.orderNumber}</p>
                     <p><strong>Statut :</strong> ${info.title}</p>
                 </div>
-                <p>A bientot,<br>L'equipe COVE</p>
+                <p>A bientôt,<br>L'équipe COVE</p>
             </div>
         `;
 
@@ -167,7 +172,7 @@ async function sendOrderStatusUpdate(order, newStatus) {
             html
         });
 
-        console.log(`Email statut "${newStatus}" envoye pour commande ${order.orderNumber}`);
+        console.log(`Email statut "${newStatus}" envoyé pour commande ${order.orderNumber}`);
     } catch (error) {
         console.error(`Erreur envoi email statut commande ${order.orderNumber}:`, error.message);
     }
@@ -188,7 +193,7 @@ async function sendContactNotification(contactData) {
                 <h2>Nouveau message de contact</h2>
                 <p><strong>Nom:</strong> ${name}</p>
                 <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Sujet:</strong> ${subject || 'Non specifie'}</p>
+                <p><strong>Sujet:</strong> ${subject || 'Non spécifié'}</p>
                 <p><strong>Message:</strong></p>
                 <p>${message.replace(/\n/g, '<br>')}</p>
                 <hr>
@@ -200,20 +205,20 @@ async function sendContactNotification(contactData) {
         await sendMail({
             from: getFromAddress(),
             to: email,
-            subject: 'COVE - Nous avons bien recu votre message',
+            subject: 'COVE - Nous avons bien reçu votre message',
             html: `
                 <h2>Merci pour votre message !</h2>
                 <p>Bonjour ${name},</p>
-                <p>Nous avons bien recu votre message et nous vous repondrons dans les plus brefs delais.</p>
-                <p>Voici un recapitulatif de votre message :</p>
+                <p>Nous avons bien reçu votre message et nous vous répondrons dans les plus brefs délais.</p>
+                <p>Voici un récapitulatif de votre message :</p>
                 <blockquote style="border-left: 3px solid #ccc; padding-left: 15px; margin: 20px 0;">
                     ${message.replace(/\n/g, '<br>')}
                 </blockquote>
-                <p>A bientot,<br>L'equipe COVE</p>
+                <p>A bientôt,<br>L'équipe COVE</p>
             `
         });
 
-        console.log(`Email contact envoye (de: ${email})`);
+        console.log(`Email contact envoyé (de: ${email})`);
         return true;
     } catch (error) {
         console.error('Erreur envoi email contact:', error.message);
@@ -239,18 +244,18 @@ async function sendOrderNotificationToOwner(order) {
 
         const shippingAddress = order.shipping
             ? `${order.shipping.address || ''}, ${order.shipping.postalCode || ''} ${order.shipping.city || ''}, ${order.shipping.country || 'FR'}`
-            : 'Non renseignee';
+            : 'Non renseignée';
 
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">COVE — Nouvelle commande</h1>
-                <p>Une nouvelle commande vient d'etre passee !</p>
+                <p>Une nouvelle commande vient d'être passée !</p>
 
                 <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
                     <p><strong>Commande :</strong> ${order.orderNumber}</p>
                     <p><strong>Client :</strong> ${order.customer.firstName} ${order.customer.lastName}</p>
                     <p><strong>Email :</strong> ${order.customer.email}</p>
-                    <p><strong>Telephone :</strong> ${order.customer.phone || 'Non renseigne'}</p>
+                    <p><strong>Telephone :</strong> ${order.customer.phone || 'Non renseigné'}</p>
                 </div>
 
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
@@ -269,7 +274,7 @@ async function sendOrderNotificationToOwner(order) {
 
                 <div style="text-align: right; margin: 20px 0;">
                     <p>Sous-total : ${(order.subtotal || 0).toFixed(2)} &euro;</p>
-                    ${order.discountAmount ? `<p>Reduction : -${order.discountAmount.toFixed(2)} &euro;</p>` : ''}
+                    ${order.discountAmount ? `<p>Réduction : -${order.discountAmount.toFixed(2)} &euro;</p>` : ''}
                     <p>Livraison : ${(order.shippingCost || 0).toFixed(2)} &euro;</p>
                     <p style="font-size: 1.2em; font-weight: bold;">Total : ${(order.total || 0).toFixed(2)} &euro;</p>
                 </div>
@@ -288,7 +293,7 @@ async function sendOrderNotificationToOwner(order) {
             html
         });
 
-        console.log(`Email notification proprietaire envoye pour commande ${order.orderNumber}`);
+        console.log(`Email notification proprietaire envoyé pour commande ${order.orderNumber}`);
     } catch (error) {
         console.error(`Erreur envoi email notification proprietaire commande ${order.orderNumber}:`, error.message);
     }
@@ -322,7 +327,7 @@ async function sendCancelReturnRequest(order, type, reason, customerEmail) {
                         <p><strong>Raison :</strong></p>
                         <p>${reason.replace(/\n/g, '<br>')}</p>
                     </div>
-                    <p>Merci de traiter cette demande dans les plus brefs delais.</p>
+                    <p>Merci de traiter cette demande dans les plus brefs délais.</p>
                 </div>
             `
         });
@@ -335,16 +340,16 @@ async function sendCancelReturnRequest(order, type, reason, customerEmail) {
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">COVE</h1>
-                    <h2>Demande de ${typeLabel} recue</h2>
+                    <h2>Demande de ${typeLabel} reçue</h2>
                     <p>Bonjour${order.customer?.firstName ? ' ' + order.customer.firstName : ''},</p>
-                    <p>Nous avons bien recu votre demande de ${typeLabel} pour la commande <strong>${order.orderNumber}</strong>.</p>
-                    <p>Notre equipe va etudier votre demande et vous recontactera dans les plus brefs delais.</p>
-                    <p>A bientot,<br>L'equipe COVE</p>
+                    <p>Nous avons bien reçu votre demande de ${typeLabel} pour la commande <strong>${order.orderNumber}</strong>.</p>
+                    <p>Notre equipe va étudier votre demande et vous recontactera dans les plus brefs délais.</p>
+                    <p>A bientôt,<br>L'équipe COVE</p>
                 </div>
             `
         });
 
-        console.log(`Email demande ${typeLabel} envoye pour commande ${order.orderNumber}`);
+        console.log(`Email demande ${typeLabel} envoyé pour commande ${order.orderNumber}`);
         return true;
     } catch (error) {
         console.error(`Erreur envoi email ${type} commande ${order.orderNumber}:`, error.message);

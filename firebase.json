@@ -1,0 +1,29 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "backend/**",
+      "tests/**",
+      "node_modules/**",
+      "plan*.md",
+      "DEPLOY.md",
+      "CLAUDE.md",
+      ".claude/**",
+      "playwright.config.js",
+      "test-results/**",
+      "playwright-report/**",
+      "*.json"
+    ],
+    "rewrites": [
+      {
+        "source": "/api/**",
+        "run": {
+          "serviceId": "cove-api",
+          "region": "europe-west1"
+        }
+      }
+    ]
+  }
+}

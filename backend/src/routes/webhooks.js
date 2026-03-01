@@ -3,14 +3,13 @@ const router = express.Router();
 const store = require('../data/store');
 const { sendOrderConfirmation, sendOrderNotificationToOwner } = require('../utils/email');
 
-// POST /api/webhooks/stripe
+// POST /api/webhooks/stripe - Webhook Stripe checkout.session.completed
 router.post('/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature'];
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-    if (!webhookSecret) {
-        console.warn('STRIPE_WEBHOOK_SECRET not configured, skipping webhook verification');
-        return res.status(400).json({ error: 'Webhook secret not configured' });
+    if (!sig || !webhookSecret) {
+        return res.status(400).json({ error: 'Signature ou secret manquant' });
     }
 
     let event;
@@ -18,43 +17,40 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
         const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
         event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
     } catch (err) {
-        console.error('Webhook signature verification failed:', err.message);
-        return res.status(400).json({ error: 'Invalid signature' });
+        console.error('Webhook Stripe: signature invalide:', err.message);
+        return res.status(400).json({ error: 'Signature invalide' });
     }
 
-    // Handle the event
-    switch (event.type) {
-        case 'checkout.session.completed': {
-            const session = event.data.object;
-            const orderId = session.metadata?.orderId;
-            const orderNumber = session.metadata?.orderNumber;
+    console.log(`Webhook Stripe recu: ${event.type}`);
 
-            if (orderId && session.payment_status === 'paid') {
-                try {
-                    await store.updateOrderPayment(orderId, {
-                        paymentIntentId: session.payment_intent
-                    });
-                    console.log(`Webhook: Order ${orderNumber} marked as paid`);
-                    const order = await store.getOrderById(orderId);
-                    if (order) {
-                        sendOrderConfirmation(order);
-                        sendOrderNotificationToOwner(order);
-                    }
-                } catch (err) {
-                    console.error(`Webhook: Failed to update order ${orderNumber}:`, err.message);
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+
+        if (session.payment_status === 'paid' && session.metadata?.orderId) {
+            const { orderId, orderNumber } = session.metadata;
+
+            try {
+                const order = await store.getOrderById(orderId);
+                if (order && order.status === 'paid') {
+                    console.log(`Webhook Stripe: commande ${orderNumber} deja marquee comme payee`);
+                    return res.json({ received: true });
                 }
+
+                await store.updateOrderPayment(orderId, {
+                    paymentIntentId: session.payment_intent
+                });
+
+                console.log(`Webhook Stripe: commande ${orderNumber} marquee comme payee`);
+
+                const fullOrder = await store.getOrderById(orderId);
+                if (fullOrder) {
+                    sendOrderConfirmation(fullOrder);
+                    sendOrderNotificationToOwner(fullOrder);
+                }
+            } catch (err) {
+                console.error(`Webhook Stripe: erreur lors de la mise a jour de ${orderNumber}:`, err.message);
             }
-            break;
         }
-
-        case 'payment_intent.payment_failed': {
-            const paymentIntent = event.data.object;
-            console.log(`Webhook: Payment failed for intent ${paymentIntent.id}`);
-            break;
-        }
-
-        default:
-            console.log(`Webhook: Unhandled event type ${event.type}`);
     }
 
     // Toujours repondre 200 pour eviter les retries Stripe

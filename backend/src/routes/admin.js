@@ -1,8 +1,11 @@
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const router = express.Router();
 const store = require('../data/store');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { sendOrderStatusUpdate } = require('../utils/email');
+const { generateLabel } = require('../utils/colissimo');
 
 // Toutes les routes admin nécessitent une authentification et le rôle owner
 router.use(authenticate);
@@ -52,6 +55,7 @@ router.get('/clients', async (req, res) => {
                         total: o.total,
                         items: o.items,
                         trackingNumber: o.trackingNumber || null,
+                        labelFile: o.labelFile || null,
                         createdAt: o.createdAt
                     }));
 
@@ -95,7 +99,7 @@ router.put('/orders/:id/status', async (req, res) => {
     try {
         const { status, comment } = req.body;
 
-        const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
+        const validStatuses = ['pending', 'confirmed', 'processing', 'label_printed', 'shipped', 'delivered', 'cancelled'];
         if (!status || !validStatuses.includes(status)) {
             return res.status(400).json({
                 success: false,
@@ -113,7 +117,7 @@ router.put('/orders/:id/status', async (req, res) => {
         }
 
         // Envoyer email de notification pour les statuts pertinents
-        if (['confirmed', 'shipped', 'delivered', 'cancelled'].includes(status) && order.customer?.email) {
+        if (['confirmed', 'label_printed', 'shipped', 'delivered', 'cancelled'].includes(status) && order.customer?.email) {
             sendOrderStatusUpdate(order, status);
         }
 
@@ -131,7 +135,7 @@ router.put('/orders/:id/tracking', async (req, res) => {
         if (!trackingNumber || !trackingNumber.trim()) {
             return res.status(400).json({
                 success: false,
-                error: 'Numero de suivi requis'
+                error: 'Numéro de suivi requis'
             });
         }
 
@@ -140,7 +144,7 @@ router.put('/orders/:id/tracking', async (req, res) => {
         if (!order) {
             return res.status(404).json({
                 success: false,
-                error: 'Commande non trouvee'
+                error: 'Commande non trouvée'
             });
         }
 
@@ -153,6 +157,60 @@ router.put('/orders/:id/tracking', async (req, res) => {
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
+});
+
+// POST /api/admin/orders/:id/generate-label - Generer une etiquette Colissimo
+router.post('/orders/:id/generate-label', async (req, res) => {
+    try {
+        const order = await store.getOrderById(req.params.id);
+        if (!order) {
+            return res.status(404).json({ success: false, error: 'Commande non trouvée' });
+        }
+
+        if (!order.shipping || !order.shipping.address || !order.shipping.city || !order.shipping.postalCode) {
+            return res.status(400).json({ success: false, error: 'Adresse de livraison incomplete' });
+        }
+
+        const result = await generateLabel(order);
+
+        // Creer le dossier labels si inexistant
+        const labelsDir = path.join(__dirname, '../../labels');
+        if (!fs.existsSync(labelsDir)) {
+            fs.mkdirSync(labelsDir, { recursive: true });
+        }
+
+        // Sauvegarder le PDF
+        const filename = `${order.orderNumber}.pdf`;
+        fs.writeFileSync(path.join(labelsDir, filename), result.labelPdf);
+
+        // Mettre a jour la commande avec tracking + labelFile
+        await store.updateOrderTracking(req.params.id, result.trackingNumber, filename);
+
+        res.json({
+            success: true,
+            trackingNumber: result.trackingNumber,
+            labelUrl: `/api/admin/labels/${filename}`
+        });
+    } catch (error) {
+        console.error('Erreur generation etiquette Colissimo:', error.message);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// GET /api/admin/labels/:filename - Servir un PDF d'etiquette
+router.get('/labels/:filename', (req, res) => {
+    const filename = req.params.filename;
+    // Securite : empecher path traversal
+    if (filename.includes('..') || filename.includes('/') || filename.includes('\\')) {
+        return res.status(400).json({ success: false, error: 'Nom de fichier invalide' });
+    }
+    const filePath = path.join(__dirname, '../../labels', filename);
+    if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ success: false, error: 'Fichier non trouvé' });
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    fs.createReadStream(filePath).pipe(res);
 });
 
 // ============ CRUD Produits ============
@@ -179,14 +237,14 @@ router.post('/products', async (req, res) => {
         if (!name || price === undefined || !category) {
             return res.status(400).json({
                 success: false,
-                error: 'Nom, prix et categorie sont requis'
+                error: 'Nom, prix et catégorie sont requis'
             });
         }
 
         if (typeof price !== 'number' || price < 0) {
             return res.status(400).json({
                 success: false,
-                error: 'Le prix doit etre un nombre positif'
+                error: 'Le prix doit être un nombre positif'
             });
         }
 
@@ -217,7 +275,7 @@ router.put('/products/:id', async (req, res) => {
             if (typeof price !== 'number' || price < 0) {
                 return res.status(400).json({
                     success: false,
-                    error: 'Le prix doit etre un nombre positif'
+                    error: 'Le prix doit être un nombre positif'
                 });
             }
             updates.price = price;
@@ -233,7 +291,7 @@ router.put('/products/:id', async (req, res) => {
         if (!product) {
             return res.status(404).json({
                 success: false,
-                error: 'Produit non trouve'
+                error: 'Produit non trouvé'
             });
         }
 
@@ -251,11 +309,11 @@ router.delete('/products/:id', async (req, res) => {
         if (!product) {
             return res.status(404).json({
                 success: false,
-                error: 'Produit non trouve'
+                error: 'Produit non trouvé'
             });
         }
 
-        res.json({ success: true, message: 'Produit supprime', product });
+        res.json({ success: true, message: 'Produit supprimé', product });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
@@ -286,7 +344,7 @@ router.put('/messages/:id/status', async (req, res) => {
         if (!status || !validStatuses.includes(status)) {
             return res.status(400).json({
                 success: false,
-                error: `Statut invalide. Valeurs acceptees: ${validStatuses.join(', ')}`
+                error: `Statut invalide. Valeurs acceptées: ${validStatuses.join(', ')}`
             });
         }
 
@@ -295,7 +353,7 @@ router.put('/messages/:id/status', async (req, res) => {
         if (!message) {
             return res.status(404).json({
                 success: false,
-                error: 'Message non trouve'
+                error: 'Message non trouvé'
             });
         }
 
@@ -336,21 +394,21 @@ router.post('/promo-codes', async (req, res) => {
         if (!['percentage', 'fixed'].includes(type)) {
             return res.status(400).json({
                 success: false,
-                error: 'Type doit etre "percentage" ou "fixed"'
+                error: 'Type doit être "percentage" ou "fixed"'
             });
         }
 
         if (typeof value !== 'number' || value <= 0) {
             return res.status(400).json({
                 success: false,
-                error: 'La valeur doit etre un nombre positif'
+                error: 'La valeur doit être un nombre positif'
             });
         }
 
         if (type === 'percentage' && value > 100) {
             return res.status(400).json({
                 success: false,
-                error: 'Le pourcentage ne peut pas depasser 100'
+                error: 'Le pourcentage ne peut pas dépasser 100'
             });
         }
 
@@ -359,7 +417,7 @@ router.post('/promo-codes', async (req, res) => {
         if (existing) {
             return res.status(400).json({
                 success: false,
-                error: 'Ce code promo existe deja'
+                error: 'Ce code promo existe déjà'
             });
         }
 
@@ -385,11 +443,11 @@ router.delete('/promo-codes/:id', async (req, res) => {
         if (!promoCode) {
             return res.status(404).json({
                 success: false,
-                error: 'Code promo non trouve'
+                error: 'Code promo non trouvé'
             });
         }
 
-        res.json({ success: true, message: 'Code promo supprime', promoCode });
+        res.json({ success: true, message: 'Code promo supprimé', promoCode });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
