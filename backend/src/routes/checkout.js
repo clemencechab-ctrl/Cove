@@ -168,7 +168,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             await store.updateProductStock(item.id, item.quantity, item.size || null);
         }
 
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        const frontendUrl = process.env.FRONTEND_URL || 'https://cove-studio.fr';
 
         // Mode demo : Stripe non configure
         if (!process.env.STRIPE_SECRET_KEY) {
