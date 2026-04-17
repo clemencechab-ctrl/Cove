@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="fr" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVE - FAQ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .faq-intro {
+            max-width: 720px;
+            margin: 0 auto 3rem;
+            text-align: center;
+            color: var(--color-text-muted, #666);
+            line-height: 1.7;
+        }
+        .faq-list { max-width: 820px; margin: 0 auto; }
+        .faq-item {
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .faq-question {
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 1.5rem 3rem 1.5rem 0;
+            text-align: left;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: #111;
+            cursor: pointer;
+            position: relative;
+            letter-spacing: 0.01em;
+            transition: color 0.2s ease;
+        }
+        .faq-question:hover { color: #555; }
+        .faq-question::after {
+            content: '+';
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            font-weight: 300;
+            transition: transform 0.3s ease;
+        }
+        .faq-item.open .faq-question::after {
+            transform: translateY(-50%) rotate(45deg);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease;
+        }
+        .faq-answer-inner {
+            padding: 0 0 1.5rem 0;
+            color: #444;
+            line-height: 1.75;
+        }
+        .faq-answer-inner p { margin: 0 0 0.75rem; }
+        .faq-answer-inner p:last-child { margin-bottom: 0; }
+        .faq-answer-inner a { color: #111; text-decoration: underline; }
+        .faq-category {
+            margin: 3rem 0 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #999;
+        }
+        .faq-category:first-child { margin-top: 0; }
+        .faq-cta {
+            max-width: 720px;
+            margin: 4rem auto 0;
+            padding: 2.5rem;
+            background: #fafafa;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .faq-cta h3 { margin: 0 0 0.75rem; font-weight: 600; }
+        .faq-cta p { margin: 0 0 1.5rem; color: #555; }
+        .faq-cta a {
+            display: inline-block;
+            padding: 0.9rem 2rem;
+            background: #111;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            transition: background 0.2s ease;
+        }
+        .faq-cta a:hover { background: #333; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-left">
+                <a href="index.html#collection" class="nav-link">Collection</a>
+                <a href="index.html#lookbook" class="nav-link">Lookbook</a>
+            </div>
+            <div class="logo">
+                <a href="index.html"><img src="image/logo-cove.png" alt="COVE"></a>
+            </div>
+            <div class="nav-right">
+                <a href="faq.html" class="nav-link active">FAQ</a>
+                <a href="contact.html" class="nav-link">Contact</a>
+                <a href="compte.html" class="nav-link">Compte</a>
+                <a href="cart.html" class="nav-link">Panier (<span id="cart-count">0</span>)</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- FAQ Hero -->
+    <section class="legal-hero">
+        <h1 class="legal-title">FAQ</h1>
+        <p class="legal-subtitle">Les réponses aux questions les plus fréquentes</p>
+    </section>
+
+    <!-- FAQ Content -->
+    <section class="legal-content">
+        <div class="legal-container">
+            <p class="faq-intro">
+                Avant de nous contacter, pensez à consulter cette section &mdash; vous y trouverez
+                probablement la réponse à votre question. Sinon, nous restons disponibles par email
+                à <a href="mailto:cove.off@gmail.com">cove.off@gmail.com</a>.
+            </p>
+
+            <div class="faq-list">
+
+                <!-- Commandes & Paiement -->
+                <h2 class="faq-category">Commandes &amp; Paiement</h2>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Quels moyens de paiement acceptez-vous ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Nous acceptons toutes les principales cartes de crédit (Visa, Mastercard, American Express) ainsi qu'Apple Pay et Google Pay via notre partenaire Stripe, qui garantit des paiements 100 % sécurisés.</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Puis-je modifier ou annuler ma commande ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Toute demande de modification ou d'annulation doit nous parvenir dans les 12 heures suivant votre commande, à <a href="mailto:cove.off@gmail.com">cove.off@gmail.com</a> en précisant votre numéro de commande. Au-delà, la commande est généralement déjà en préparation.</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Je n'ai pas reçu d'email de confirmation, que faire ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Vérifiez d'abord votre dossier de spam ou courrier indésirable. Si l'email n'y est pas, contactez-nous avec l'adresse email utilisée lors de la commande et nous retrouverons votre commande.</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Puis-je utiliser un code promo ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Oui, un champ dédié est disponible lors du passage en caisse. Les codes promotionnels ne sont pas cumulables entre eux et peuvent être limités à certaines conditions (commande minimum, période, etc.).</p>
+                    </div></div>
+                </div>
+
+                <!-- Livraison -->
+                <h2 class="faq-category">Livraison</h2>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Quels sont les délais de livraison ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Les commandes sont préparées sous 1 à 3 jours ouvrés. L'expédition via Colissimo La Poste prend ensuite 2 à 5 jours ouvrés en France métropolitaine. Comptez 7 à 14 jours pour l'Europe.</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Comment suivre ma commande ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Dès que votre colis est expédié, vous recevez un email avec un numéro de suivi La Poste et un lien direct pour suivre votre colis. Vous serez également notifié à chaque changement de statut (préparation, expédition, livraison).</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Livrez-vous à l'international ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Nous livrons actuellement en France et dans l'Union Européenne. Pour toute demande hors UE, contactez-nous par email et nous évaluerons la faisabilité au cas par cas.</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Que faire si mon colis est perdu ou endommagé ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Contactez-nous dans les 48 heures suivant la livraison à <a href="mailto:cove.off@gmail.com">cove.off@gmail.com</a> avec votre numéro de commande et, si possible, des photos de l'emballage et du colis. Nous ouvrirons une enquête avec La Poste et vous proposerons un renvoi ou un remboursement.</p>
+                    </div></div>
+                </div>
+
+                <!-- Produits -->
+                <h2 class="faq-category">Produits &amp; Tailles</h2>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Comment choisir ma taille ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Nos pièces sont conçues avec une coupe oversize streetwear. Si vous hésitez entre deux tailles, nous vous recommandons de prendre la plus petite pour un fit ajusté, ou la plus grande pour un look plus relâché. En cas de doute, écrivez-nous pour un conseil personnalisé.</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Un article est en rupture, sera-t-il réapprovisionné ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Nos collections sont produites en séries limitées. Certaines pièces peuvent être réapprovisionnées ponctuellement, d'autres non. Abonnez-vous à notre Instagram <a href="https://www.instagram.com/covestudio.off/" target="_blank">@covestudio.off</a> pour être informé en priorité.</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Comment entretenir mes pièces COVE ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Lavage à 30 °C maximum, sur l'envers. Pas de sèche-linge pour préserver les impressions et les coupes. Les instructions détaillées figurent sur chaque étiquette.</p>
+                    </div></div>
+                </div>
+
+                <!-- Retours -->
+                <h2 class="faq-category">Retours &amp; Échanges</h2>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Puis-je retourner ou échanger un article ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Oui, vous disposez de 14 jours à compter de la réception pour nous retourner un article non porté, non lavé, avec ses étiquettes d'origine. Pour plus de détails, consultez notre <a href="retours.html">politique de retour</a>.</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Qui prend en charge les frais de retour ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Les frais de retour sont à la charge du client, sauf en cas d'article défectueux, d'erreur d'envoi de notre part, ou de non-conformité à la description — auquel cas nous les prenons intégralement en charge.</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Quand serai-je remboursé ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Le remboursement est effectué sous 14 jours après réception et vérification de votre retour, sur le moyen de paiement utilisé lors de l'achat. Vous recevrez un email de confirmation dès que le remboursement est émis.</p>
+                    </div></div>
+                </div>
+
+                <!-- Compte & Données -->
+                <h2 class="faq-category">Compte &amp; Données personnelles</h2>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Dois-je créer un compte pour commander ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Non, vous pouvez commander en tant qu'invité. Créer un compte vous permet toutefois de suivre vos commandes, conserver votre historique et accélérer vos prochains achats.</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Mes données bancaires sont-elles en sécurité ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Tous les paiements sont traités par Stripe, certifié PCI-DSS niveau 1, le standard de sécurité le plus strict de l'industrie. Nous ne stockons ni ne voyons jamais vos informations bancaires.</p>
+                    </div></div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question" type="button">Comment supprimer mon compte ou mes données ?</button>
+                    <div class="faq-answer"><div class="faq-answer-inner">
+                        <p>Envoyez-nous simplement un email à <a href="mailto:cove.off@gmail.com">cove.off@gmail.com</a> depuis l'adresse associée au compte. Conformément au RGPD, nous traitons toute demande de suppression sous 30 jours. Plus d'informations dans notre <a href="confidentialite.html">politique de confidentialité</a>.</p>
+                    </div></div>
+                </div>
+
+            </div>
+
+            <!-- Contact CTA -->
+            <div class="faq-cta">
+                <h3>Vous n'avez pas trouvé votre réponse ?</h3>
+                <p>Notre équipe vous répond sous 24 à 48 heures ouvrées.</p>
+                <a href="contact.html">Nous contacter</a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <img src="image/logo-cove.png" alt="COVE" class="footer-logo-img">
+                <p class="footer-tagline">Streetwear Premium</p>
+                <p class="footer-credit">made by Clemence</p>
+            </div>
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4>Navigation</h4>
+                    <a href="index.html#collection">Collection</a>
+                    <a href="index.html#lookbook">Lookbook</a>
+                    <a href="about.html">About</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Aide</h4>
+                    <a href="faq.html">FAQ</a>
+                    <a href="contact.html">Nous contacter</a>
+                    <a href="retours.html">Retours</a>
+                </div>
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <a href="cgv.html">CGV</a>
+                    <a href="mentions-legales.html">Mentions légales</a>
+                    <a href="confidentialite.html">Confidentialité</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 COVE. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <script src="js/cart.js"></script>
+    <script>
+        // Accordion behavior : un seul item ouvert a la fois (comportement ferme-par-defaut)
+        document.querySelectorAll('.faq-question').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const item = btn.parentElement;
+                const answer = item.querySelector('.faq-answer');
+                const isOpen = item.classList.contains('open');
+
+                // Optionnel : fermer les autres items. Decommente si tu veux ce comportement.
+                // document.querySelectorAll('.faq-item.open').forEach(other => {
+                //     if (other !== item) {
+                //         other.classList.remove('open');
+                //         other.querySelector('.faq-answer').style.maxHeight = '0';
+                //     }
+                // });
+
+                if (isOpen) {
+                    item.classList.remove('open');
+                    answer.style.maxHeight = '0';
+                } else {
+                    item.classList.add('open');
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

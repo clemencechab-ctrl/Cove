@@ -22,6 +22,7 @@
             </div>
             <div class="nav-right">
                 <a href="admin.html" class="nav-link">Administration</a>
+                <a href="faq.html" class="nav-link">FAQ</a>
                 <a href="contact.html" class="nav-link">Contact</a>
                 <a href="compte.html" class="nav-link">Compte</a>
                 <a href="cart.html" class="nav-link">Panier (<span id="cart-count">0</span>)</a>
@@ -60,6 +61,7 @@
                         <img src="image/t-shirt-front.JPG" alt="T-shirt Cove">
                         <div class="shop-card-overlay" onclick="event.preventDefault(); event.stopPropagation();">
                             <div class="shop-size-selector">
+                                <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XS</button>
                                 <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
                                 <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">M</button>
                                 <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">L</button>
@@ -80,6 +82,7 @@
                         <img src="image/hoodie-front.JPG" alt="Hoodie Picnic">
                         <div class="shop-card-overlay" onclick="event.preventDefault(); event.stopPropagation();">
                             <div class="shop-size-selector">
+                                <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XS</button>
                                 <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
                                 <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">M</button>
                                 <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">L</button>
@@ -115,7 +118,7 @@
 
     <section id="about" class="about">
         <div class="about-content">
-            <h2 class="about-title">COVE</h2>
+            <img src="image/logo-cove.png" alt="COVE" class="about-logo-img">
             <p class="about-text">Une marque née de la passion pour le streetwear authentique. Chaque pièce est pensée pour allier confort, style et durabilité. COVE, c'est plus qu'une marque, c'est une vision.</p>
         </div>
     </section>
