@@ -205,6 +205,7 @@
                 <div class="form-group">
                     <label>Stock per size</label>
                     <div class="size-stock-grid">
+                        <div><label>XS</label><input type="number" id="stock-xs" min="0" value="0"></div>
                         <div><label>S</label><input type="number" id="stock-s" min="0" value="0"></div>
                         <div><label>M</label><input type="number" id="stock-m" min="0" value="0"></div>
                         <div><label>L</label><input type="number" id="stock-l" min="0" value="0"></div>
@@ -544,15 +545,15 @@
                             <th>Name</th>
                             <th>Price</th>
                             <th>Category</th>
-                            <th>Stock (S/M/L/XL)</th>
+                            <th>Stock (XS/S/M/L/XL)</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${result.products.map(p => {
                             const ss = p.sizeStock || {};
-                            const stockStr = `${ss.S || 0} / ${ss.M || 0} / ${ss.L || 0} / ${ss.XL || 0}`;
-                            const totalStock = (ss.S || 0) + (ss.M || 0) + (ss.L || 0) + (ss.XL || 0);
+                            const stockStr = `${ss.XS || 0} / ${ss.S || 0} / ${ss.M || 0} / ${ss.L || 0} / ${ss.XL || 0}`;
+                            const totalStock = (ss.XS || 0) + (ss.S || 0) + (ss.M || 0) + (ss.L || 0) + (ss.XL || 0);
                             const cat = categoryLabels[p.category] || p.category;
                             const imgSrc = p.image || 'https://via.placeholder.com/60';
                             return `
@@ -586,6 +587,7 @@
                 document.getElementById('product-description').value = product.description || '';
                 document.getElementById('product-image').value = product.image || '';
                 const ss = product.sizeStock || {};
+                document.getElementById('stock-xs').value = ss.XS || 0;
                 document.getElementById('stock-s').value = ss.S || 0;
                 document.getElementById('stock-m').value = ss.M || 0;
                 document.getElementById('stock-l').value = ss.L || 0;
@@ -594,6 +596,7 @@
                 document.getElementById('product-modal-title').textContent = 'Add product';
                 document.getElementById('product-edit-id').value = '';
                 document.getElementById('product-form').reset();
+                document.getElementById('stock-xs').value = 0;
                 document.getElementById('stock-s').value = 0;
                 document.getElementById('stock-m').value = 0;
                 document.getElementById('stock-l').value = 0;
@@ -625,6 +628,7 @@
                 description: document.getElementById('product-description').value.trim(),
                 image: document.getElementById('product-image').value.trim(),
                 sizeStock: {
+                    XS: parseInt(document.getElementById('stock-xs').value) || 0,
                     S: parseInt(document.getElementById('stock-s').value) || 0,
                     M: parseInt(document.getElementById('stock-m').value) || 0,
                     L: parseInt(document.getElementById('stock-l').value) || 0,

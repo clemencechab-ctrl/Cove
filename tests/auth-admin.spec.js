@@ -94,4 +94,19 @@ test.describe('Connexion + Admin', () => {
     await expect(page.locator('#register-password')).toBeVisible();
     await expect(page.locator('#register-confirm')).toBeVisible();
   });
+
+  test('Bouton Google Sign-In déclenche la redirection OAuth', async ({ page }) => {
+    await page.goto('/compte.html');
+    await expect(page.locator('#btn-google-signin')).toBeVisible();
+
+    // Clic → signInWithRedirect → la page navigue vers Firebase auth handler
+    await Promise.all([
+      page.waitForURL(/covestudio\.firebaseapp\.com\/__\/auth\/handler|accounts\.google\.com/, { timeout: 15000 }),
+      page.locator('#btn-google-signin').click(),
+    ]);
+
+    const url = page.url();
+    console.log('Redirect URL:', url);
+    expect(url).toMatch(/covestudio\.firebaseapp\.com\/__\/auth\/handler|accounts\.google\.com/);
+  });
 });

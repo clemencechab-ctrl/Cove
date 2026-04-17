@@ -352,6 +352,14 @@ img {
     margin-bottom: 2rem;
 }
 
+.about-logo-img {
+    height: 280px;
+    width: auto;
+    filter: invert(1) brightness(2);
+    display: block;
+    margin: 0 auto 2rem;
+}
+
 .about-text {
     font-size: 1.1rem;
     font-weight: 300;
@@ -1104,6 +1112,11 @@ img {
 
 .checkout-content .form-group select {
     cursor: pointer;
+}
+
+.checkout-content .form-group select option {
+    background: var(--color-bg);
+    color: var(--color-text);
 }
 
 .payment-info {
