@@ -129,7 +129,9 @@ If a test needs an owner session, **do not** promote `test-owner@cove-test.com` 
 
 ## Deployment
 
-**Deployment is manual, via `.\deploy.ps1` run from PowerShell on the dev machine.** The GitHub Actions workflow at `.github/workflows/deploy.yml` exists but is broken (service account lacks Cloud Run / Cloud Build / IAM roles) — do not rely on it.
+**Claude est en charge de TOUS les déploiements. Ne jamais demander à l'utilisateur de lancer `deploy.ps1` ou `firebase deploy` lui-même.** Dès qu'une modification touche `backend/`, `image/`, ou un fichier HTML/CSS/JS servi en prod, Claude doit lancer le déploiement automatiquement et confirmer le succès avant de rendre la main. Si l'auth gcloud/firebase a expiré, Claude doit le signaler avec la commande exacte à taper, mais jamais déléguer le `deploy.ps1` lui-même à l'utilisateur.
+
+**Mécanisme : `.\deploy.ps1` exécuté en arrière-plan via `powershell.exe -ExecutionPolicy Bypass -NoProfile -File ./deploy.ps1`.** Le GitHub Actions workflow à `.github/workflows/deploy.yml` existe mais est cassé (le service account n'a pas les rôles Cloud Run / Cloud Build / IAM) — ne pas s'y fier.
 
 ### Required tools (on dev machine)
 - Google Cloud SDK at `%LOCALAPPDATA%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd` (this exact path is hardcoded in `deploy.ps1`). If missing, install by downloading and extracting https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-windows-x86_64.zip into `%LOCALAPPDATA%\Google\Cloud SDK\` — the archive contains a `google-cloud-sdk/` folder at its root.
