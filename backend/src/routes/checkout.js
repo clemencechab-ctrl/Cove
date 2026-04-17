@@ -3,6 +3,21 @@ const router = express.Router();
 const store = require('../data/store');
 const { sendOrderConfirmation, sendOrderNotificationToOwner } = require('../utils/email');
 
+// Versions carrées 640x640 optimisées pour le récap Stripe (Stripe affiche les images en thumbnail carré)
+const STRIPE_IMAGE_VARIANTS = {
+    'image/t-shirt-front.JPG': 'image/t-shirt-front-stripe.jpg',
+    'image/hoodie-front.JPG': 'image/hoodie-front-stripe.jpg'
+};
+
+function buildStripeImageUrl(image, frontendUrl) {
+    if (!image) return null;
+    // URL externe déjà absolue
+    if (/^https?:\/\//i.test(image)) return image;
+    const variant = STRIPE_IMAGE_VARIANTS[image] || image;
+    const path = variant.startsWith('/') ? variant.slice(1) : variant;
+    return `${frontendUrl}/${path}`;
+}
+
 // Middleware optionnel pour recuperer l'utilisateur si connecte
 const optionalAuth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -191,17 +206,19 @@ router.post('/create-session', optionalAuth, async (req, res) => {
         // Creer la session Stripe
         const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-        const lineItems = orderItems.map(item => ({
-            price_data: {
-                currency: 'eur',
-                product_data: {
-                    name: item.name,
-                    images: [`${frontendUrl}/${item.image}`]
+        const lineItems = orderItems.map(item => {
+            const productData = { name: item.name };
+            const imageUrl = buildStripeImageUrl(item.image, frontendUrl);
+            if (imageUrl) productData.images = [imageUrl];
+            return {
+                price_data: {
+                    currency: 'eur',
+                    product_data: productData,
+                    unit_amount: Math.round(item.price * 100)
                 },
-                unit_amount: Math.round(item.price * 100)
-            },
-            quantity: item.quantity
-        }));
+                quantity: item.quantity
+            };
+        });
 
         if (shippingCost > 0) {
             lineItems.push({

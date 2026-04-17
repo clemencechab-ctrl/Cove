@@ -54,16 +54,13 @@
         <div class="shop-filters">
             <button class="filter-btn active" data-filter="all">All</button>
             <button class="filter-btn" data-filter="tops">Tops</button>
-            <button class="filter-btn" data-filter="bottoms">Pants</button>
-            <button class="filter-btn" data-filter="outerwear">Jackets</button>
-            <button class="filter-btn" data-filter="accessories">Accessories</button>
         </div>
 
         <div class="shop-grid">
             <!-- Product 1 -->
-            <article class="shop-card" data-category="tops" data-id="1" data-name="T-shirt Cove" data-price="30" data-image="../image/t-shirt-chat-drole-2.webp">
+            <article class="shop-card" data-category="tops" data-id="1" data-name="T-shirt Cove" data-price="30" data-image="../image/t-shirt-front.JPG">
                 <div class="shop-card-image">
-                    <img src="../image/t-shirt-chat-drole-2.webp" alt="T-shirt Cove">
+                    <img src="../image/t-shirt-front.JPG" alt="T-shirt Cove">
                     <div class="shop-card-overlay">
                         <div class="shop-size-selector">
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XS</button>
@@ -106,143 +103,6 @@
                 </div>
             </article>
 
-            <!-- Product 3 -->
-            <article class="shop-card" data-category="bottoms" data-id="3" data-name="Cargo Pants" data-price="95" data-image="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&q=80">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&q=80" alt="Cargo Pants">
-                    <div class="shop-card-overlay">
-                        <div class="shop-size-selector">
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XS</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">M</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">L</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
-                        </div>
-                        <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Add to cart
-                        </button>
-                    </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">Cargo Pants</h3>
-                    <p class="shop-card-price">95 EUR</p>
-                </div>
-            </article>
-
-            <!-- Product 4 -->
-            <article class="shop-card" data-category="outerwear" data-id="4" data-name="Jacket Bomber" data-price="180" data-image="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80" alt="Jacket Bomber">
-                    <div class="shop-card-overlay">
-                        <div class="shop-size-selector">
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XS</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">M</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">L</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
-                        </div>
-                        <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Add to cart
-                        </button>
-                    </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">Jacket Bomber</h3>
-                    <p class="shop-card-price">180 EUR</p>
-                </div>
-            </article>
-
-            <!-- Product 5 -->
-            <article class="shop-card" data-category="tops" data-id="5" data-name="Sweatshirt Logo" data-price="85" data-image="https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=600&q=80" alt="Sweatshirt Logo">
-                    <div class="shop-card-overlay">
-                        <div class="shop-size-selector">
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XS</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">M</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">L</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
-                        </div>
-                        <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Add to cart
-                        </button>
-                    </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">Sweatshirt Logo</h3>
-                    <p class="shop-card-price">85 EUR</p>
-                </div>
-            </article>
-
-            <!-- Product 6 -->
-            <article class="shop-card" data-category="accessories" data-id="6" data-name="Cap Classic" data-price="35" data-image="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=600&q=80">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=600&q=80" alt="Cap Classic">
-                    <div class="shop-card-overlay">
-                        <div class="shop-size-selector">
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XS</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">M</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">L</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
-                        </div>
-                        <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Add to cart
-                        </button>
-                    </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">Cap Classic</h3>
-                    <p class="shop-card-price">35 EUR</p>
-                </div>
-            </article>
-
-            <!-- Product 7 -->
-            <article class="shop-card" data-category="tops" data-id="7" data-name="T-Shirt Basic Noir" data-price="55" data-image="https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=600&q=80" alt="T-Shirt Basic Noir">
-                    <div class="shop-card-overlay">
-                        <div class="shop-size-selector">
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XS</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">M</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">L</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
-                        </div>
-                        <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Add to cart
-                        </button>
-                    </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">T-Shirt Basic Noir</h3>
-                    <p class="shop-card-price">55 EUR</p>
-                </div>
-            </article>
-
-            <!-- Product 8 -->
-            <article class="shop-card" data-category="outerwear" data-id="8" data-name="Veste Denim" data-price="145" data-image="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80">
-                <div class="shop-card-image">
-                    <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80" alt="Veste Denim">
-                    <div class="shop-card-overlay">
-                        <div class="shop-size-selector">
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XS</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">M</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">L</button>
-                            <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XL</button>
-                        </div>
-                        <button class="btn-add-cart" onclick="shopAddToCart(this)">
-                            Add to cart
-                        </button>
-                    </div>
-                </div>
-                <div class="shop-card-info">
-                    <h3 class="shop-card-name">Veste Denim</h3>
-                    <p class="shop-card-price">145 EUR</p>
-                </div>
-            </article>
         </div>
     </section>
 
