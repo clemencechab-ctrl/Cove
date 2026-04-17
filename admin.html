@@ -55,12 +55,14 @@
         <!-- Admin Tabs -->
         <div class="admin-tabs">
             <button class="admin-tab active" data-tab="tab-dashboard">Tableau de bord</button>
+            <button class="admin-tab" data-tab="tab-orders">Commandes</button>
+            <button class="admin-tab" data-tab="tab-clients">Clients</button>
             <button class="admin-tab" data-tab="tab-products">Produits</button>
             <button class="admin-tab" data-tab="tab-promos">Codes Promo</button>
             <button class="admin-tab" data-tab="tab-messages">Messages</button>
         </div>
 
-        <!-- Tab: Dashboard -->
+        <!-- Tab: Dashboard (stats only) -->
         <div id="tab-dashboard" class="admin-tab-content active">
             <section class="admin-section">
                 <div id="admin-stats" class="admin-stats">
@@ -78,13 +80,15 @@
                     </div>
                 </div>
             </section>
+        </div>
 
+        <!-- Tab: Commandes -->
+        <div id="tab-orders" class="admin-tab-content">
             <section class="admin-section">
-                <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Clients &amp; Commandes</h2>
-                <!-- Filter Bar -->
+                <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Commandes</h2>
                 <div class="admin-filter-bar">
-                    <input type="text" id="filter-search" class="admin-filter-input" placeholder="Rechercher par email ou numero...">
-                    <select id="filter-status" class="admin-filter-select">
+                    <input type="text" id="filter-orders-search" class="admin-filter-input" placeholder="Rechercher par email ou numero de commande...">
+                    <select id="filter-orders-status" class="admin-filter-select">
                         <option value="">Tous les statuts</option>
                         <option value="pending">En attente</option>
                         <option value="paid">Payé</option>
@@ -95,6 +99,19 @@
                         <option value="delivered">Livrée</option>
                         <option value="cancelled">Annulée</option>
                     </select>
+                </div>
+                <div id="admin-orders" class="admin-orders">
+                    <p style="text-align:center; color: var(--color-text-muted);">Chargement...</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Tab: Clients -->
+        <div id="tab-clients" class="admin-tab-content">
+            <section class="admin-section">
+                <h2 class="section-title" style="text-align:center; margin-bottom:2rem;">Clients</h2>
+                <div class="admin-filter-bar">
+                    <input type="text" id="filter-clients-search" class="admin-filter-input" placeholder="Rechercher par email...">
                 </div>
                 <div id="admin-clients" class="admin-clients">
                     <p style="text-align:center; color: var(--color-text-muted);">Chargement...</p>
@@ -330,18 +347,41 @@
         let allClientsData = [];
 
         async function loadClients() {
-            const container = document.getElementById('admin-clients');
+            // Single source of truth : /api/admin/clients retourne les clients
+            // AVEC leurs commandes jointes. On derive les deux vues (Commandes, Clients)
+            // de ce meme dataset — pas de double appel reseau.
+            const clientsContainer = document.getElementById('admin-clients');
+            const ordersContainer = document.getElementById('admin-orders');
             const result = await api.getAdminClients();
 
             if (!result.success) {
-                container.innerHTML = '<p style="text-align:center; color: #e74c3c;">Erreur: ' + (result.error || 'Impossible de charger les clients') + '</p>';
+                const err = '<p style="text-align:center; color: #e74c3c;">Erreur: ' + (result.error || 'Impossible de charger les donnees') + '</p>';
+                clientsContainer.innerHTML = err;
+                ordersContainer.innerHTML = err;
                 return;
             }
 
             allClientsData = result.clients;
             renderClients(result.clients);
+            renderOrders(flattenOrders(result.clients));
         }
 
+        // Aplati les commandes de tous les clients en une seule liste triee par date desc.
+        function flattenOrders(clients) {
+            const flat = [];
+            clients.forEach(c => {
+                (c.orders || []).forEach(o => {
+                    flat.push({
+                        ...o,
+                        clientEmail: c.email,
+                        clientUid: c.uid
+                    });
+                });
+            });
+            return flat.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+
+        // ============ Render : Clients (sans commandes imbriquees) ============
         function renderClients(clients) {
             const container = document.getElementById('admin-clients');
 
@@ -357,43 +397,7 @@
                 const createdAt = client.createdAt
                     ? new Date(client.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
                     : '-';
-
-                const ordersHtml = client.orders.length > 0
-                    ? client.orders.map(order => {
-                        const status = statusLabels[order.status] || { label: order.status, class: '' };
-                        const orderDate = new Date(order.createdAt).toLocaleDateString('fr-FR');
-                        return `
-                            <div class="order-row" data-status="${order.status}" data-order-number="${order.orderNumber}">
-                                <div class="order-info">
-                                    <span class="order-number">${order.orderNumber}</span>
-                                    <span class="order-date">${orderDate}</span>
-                                    <span class="order-total">${order.total} EUR</span>
-                                </div>
-                                <div class="order-actions">
-                                    <span class="status-badge ${status.class}">${status.label}</span>
-                                    <select class="status-select" data-order-id="${order.id}" onchange="updateStatus(this)">
-                                        <option value="">Changer statut...</option>
-                                        <option value="confirmed">Confirmer</option>
-                                        <option value="processing">En préparation</option>
-                                        <option value="label_printed">Bordereau imprimé</option>
-                                        <option value="shipped">Expédier</option>
-                                        <option value="delivered">Livrée</option>
-                                        <option value="cancelled">Annuler</option>
-                                    </select>
-                                </div>
-                                <div class="order-tracking">
-                                    <input type="text" class="tracking-input" id="tracking-${order.id}" placeholder="N° suivi La Poste" value="${order.trackingNumber || ''}" />
-                                    <button class="btn-admin-action btn-tracking" onclick="setTracking('${order.id}', this)">Suivi</button>
-                                    <button class="btn-admin-action" onclick="generateColissimoLabel('${order.id}', this)" style="background:#6366f1; color:#fff;">Colissimo</button>
-                                    ${order.labelFile ? `<a href="/api/admin/labels/${order.labelFile}" class="btn-admin-action" style="text-decoration:none; background:#8b5cf6; color:#fff;" target="_blank">PDF</a>` : ''}
-                                </div>
-                                <div class="order-items">
-                                    ${order.items.map(i => `<span class="order-item-pill">${i.name} x${i.quantity}</span>`).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }).join('')
-                    : '<p style="color: var(--color-text-muted); font-size: 0.9rem;">Aucune commande</p>';
+                const escapedEmail = String(client.email).replace(/'/g, "\\'");
 
                 return `
                     <div class="client-card" data-email="${client.email}">
@@ -413,49 +417,103 @@
                                 <span class="last-login-value">${lastLogin}</span>
                             </div>
                         </div>
-                        <div class="client-orders">${ordersHtml}</div>
+                        ${client.ordersCount > 0 ? `
+                        <div style="margin-top:1rem; text-align:right;">
+                            <button class="btn-admin-action" onclick="viewClientOrders('${escapedEmail}')" style="background:#6366f1; color:#fff;">Voir ses commandes →</button>
+                        </div>
+                        ` : ''}
                     </div>
                 `;
             }).join('');
         }
 
-        // ============ Filters (Phase 4) ============
-        function applyFilters() {
-            const search = document.getElementById('filter-search').value.toLowerCase().trim();
-            const statusFilter = document.getElementById('filter-status').value;
+        // Bascule vers l'onglet Commandes et pre-filtre par email client.
+        function viewClientOrders(email) {
+            const ordersTab = document.querySelector('.admin-tab[data-tab="tab-orders"]');
+            if (ordersTab) ordersTab.click();
+            const searchInput = document.getElementById('filter-orders-search');
+            if (searchInput) {
+                searchInput.value = email;
+                applyOrderFilters();
+            }
+        }
 
-            document.querySelectorAll('.client-card').forEach(card => {
+        // ============ Render : Commandes (liste plate) ============
+        function renderOrders(orders) {
+            const container = document.getElementById('admin-orders');
+
+            if (orders.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color: var(--color-text-muted);">Aucune commande pour le moment.</p>';
+                return;
+            }
+
+            container.innerHTML = orders.map(order => {
+                const status = statusLabels[order.status] || { label: order.status, class: '' };
+                const orderDate = new Date(order.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+                return `
+                    <div class="order-row" data-status="${order.status}" data-order-number="${order.orderNumber}" data-client-email="${order.clientEmail || ''}">
+                        <div class="order-info">
+                            <span class="order-number">${order.orderNumber}</span>
+                            <span class="order-date">${orderDate}</span>
+                            <span class="order-client" style="color: var(--color-text-muted); font-size: 0.9rem;">${order.clientEmail || ''}</span>
+                            <span class="order-total">${order.total} EUR</span>
+                        </div>
+                        <div class="order-actions">
+                            <span class="status-badge ${status.class}">${status.label}</span>
+                            <select class="status-select" data-order-id="${order.id}" onchange="updateStatus(this)">
+                                <option value="">Changer statut...</option>
+                                <option value="confirmed">Confirmer</option>
+                                <option value="processing">En préparation</option>
+                                <option value="label_printed">Bordereau imprimé</option>
+                                <option value="shipped">Expédier</option>
+                                <option value="delivered">Livrée</option>
+                                <option value="cancelled">Annuler</option>
+                            </select>
+                        </div>
+                        <div class="order-tracking">
+                            <input type="text" class="tracking-input" id="tracking-${order.id}" placeholder="N° suivi La Poste" value="${order.trackingNumber || ''}" />
+                            <button class="btn-admin-action btn-tracking" onclick="setTracking('${order.id}', this)">Suivi</button>
+                            <button class="btn-admin-action" onclick="generateColissimoLabel('${order.id}', this)" style="background:#6366f1; color:#fff;">Colissimo</button>
+                            ${order.labelFile ? `<a href="/api/admin/labels/${order.labelFile}" class="btn-admin-action" style="text-decoration:none; background:#8b5cf6; color:#fff;" target="_blank">PDF</a>` : ''}
+                        </div>
+                        <div class="order-items">
+                            ${order.items.map(i => `<span class="order-item-pill">${i.name} x${i.quantity}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ============ Filters ============
+        function applyOrderFilters() {
+            const search = (document.getElementById('filter-orders-search').value || '').toLowerCase().trim();
+            const statusFilter = document.getElementById('filter-orders-status').value;
+
+            document.querySelectorAll('#admin-orders .order-row').forEach(row => {
+                const orderNum = (row.dataset.orderNumber || '').toLowerCase();
+                const email = (row.dataset.clientEmail || '').toLowerCase();
+                const status = row.dataset.status;
+                const matchSearch = !search || orderNum.includes(search) || email.includes(search);
+                const matchStatus = !statusFilter || status === statusFilter;
+                row.style.display = (matchSearch && matchStatus) ? '' : 'none';
+            });
+        }
+
+        function applyClientFilters() {
+            const search = (document.getElementById('filter-clients-search').value || '').toLowerCase().trim();
+            document.querySelectorAll('#admin-clients .client-card').forEach(card => {
                 const email = (card.dataset.email || '').toLowerCase();
-                const orders = card.querySelectorAll('.order-row');
-                let hasVisibleOrder = false;
-
-                if (orders.length === 0) {
-                    // Client without orders
-                    const matchSearch = !search || email.includes(search);
-                    const matchStatus = !statusFilter;
-                    card.style.display = (matchSearch && matchStatus) ? '' : 'none';
-                    return;
-                }
-
-                orders.forEach(row => {
-                    const orderNum = (row.dataset.orderNumber || '').toLowerCase();
-                    const orderStatus = row.dataset.status;
-                    const matchSearch = !search || email.includes(search) || orderNum.includes(search);
-                    const matchStatus = !statusFilter || orderStatus === statusFilter;
-                    row.style.display = (matchSearch && matchStatus) ? '' : 'none';
-                    if (matchSearch && matchStatus) hasVisibleOrder = true;
-                });
-
-                const matchEmail = !search || email.includes(search);
-                card.style.display = (matchEmail && (hasVisibleOrder || !statusFilter)) ? '' : 'none';
+                card.style.display = (!search || email.includes(search)) ? '' : 'none';
             });
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const searchInput = document.getElementById('filter-search');
-            const statusSelect = document.getElementById('filter-status');
-            if (searchInput) searchInput.addEventListener('input', applyFilters);
-            if (statusSelect) statusSelect.addEventListener('change', applyFilters);
+            const ordersSearch = document.getElementById('filter-orders-search');
+            const ordersStatus = document.getElementById('filter-orders-status');
+            const clientsSearch = document.getElementById('filter-clients-search');
+            if (ordersSearch) ordersSearch.addEventListener('input', applyOrderFilters);
+            if (ordersStatus) ordersStatus.addEventListener('change', applyOrderFilters);
+            if (clientsSearch) clientsSearch.addEventListener('input', applyClientFilters);
         });
 
         // ============ Order Status ============
@@ -469,7 +527,7 @@
 
             if (result.success) {
                 await loadClients();
-                applyFilters();
+                applyOrderFilters();
             } else {
                 alert('Erreur: ' + (result.error || 'Impossible de mettre à jour le statut'));
                 select.value = '';
@@ -527,7 +585,7 @@
 
                 // Rafraichir la liste
                 await loadClients();
-                applyFilters();
+                applyOrderFilters();
             } else {
                 alert('Erreur Colissimo: ' + (result.error || 'Impossible de générer l\'étiquette'));
             }

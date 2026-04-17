@@ -101,14 +101,18 @@ npx http-server -p 8080 -c-1   # Serve static files, no cache
 - Firebase service account JSON at project root (referenced in `backend/src/config/firebase.js`)
 - Firebase project: `covestudio` (europe-west1)
 
+## Admin / Owner account
+
+**The sole admin (owner) account for production is `clemence.chab@gmail.com`** (Google OAuth). This must remain the only account with `role: "owner"` in `users/{uid}/role`. Do not grant owner to any other account without explicit instruction; demote any account you accidentally promote during testing.
+
 ## Test Accounts
 
 | Role | Email | Password |
 |------|-------|----------|
 | Client | test-user@cove-test.com | CoveTest2026! |
-| Owner | test-owner@cove-test.com | CoveOwner2026! |
+| Client | test-owner@cove-test.com | CoveOwner2026! (historically seeded as owner, now demoted to client) |
 
-Owner role must be set manually in Firebase RTDB: `users/{uid}/role = "owner"`.
+If a test needs an owner session, **do not** promote `test-owner@cove-test.com` — instead, mint a Firebase custom token for `clemence.chab@gmail.com` via firebase-admin, or use a dedicated short-lived test account that you demote at the end of the test.
 
 ## Important Conventions
 
@@ -116,3 +120,78 @@ Owner role must be set manually in Firebase RTDB: `users/{uid}/role = "owner"`.
 - Language: French is primary. Code comments, commit messages, and UI text are in French.
 - Currency: EUR. Prices are integers (65, 120).
 - Frontend uses no build step, no bundler, no framework — plain HTML/CSS/JS.
+
+## Production Domain
+
+- **Real production domain: `https://covestudio.fr`** (no hyphen). `cove-studio.fr` does NOT exist — do not use it.
+- Firebase Hosting default URL: `https://covestudio.web.app`
+- Cloud Run backend URL: `https://cove-api-2ywkmeggja-ew.a.run.app` (region: europe-west1)
+
+## Deployment
+
+**Deployment is manual, via `.\deploy.ps1` run from PowerShell on the dev machine.** The GitHub Actions workflow at `.github/workflows/deploy.yml` exists but is broken (service account lacks Cloud Run / Cloud Build / IAM roles) — do not rely on it.
+
+### Required tools (on dev machine)
+- Google Cloud SDK at `%LOCALAPPDATA%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd` (this exact path is hardcoded in `deploy.ps1`). If missing, install by downloading and extracting https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-windows-x86_64.zip into `%LOCALAPPDATA%\Google\Cloud SDK\` — the archive contains a `google-cloud-sdk/` folder at its root.
+- Firebase CLI: `firebase` from `%APPDATA%\npm\firebase.cmd` (installed via `npm install -g firebase-tools`)
+
+### How `deploy.ps1` works (critical)
+
+The script performs 7 steps:
+1. Verify tools
+2. `gcloud auth login` — opens browser, interactive
+3. `firebase login` — opens browser, interactive
+4. **Generates `backend/.env-cloudrun.yaml` from `backend/.env`** — this is the critical step: every KEY=VALUE pair in `backend/.env` is pushed as a Cloud Run env var via `--env-vars-file`. The service account JSON is also base64-encoded and injected as `FIREBASE_SERVICE_ACCOUNT`. `PORT` is removed (reserved by Cloud Run), `NODE_ENV` is forced to `production`.
+5. Enable required GCP APIs (run, cloudbuild, artifactregistry)
+6. `gcloud run deploy cove-api --source . --region europe-west1 --env-vars-file .env-cloudrun.yaml --memory 512Mi --max-instances 10` — Cloud Build compiles the Docker image from `backend/Dockerfile` and deploys
+7. `firebase deploy --only hosting`
+
+### Key implication
+
+**`backend/.env` is the source of truth for Cloud Run env vars.** When modifying production config, edit `backend/.env` then run `.\deploy.ps1`. In particular, `FRONTEND_URL` must be `https://covestudio.fr` for Stripe `success_url`/`cancel_url` to redirect to the correct domain after payment.
+
+Because `.env` is also read by the local dev backend (`npm run dev`), there is a tension: changing `FRONTEND_URL=https://covestudio.fr` for prod means local Stripe tests also redirect to prod. This is currently accepted since Stripe is rarely tested locally. If it becomes an issue, split into `.env.production` or override `FRONTEND_URL` via Cloud Run secrets directly (which would require modifying `deploy.ps1`).
+
+### Running the deploy
+
+From PowerShell:
+```powershell
+cd C:\dev\clem\Cove
+.\deploy.ps1
+```
+Browser opens twice for `gcloud auth login` and `firebase login` — authenticate with the Google account that owns the `covestudio` GCP + Firebase project. After that, steps 4-7 run unattended (~5-8 min total, most of it is Cloud Build in step 6).
+
+Claude can also run this via `powershell.exe -ExecutionPolicy Bypass -NoProfile -File ./deploy.ps1` as a background task, with the user handling the interactive auth prompts in their browser. Use `Monitor` to stream step-transition events from the output file.
+
+### Known issues
+
+- **Firebase Hosting step often fails** with `Failed to get Firebase project covestudio. Please make sure the project exists and your account has permission to access it.` — means the `firebase login` account lacks permissions on the project. The backend (Cloud Run) deploy succeeds independently, so backend-only fixes still go through. Resolve by re-logging in with an account that has Firebase roles on `covestudio`, or running `firebase deploy --only hosting` separately with the right account.
+- **Workaround when the Firebase CLI auth can't be refreshed**: `tests/deploy-hosting.js` is a standalone Node script that deploys Hosting via the Firebase Hosting REST API directly, using gcloud's access token (gcloud is authenticated as `clemence.chab@gmail.com`). It walks the public dir per `firebase.json` ignore list, gzips each file, runs the full `createVersion → populateFiles → upload → FINALIZED → release` flow. Run with `node tests/deploy-hosting.js`. Useful when `firebase login` is stuck on a wrong account and you need to ship a frontend change immediately. Critical detail: the REST API field is `glob`, not `source` (as in `firebase.json`) — the script translates it.
+- **`deploy.ps1` hardcodes the service account JSON filename** (`covestudio-firebase-adminsdk-fbsvc-854611e7e9.json`). If the key is rotated, update both the file on disk and the path in `deploy.ps1` line 63.
+
+### Verifying a deploy
+```bash
+# Health check
+curl https://cove-api-2ywkmeggja-ew.a.run.app/api/health
+
+# Inspect Cloud Run env vars (to confirm FRONTEND_URL, etc.)
+"$LOCALAPPDATA/Google/Cloud SDK/google-cloud-sdk/bin/gcloud.cmd" run services describe cove-api \
+  --region europe-west1 --project covestudio --format=json | grep -A1 FRONTEND_URL
+```
+
+### End-to-end Stripe redirect test
+
+`tests/prod-stripe-redirect.js` is a standalone Playwright script (no test runner) that hits `https://covestudio.fr` directly, adds a T-shirt to cart, fills the checkout form, pays with Stripe test card `4242 4242 4242 4242`, and asserts the final URL is on `covestudio.fr/success.html`. Run with `node tests/prod-stripe-redirect.js`. It opens a visible Chromium window (`headless: false`, `slowMo: 800`). Use this to verify post-deploy that the full payment flow works against prod.
+
+## Self-maintenance of this file
+
+This CLAUDE.md is a living document. On every session, Claude must:
+
+1. **Verify before trusting.** Any file path, command, URL, version, or convention stated here is a claim about *past* state. Before acting on it in a way the user will rely on, spot-check it against the current repo (read the file, run the command, curl the URL). If the claim is stale, fix it in this file before proceeding.
+2. **Record hard-won knowledge.** When a session uncovers non-obvious information — a deployment gotcha, a hidden dependency, an environment-variable footgun, an incorrect assumption the user or prior Claude made, the *why* behind a design choice — add it to the relevant section of this file in the same turn. "Hard-won" means: the kind of thing the next session would otherwise have to rediscover by trial and error.
+3. **Prefer editing over appending.** If a section already covers the topic, rewrite or extend it in place rather than tacking on a new subsection. Keep the file navigable.
+4. **Delete what's wrong.** If a claim in this file turns out to be false or outdated, remove it or correct it immediately. Do not leave `// NOTE: this might be wrong` comments — fix it.
+5. **Keep it concrete.** Favor exact paths, exact commands, exact error messages, exact values over generalities. The reader is a future Claude session with no memory of this one.
+6. **Respect the user's time.** Don't bloat the file with trivia. The test is: would a new session that reads only this file be meaningfully better off? If not, don't add it.
+
+Do not ask permission to update CLAUDE.md when the trigger conditions above are met — just do it, and mention it briefly in the session summary.

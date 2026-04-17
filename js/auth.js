@@ -8,6 +8,11 @@ const auth = {
             this.showAuth();
         }
 
+        // Gérer le retour de redirection Google OAuth
+        if (typeof firebase !== 'undefined') {
+            this.handleGoogleRedirectResult();
+        }
+
         // Onglets
         const tabs = document.querySelectorAll('.auth-tab');
         tabs.forEach(tab => {
@@ -184,12 +189,12 @@ const auth = {
         }
     },
 
-    async handleGoogleSignIn() {
+    async handleGoogleRedirectResult() {
         try {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            const result = await firebase.auth().signInWithPopup(provider);
-            const idToken = await result.user.getIdToken();
+            const result = await firebase.auth().getRedirectResult();
+            if (!result || !result.user) return;
 
+            const idToken = await result.user.getIdToken();
             const authResult = await api.googleAuth(idToken);
             if (authResult.user) {
                 localStorage.setItem('coveToken', idToken);
@@ -200,10 +205,44 @@ const auth = {
                 if (errorEl) errorEl.textContent = authResult.error || 'Erreur de connexion Google';
             }
         } catch (error) {
-            console.error('Google sign-in error:', error);
-            if (error.code !== 'auth/popup-closed-by-user') {
-                const errorEl = document.getElementById('login-error');
-                if (errorEl) errorEl.textContent = 'Erreur de connexion Google';
+            console.error('Google redirect error:', error);
+            const errorEl = document.getElementById('login-error');
+            if (errorEl) errorEl.textContent = 'Erreur de connexion Google';
+        }
+    },
+
+    async handleGoogleSignIn() {
+        const errorEl = document.getElementById('login-error');
+        try {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            // signInWithPopup est plus robuste que signInWithRedirect (pas de dependance
+            // aux cookies tiers, ferme les bugs silencieux Chrome post-2023).
+            const result = await firebase.auth().signInWithPopup(provider);
+            if (!result || !result.user) {
+                if (errorEl) errorEl.textContent = 'Connexion Google annulée';
+                return;
+            }
+            const idToken = await result.user.getIdToken();
+            const authResult = await api.googleAuth(idToken);
+            if (authResult.user) {
+                localStorage.setItem('coveToken', idToken);
+                localStorage.setItem('coveUser', JSON.stringify(authResult.user));
+                this.showProfile();
+            } else {
+                if (errorEl) errorEl.textContent = authResult.error || 'Erreur de connexion Google';
+            }
+        } catch (error) {
+            console.error('Google signin error:', error);
+            if (errorEl) {
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorEl.textContent = 'Connexion Google annulée';
+                } else if (error.code === 'auth/popup-blocked') {
+                    errorEl.textContent = 'Popup bloqué par le navigateur — autorisez les popups pour ce site.';
+                } else if (error.code === 'auth/unauthorized-domain') {
+                    errorEl.textContent = 'Domaine non autorisé dans Firebase Auth.';
+                } else {
+                    errorEl.textContent = 'Erreur de connexion Google : ' + (error.message || error.code || 'inconnue');
+                }
             }
         }
     },

@@ -116,8 +116,9 @@ router.put('/orders/:id/status', async (req, res) => {
             });
         }
 
-        // Envoyer email de notification pour les statuts pertinents
-        if (['confirmed', 'label_printed', 'shipped', 'delivered', 'cancelled'].includes(status) && order.customer?.email) {
+        // Envoyer email de notification pour chaque changement de statut
+        // (on exclut 'pending' car c'est l'etat initial couvert par la confirmation de commande)
+        if (['confirmed', 'processing', 'label_printed', 'shipped', 'delivered', 'cancelled'].includes(status) && order.customer?.email) {
             sendOrderStatusUpdate(order, status);
         }
 

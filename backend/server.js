@@ -38,7 +38,7 @@ app.use(helmet({
 }));
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'https://cove-studio.fr',
+    origin: process.env.FRONTEND_URL || 'https://covestudio.fr',
     credentials: true
 }));
 
