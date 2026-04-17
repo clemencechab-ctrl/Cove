@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /en/admin.html
+Disallow: /api/
+Disallow: /.firebase/
+Disallow: /backend/
+Disallow: /tests/
+Disallow: /node_modules/
+
+Sitemap: https://covestudio.fr/sitemap.xml
