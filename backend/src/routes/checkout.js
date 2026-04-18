@@ -232,7 +232,9 @@ router.post('/create-session', optionalAuth, async (req, res) => {
         }
 
         const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
+            // card inclut Apple Pay et Google Pay automatiquement (wallets).
+            // paypal necessite d'etre active dans le Dashboard Stripe (Settings > Payment methods).
+            payment_method_types: ['card', 'paypal'],
             line_items: lineItems,
             mode: 'payment',
             success_url: `${frontendUrl}/success.html?order=${order.orderNumber}`,
