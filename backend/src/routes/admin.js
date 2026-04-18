@@ -1,15 +1,68 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 const router = express.Router();
 const store = require('../data/store');
 const { authenticate, requireRole } = require('../middleware/auth');
+const { bucket } = require('../config/firebase');
 const { sendOrderStatusUpdate } = require('../utils/email');
 const { generateLabel } = require('../utils/colissimo');
 
 // Toutes les routes admin nécessitent une authentification et le rôle owner
 router.use(authenticate);
 router.use(requireRole('owner'));
+
+// ───── Upload de fichiers (images / PDF) vers Firebase Storage ─────
+const ALLOWED_MIME = new Set([
+    'image/png', 'image/jpeg', 'image/webp', 'image/gif',
+    'application/pdf'
+]);
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10 Mo max
+    fileFilter: (req, file, cb) => {
+        if (!ALLOWED_MIME.has(file.mimetype)) {
+            return cb(new Error(`Type de fichier non supporté : ${file.mimetype}. Autorisés : PNG, JPG, WEBP, GIF, PDF.`));
+        }
+        cb(null, true);
+    }
+});
+
+// POST /api/admin/upload - Upload un fichier et retourne son URL publique
+router.post('/upload', (req, res) => {
+    upload.single('file')(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ success: false, error: err.message });
+        }
+        if (!req.file) {
+            return res.status(400).json({ success: false, error: 'Aucun fichier fourni' });
+        }
+        try {
+            const ts = Date.now();
+            const safeName = (req.file.originalname || 'upload').replace(/[^a-zA-Z0-9._-]/g, '-').toLowerCase();
+            const objectName = `products/${ts}-${safeName}`;
+            const file = bucket.file(objectName);
+            await file.save(req.file.buffer, {
+                metadata: { contentType: req.file.mimetype, cacheControl: 'public, max-age=31536000' },
+                resumable: false,
+                public: false
+            });
+            // URL publique (le bucket est deja configure allUsers:objectViewer)
+            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${objectName}`;
+            res.json({
+                success: true,
+                url: publicUrl,
+                mimetype: req.file.mimetype,
+                size: req.file.size,
+                filename: req.file.originalname
+            });
+        } catch (e) {
+            console.error('Upload error:', e);
+            res.status(500).json({ success: false, error: e.message });
+        }
+    });
+});
 
 // GET /api/admin/stats - Statistiques générales
 router.get('/stats', async (req, res) => {

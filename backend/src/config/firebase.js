@@ -23,9 +23,11 @@ if (serviceAccountEnv) {
 
 admin.initializeApp({
     credential,
-    databaseURL: process.env.FIREBASE_DATABASE_URL || 'https://covestudio-default-rtdb.europe-west1.firebasedatabase.app'
+    databaseURL: process.env.FIREBASE_DATABASE_URL || 'https://covestudio-default-rtdb.europe-west1.firebasedatabase.app',
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'covestudio-uploads'
 });
 
 const db = admin.database();
+const bucket = admin.storage().bucket();
 
-module.exports = { admin, db };
+module.exports = { admin, db, bucket };
