@@ -1,12 +1,52 @@
 const nodemailer = require('nodemailer');
+const path = require('path');
+const fs = require('fs');
 
 // URL publique pour les images produits
 const PUBLIC_URL = process.env.PUBLIC_URL || 'https://clemencechab-ctrl.github.io/Cove';
+
+// Bandeau complet (noir avec logo blanc integre, fusionne en une seule image)
+// Une image ne sera pas inversee par Gmail Android en mode sombre.
+const BANNER_PATH = path.join(__dirname, '..', '..', '..', 'image', 'email-banner-cove.png');
+const BANNER_CID = 'cove-banner';
+const LOGO_AVAILABLE = fs.existsSync(BANNER_PATH);
 
 function getImageUrl(image) {
     if (!image) return '';
     return image.startsWith('http') ? image : `${PUBLIC_URL}/${image}`;
 }
+
+// Bandeau complet en UNE image : noir avec logo blanc. Aucun fond CSS, aucun
+// texte HTML — Gmail Android ne pourra pas inverser les couleurs.
+function getEmailHeader() {
+    const src = LOGO_AVAILABLE ? `cid:${BANNER_CID}` : `${PUBLIC_URL}/image/email-banner-cove.png`;
+    return `<div style="margin-bottom: 20px; font-size: 0; line-height: 0;">
+        <img src="${src}" alt="Cove." width="600" style="width: 100%; max-width: 600px; height: auto; display: block; border: 0;">
+    </div>`;
+}
+
+const EMAIL_HEAD_STYLES = ``;
+
+// Emballe un fragment HTML dans un document complet avec <head> et <style>
+// afin que les regles @media prefers-color-scheme soient prises en compte
+// par les clients mail (Apple Mail, iOS Mail, Gmail mobile, Outlook.com).
+function wrapEmailHtml(bodyHtml, subject = 'COVE') {
+    return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <meta name="supported-color-schemes" content="light dark">
+    <title>${subject}</title>
+    <style>${EMAIL_HEAD_STYLES}</style>
+</head>
+<body style="margin: 0; padding: 0;">
+${bodyHtml}
+</body>
+</html>`;
+}
+
 
 // Creer le transporter si les variables sont configurees
 function createTransporter() {
@@ -33,6 +73,23 @@ function getFromAddress() {
 // Envoyer un email (ou log en console si pas de transporter)
 async function sendMail(mailOptions) {
     if (transporter) {
+        if (typeof mailOptions.html === 'string') {
+            // Enveloppe le fragment HTML dans un document complet (avec <head>)
+            if (!mailOptions.html.includes('<!DOCTYPE')) {
+                mailOptions = { ...mailOptions, html: wrapEmailHtml(mailOptions.html, mailOptions.subject) };
+            }
+            // Attache le bandeau en CID si l'email l'utilise
+            const usesBanner = mailOptions.html.includes(`cid:${BANNER_CID}`);
+            if (usesBanner && LOGO_AVAILABLE) {
+                mailOptions = {
+                    ...mailOptions,
+                    attachments: [
+                        ...(mailOptions.attachments || []),
+                        { filename: 'cove-banner.png', path: BANNER_PATH, cid: BANNER_CID }
+                    ]
+                };
+            }
+        }
         const info = await transporter.sendMail(mailOptions);
         console.log(`[SMTP] to=${JSON.stringify(mailOptions.to)} accepted=${JSON.stringify(info.accepted)} rejected=${JSON.stringify(info.rejected)} messageId=${info.messageId} response="${info.response}"`);
         if (info.rejected && info.rejected.length) {
@@ -66,7 +123,7 @@ async function sendOrderConfirmation(order) {
 
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">COVE</h1>
+                ${getEmailHeader()}
                 <h2>Confirmation de commande</h2>
                 <p>Bonjour ${order.customer.firstName},</p>
                 <p>Merci pour votre commande ! Voici le récapitulatif :</p>
@@ -157,7 +214,7 @@ async function sendOrderStatusUpdate(order, newStatus) {
 
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">COVE</h1>
+                ${getEmailHeader()}
                 <h2>${info.title}</h2>
                 <p>Bonjour ${order.customer.firstName},</p>
                 <p>${info.message}</p>
@@ -194,6 +251,8 @@ async function sendContactNotification(contactData) {
             replyTo: email,
             subject: `[COVE Contact] ${subject || 'Nouveau message'}`,
             html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                ${getEmailHeader()}
                 <h2>Nouveau message de contact</h2>
                 <p><strong>Nom:</strong> ${name}</p>
                 <p><strong>Email:</strong> ${email}</p>
@@ -202,6 +261,7 @@ async function sendContactNotification(contactData) {
                 <p>${message.replace(/\n/g, '<br>')}</p>
                 <hr>
                 <p><small>Message envoye depuis le site COVE</small></p>
+                </div>
             `
         });
 
@@ -211,6 +271,8 @@ async function sendContactNotification(contactData) {
             to: email,
             subject: 'COVE - Nous avons bien reçu votre message',
             html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                ${getEmailHeader()}
                 <h2>Merci pour votre message !</h2>
                 <p>Bonjour ${name},</p>
                 <p>Nous avons bien reçu votre message et nous vous répondrons dans les plus brefs délais.</p>
@@ -219,6 +281,7 @@ async function sendContactNotification(contactData) {
                     ${message.replace(/\n/g, '<br>')}
                 </blockquote>
                 <p>A bientôt,<br>L'équipe COVE</p>
+                </div>
             `
         });
 
@@ -252,7 +315,8 @@ async function sendOrderNotificationToOwner(order) {
 
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">COVE — Nouvelle commande</h1>
+                ${getEmailHeader()}
+                <h2>Nouvelle commande</h2>
                 <p>Une nouvelle commande vient d'être passée !</p>
 
                 <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
@@ -319,7 +383,7 @@ async function sendCancelReturnRequest(order, type, reason, customerEmail) {
             subject: `[COVE] Demande de ${typeLabel} — Commande #${order.orderNumber}`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">COVE</h1>
+                    ${getEmailHeader()}
                     <h2>Demande de ${typeLabel}</h2>
                     <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
                         <p><strong>Commande :</strong> ${order.orderNumber}</p>
@@ -343,7 +407,7 @@ async function sendCancelReturnRequest(order, type, reason, customerEmail) {
             subject: `COVE — Votre demande de ${typeLabel} pour la commande #${order.orderNumber}`,
             html: `
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h1 style="color: #333; border-bottom: 2px solid #333; padding-bottom: 10px;">COVE</h1>
+                    ${getEmailHeader()}
                     <h2>Demande de ${typeLabel} reçue</h2>
                     <p>Bonjour${order.customer?.firstName ? ' ' + order.customer.firstName : ''},</p>
                     <p>Nous avons bien reçu votre demande de ${typeLabel} pour la commande <strong>${order.orderNumber}</strong>.</p>

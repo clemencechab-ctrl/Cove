@@ -3471,6 +3471,12 @@ img {
     min-height: 80px;
 }
 
+.admin-modal-content .form-group select option,
+.admin-promo-form .form-group select option {
+    background: #111;
+    color: var(--color-text);
+}
+
 /* Size Stock Grid */
 .size-stock-grid {
     display: grid;
