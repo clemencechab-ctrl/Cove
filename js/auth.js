@@ -213,10 +213,18 @@ const auth = {
 
     async handleGoogleSignIn() {
         const errorEl = document.getElementById('login-error');
+        const googleBtn = document.getElementById('btn-google-signin');
+
+        // Guard : evite d'ouvrir deux popups Google simultanement (double-clic ou
+        // listener double). Sans ce guard, Firebase renvoie
+        // auth/cancelled-popup-request et l'utilisateur voit une erreur rouge.
+        if (this._googleSignInInProgress) return;
+        this._googleSignInInProgress = true;
+        if (googleBtn) googleBtn.disabled = true;
+        if (errorEl) errorEl.textContent = '';
+
         try {
             const provider = new firebase.auth.GoogleAuthProvider();
-            // signInWithPopup est plus robuste que signInWithRedirect (pas de dependance
-            // aux cookies tiers, ferme les bugs silencieux Chrome post-2023).
             const result = await firebase.auth().signInWithPopup(provider);
             if (!result || !result.user) {
                 if (errorEl) errorEl.textContent = 'Connexion Google annulée';
@@ -234,8 +242,10 @@ const auth = {
         } catch (error) {
             console.error('Google signin error:', error);
             if (errorEl) {
-                if (error.code === 'auth/popup-closed-by-user') {
-                    errorEl.textContent = 'Connexion Google annulée';
+                if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
+                    // Popup ferme ou double-clic : pas d'erreur visible, on laisse
+                    // l'utilisateur reessayer proprement.
+                    errorEl.textContent = '';
                 } else if (error.code === 'auth/popup-blocked') {
                     errorEl.textContent = 'Popup bloqué par le navigateur — autorisez les popups pour ce site.';
                 } else if (error.code === 'auth/unauthorized-domain') {
@@ -244,6 +254,9 @@ const auth = {
                     errorEl.textContent = 'Erreur de connexion Google : ' + (error.message || error.code || 'inconnue');
                 }
             }
+        } finally {
+            this._googleSignInInProgress = false;
+            if (googleBtn) googleBtn.disabled = false;
         }
     },
 
