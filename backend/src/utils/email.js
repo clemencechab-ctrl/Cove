@@ -33,7 +33,11 @@ function getFromAddress() {
 // Envoyer un email (ou log en console si pas de transporter)
 async function sendMail(mailOptions) {
     if (transporter) {
-        await transporter.sendMail(mailOptions);
+        const info = await transporter.sendMail(mailOptions);
+        console.log(`[SMTP] to=${JSON.stringify(mailOptions.to)} accepted=${JSON.stringify(info.accepted)} rejected=${JSON.stringify(info.rejected)} messageId=${info.messageId} response="${info.response}"`);
+        if (info.rejected && info.rejected.length) {
+            console.warn(`[SMTP] Adresses rejetees: ${JSON.stringify(info.rejected)}`);
+        }
         return true;
     }
     console.log('[EMAIL DEMO] To:', mailOptions.to);

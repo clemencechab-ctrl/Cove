@@ -364,6 +364,23 @@ const api = {
         }
     },
 
+    // Admin - All orders (includes guest orders without userId)
+    async getAdminOrders() {
+        try {
+            const token = localStorage.getItem('coveToken');
+            const response = await fetch(`${API_URL}/admin/orders`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('API Error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
     // Admin - Update order status
     async updateOrderStatus(orderId, status, comment = '') {
         try {
