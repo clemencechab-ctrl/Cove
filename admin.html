@@ -219,12 +219,34 @@
                 </div>
                 <div class="form-group">
                     <label>Image du produit (PNG, JPEG, WEBP, GIF ou PDF — max 10 Mo)</label>
-                    <input type="file" id="product-image-file" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" onchange="uploadProductImage(this)">
+                    <!-- Input fichier masqué : texte du bouton natif varie selon la langue du navigateur.
+                         On utilise un label stylé en FR qui le déclenche. -->
+                    <input type="file" id="product-image-file" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" onchange="uploadProductImage(this)" style="display:none;">
+                    <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+                        <label for="product-image-file" class="btn-file-picker">Choisir un fichier</label>
+                        <span id="product-image-filename" style="color: var(--color-text-muted); font-size:0.9rem;">Aucun fichier sélectionné</span>
+                    </div>
                     <!-- URL stockee en interne (input hidden) — remplie apres upload -->
                     <input type="hidden" id="product-image">
                     <p id="product-image-status" style="font-size:0.85rem; color: var(--color-text-muted); margin:0.5rem 0 0;"></p>
                     <img id="product-image-preview" src="" alt="" style="display:none; max-width:150px; margin-top:0.5rem; border-radius:4px;">
                 </div>
+                <style>
+                    .btn-file-picker {
+                        display: inline-block;
+                        padding: 0.55rem 1.1rem;
+                        background: var(--color-text, #fff);
+                        color: var(--color-bg, #000);
+                        border-radius: 4px;
+                        font-size: 0.9rem;
+                        font-weight: 500;
+                        letter-spacing: 0.03em;
+                        cursor: pointer;
+                        transition: opacity 0.2s ease;
+                        user-select: none;
+                    }
+                    .btn-file-picker:hover { opacity: 0.85; }
+                </style>
                 <div class="form-group">
                     <label>Stock par taille</label>
                     <div class="size-stock-grid">
@@ -678,9 +700,11 @@
             const statusEl = document.getElementById('product-image-status');
             const previewEl = document.getElementById('product-image-preview');
             const fileInput = document.getElementById('product-image-file');
+            const filenameEl = document.getElementById('product-image-filename');
             if (statusEl) statusEl.textContent = '';
             if (previewEl) { previewEl.src = ''; previewEl.style.display = 'none'; }
             if (fileInput) fileInput.value = '';
+            if (filenameEl) filenameEl.textContent = 'Aucun fichier sélectionné';
             if (product) {
                 document.getElementById('product-modal-title').textContent = 'Modifier le produit';
                 document.getElementById('product-edit-id').value = product.id;
@@ -721,17 +745,25 @@
             const statusEl = document.getElementById('product-image-status');
             const previewEl = document.getElementById('product-image-preview');
             const urlInput = document.getElementById('product-image');
-            if (!file) return;
+            const filenameEl = document.getElementById('product-image-filename');
+            if (!file) {
+                if (filenameEl) filenameEl.textContent = 'Aucun fichier sélectionné';
+                return;
+            }
+
+            // Affiche immediatement le nom du fichier choisi
+            if (filenameEl) filenameEl.textContent = `${file.name} (${(file.size/1024).toFixed(0)} Ko)`;
 
             const MAX_SIZE = 10 * 1024 * 1024;
             if (file.size > MAX_SIZE) {
                 statusEl.textContent = `Fichier trop lourd (${(file.size/1024/1024).toFixed(1)} Mo, max 10 Mo).`;
                 statusEl.style.color = '#e74c3c';
                 input.value = '';
+                if (filenameEl) filenameEl.textContent = 'Aucun fichier sélectionné';
                 return;
             }
 
-            statusEl.textContent = `Upload en cours... ${file.name} (${(file.size/1024).toFixed(0)} Ko)`;
+            statusEl.textContent = `Téléversement en cours...`;
             statusEl.style.color = 'var(--color-text-muted)';
 
             const formData = new FormData();
@@ -749,15 +781,15 @@
                     throw new Error(data.error || `HTTP ${resp.status}`);
                 }
                 urlInput.value = data.url;
-                statusEl.textContent = `✓ Uploade (${(data.size/1024).toFixed(0)} Ko)`;
+                statusEl.textContent = `✓ Fichier téléversé avec succès (${(data.size/1024).toFixed(0)} Ko)`;
                 statusEl.style.color = '#2ecc71';
-                // Preview si image
+                // Apercu si image
                 if (data.mimetype && data.mimetype.startsWith('image/')) {
                     previewEl.src = data.url;
                     previewEl.style.display = 'block';
                 } else if (data.mimetype === 'application/pdf') {
                     previewEl.style.display = 'none';
-                    statusEl.textContent += ' (PDF — pas de preview)';
+                    statusEl.textContent += ' (PDF — aperçu non disponible)';
                 }
             } catch (err) {
                 statusEl.textContent = 'Erreur : ' + err.message;
