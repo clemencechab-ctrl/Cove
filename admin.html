@@ -768,10 +768,17 @@
 
         async function editProduct(id) {
             const result = await api.getAdminProducts();
-            if (result.success) {
-                const product = result.products.find(p => p.id === id);
-                if (product) openProductModal(product);
+            if (!result.success) {
+                alert('Erreur chargement produits: ' + (result.error || 'inconnue'));
+                return;
             }
+            const target = String(id);
+            const product = result.products.find(p => String(p.id) === target);
+            if (!product) {
+                alert(`Produit ${id} introuvable.`);
+                return;
+            }
+            openProductModal(product);
         }
 
         async function saveProduct(e) {

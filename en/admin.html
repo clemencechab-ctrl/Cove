@@ -610,10 +610,17 @@
 
         async function editProduct(id) {
             const result = await api.getAdminProducts();
-            if (result.success) {
-                const product = result.products.find(p => p.id === id);
-                if (product) openProductModal(product);
+            if (!result.success) {
+                alert('Error loading products: ' + (result.error || 'unknown'));
+                return;
             }
+            const target = String(id);
+            const product = result.products.find(p => String(p.id) === target);
+            if (!product) {
+                alert(`Product ${id} not found.`);
+                return;
+            }
+            openProductModal(product);
         }
 
         async function saveProduct(e) {
