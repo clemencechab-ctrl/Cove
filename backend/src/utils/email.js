@@ -133,7 +133,7 @@ async function sendOrderConfirmation(order) {
                         <tr style="background: #f5f5f5;">
                             <th style="padding: 8px; text-align: left;"></th>
                             <th style="padding: 8px; text-align: left;">Produit</th>
-                            <th style="padding: 8px; text-align: center;">Qte</th>
+                            <th style="padding: 8px; text-align: center;">Qté</th>
                             <th style="padding: 8px; text-align: right;">Total</th>
                         </tr>
                     </thead>
@@ -154,7 +154,7 @@ async function sendOrderConfirmation(order) {
                 </div>
 
                 <p>Vous recevrez un email lorsque votre commande sera expédiée.</p>
-                <p>A bientôt,<br>L'équipe COVE</p>
+                <p>À bientôt,<br>L'équipe COVE</p>
             </div>
         `;
 
@@ -178,24 +178,24 @@ async function sendOrderStatusUpdate(order, newStatus) {
             confirmed: {
                 subject: `COVE — Votre commande #${order.orderNumber} est confirmée`,
                 title: 'Commande confirmée',
-                message: 'Votre commande a été confirmée et sera bientôt preparee.'
+                message: 'Votre commande a été confirmée et sera bientôt préparée.'
             },
             processing: {
                 subject: `COVE — Votre commande #${order.orderNumber} est en préparation`,
                 title: 'Commande en préparation',
-                message: 'Votre commande est en cours de preparation dans nos ateliers.'
+                message: 'Votre commande est en cours de préparation dans nos ateliers.'
             },
             label_printed: {
                 subject: `COVE — Votre commande #${order.orderNumber} est prête à être expédiée`,
                 title: 'Bordereau imprimé',
-                message: 'Votre commande a été preparee et le bordereau d\'expedition a été imprimé. L\'expédition est imminente !'
+                message: 'Votre commande a été préparée et le bordereau d\'expédition a été imprimé. L\'expédition est imminente !'
             },
             shipped: {
-                subject: `COVE — Votre commande #${order.orderNumber} a ete expédiée`,
+                subject: `COVE — Votre commande #${order.orderNumber} a été expédiée`,
                 title: 'Commande expédiée',
                 message: order.trackingNumber
-                    ? `Votre commande a ete expédiée ! Numero de suivi : <strong>${order.trackingNumber}</strong><br><a href="https://www.laposte.fr/outils/suivre-vos-envois?code=${order.trackingNumber}" style="color: #333;">Suivre mon colis sur La Poste</a>`
-                    : 'Votre commande a ete expédiée ! Vous la recevrez bientôt.'
+                    ? `Votre commande a été expédiée ! Numéro de suivi : <strong>${order.trackingNumber}</strong><br><a href="https://www.laposte.fr/outils/suivre-vos-envois?code=${order.trackingNumber}" style="color: #333;">Suivre mon colis sur La Poste</a>`
+                    : 'Votre commande a été expédiée ! Vous la recevrez bientôt.'
             },
             delivered: {
                 subject: `COVE — Votre commande #${order.orderNumber} a été livrée`,
@@ -205,7 +205,7 @@ async function sendOrderStatusUpdate(order, newStatus) {
             cancelled: {
                 subject: `COVE — Votre commande #${order.orderNumber} a été annulée`,
                 title: 'Commande annulée',
-                message: 'Votre commande a été annulée. Si vous avez des questions, n\'hesitez pas a nous contacter.'
+                message: 'Votre commande a été annulée. Si vous avez des questions, n\'hésitez pas à nous contacter.'
             }
         };
 
@@ -222,7 +222,7 @@ async function sendOrderStatusUpdate(order, newStatus) {
                     <p><strong>Commande :</strong> ${order.orderNumber}</p>
                     <p><strong>Statut :</strong> ${info.title}</p>
                 </div>
-                <p>A bientôt,<br>L'équipe COVE</p>
+                <p>À bientôt,<br>L'équipe COVE</p>
             </div>
         `;
 
@@ -260,7 +260,7 @@ async function sendContactNotification(contactData) {
                 <p><strong>Message:</strong></p>
                 <p>${message.replace(/\n/g, '<br>')}</p>
                 <hr>
-                <p><small>Message envoye depuis le site COVE</small></p>
+                <p><small>Message envoyé depuis le site COVE</small></p>
                 </div>
             `
         });
@@ -280,7 +280,7 @@ async function sendContactNotification(contactData) {
                 <blockquote style="border-left: 3px solid #ccc; padding-left: 15px; margin: 20px 0;">
                     ${message.replace(/\n/g, '<br>')}
                 </blockquote>
-                <p>A bientôt,<br>L'équipe COVE</p>
+                <p>À bientôt,<br>L'équipe COVE</p>
                 </div>
             `
         });
@@ -323,7 +323,7 @@ async function sendOrderNotificationToOwner(order) {
                     <p><strong>Commande :</strong> ${order.orderNumber}</p>
                     <p><strong>Client :</strong> ${order.customer.firstName} ${order.customer.lastName}</p>
                     <p><strong>Email :</strong> ${order.customer.email}</p>
-                    <p><strong>Telephone :</strong> ${order.customer.phone || 'Non renseigné'}</p>
+                    <p><strong>Téléphone :</strong> ${order.customer.phone || 'Non renseigné'}</p>
                 </div>
 
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
@@ -331,7 +331,7 @@ async function sendOrderNotificationToOwner(order) {
                         <tr style="background: #f5f5f5;">
                             <th style="padding: 8px; text-align: left;"></th>
                             <th style="padding: 8px; text-align: left;">Produit</th>
-                            <th style="padding: 8px; text-align: center;">Qte</th>
+                            <th style="padding: 8px; text-align: center;">Qté</th>
                             <th style="padding: 8px; text-align: right;">Total</th>
                         </tr>
                     </thead>
@@ -411,8 +411,8 @@ async function sendCancelReturnRequest(order, type, reason, customerEmail) {
                     <h2>Demande de ${typeLabel} reçue</h2>
                     <p>Bonjour${order.customer?.firstName ? ' ' + order.customer.firstName : ''},</p>
                     <p>Nous avons bien reçu votre demande de ${typeLabel} pour la commande <strong>${order.orderNumber}</strong>.</p>
-                    <p>Notre equipe va étudier votre demande et vous recontactera dans les plus brefs délais.</p>
-                    <p>A bientôt,<br>L'équipe COVE</p>
+                    <p>Notre équipe va étudier votre demande et vous recontactera dans les plus brefs délais.</p>
+                    <p>À bientôt,<br>L'équipe COVE</p>
                 </div>
             `
         });

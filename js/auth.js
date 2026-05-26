@@ -243,8 +243,6 @@ const auth = {
             console.error('Google signin error:', error);
             if (errorEl) {
                 if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
-                    // Popup ferme ou double-clic : pas d'erreur visible, on laisse
-                    // l'utilisateur reessayer proprement.
                     errorEl.textContent = '';
                 } else if (error.code === 'auth/popup-blocked') {
                     errorEl.textContent = 'Popup bloqué par le navigateur — autorisez les popups pour ce site.';
