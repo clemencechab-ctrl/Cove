@@ -234,12 +234,13 @@ router.post('/create-session', optionalAuth, async (req, res) => {
         const session = await stripe.checkout.sessions.create({
             // card inclut Apple Pay et Google Pay automatiquement (wallets).
             // paypal necessite d'etre active dans le Dashboard Stripe (Settings > Payment methods).
+            // customer_email intentionnellement absent : le passer déclenche le popup
+            // Stripe Link automatiquement si l'email est reconnu comme utilisateur Link.
             payment_method_types: ['card', 'paypal'],
             line_items: lineItems,
             mode: 'payment',
             success_url: `${frontendUrl}/success.html?order=${order.orderNumber}`,
             cancel_url: `${frontendUrl}/success.html?canceled=true`,
-            customer_email: customer?.email || undefined,
             metadata: { orderId: order.id, orderNumber: order.orderNumber }
         });
 
