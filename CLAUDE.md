@@ -167,7 +167,19 @@ Claude can also run this via `powershell.exe -ExecutionPolicy Bypass -NoProfile 
 
 ### Known issues
 
-- **Firebase Hosting step often fails** with `Failed to get Firebase project covestudio. Please make sure the project exists and your account has permission to access it.` — means the `firebase login` account lacks permissions on the project. The backend (Cloud Run) deploy succeeds independently, so backend-only fixes still go through. Resolve by re-logging in with an account that has Firebase roles on `covestudio`, or running `firebase deploy --only hosting` separately with the right account.
+- **GitHub Actions workflow** (`.github/workflows/deploy.yml`): le workflow utilise le SA `github-actions-deploy@covestudio.iam.gserviceaccount.com` (créé 2026-05-31). Ce SA a les rôles `run.admin`, `cloudbuild.builds.editor`, `artifactregistry.writer`, `storage.admin`, `iam.serviceAccountUser`, `firebase.admin`. La clé JSON est dans `github-actions-sa-key.json` à la racine.
+  - **Secrets GitHub requis** (à configurer dans Settings → Secrets and variables → Actions) :
+    - `GCP_SA_KEY` → contenu brut de `github-actions-sa-key.json`
+    - `FIREBASE_SERVICE_ACCOUNT_B64` → contenu de `firebase-sa-b64.txt` (base64 du SA Firebase)
+    - `FIREBASE_DATABASE_URL` → `https://covestudio-default-rtdb.europe-west1.firebasedatabase.app`
+    - `FIREBASE_API_KEY` → voir `backend/.env`
+    - `EMAIL_USER` → `cove.off@gmail.com`
+    - `EMAIL_PASS` → voir `backend/.env`
+    - `OWNER_EMAIL` → `cove.off@gmail.com`
+    - `STRIPE_SECRET_KEY` → voir `backend/.env`
+    - `STRIPE_WEBHOOK_SECRET` → voir `backend/.env`
+    - `FIREBASE_TOKEN` → générer via `firebase login:ci` (pour le deploy Hosting)
+- **Firebase Hosting step (deploy.ps1)** peut échouer avec `Failed to get Firebase project covestudio.` — means the `firebase login` account lacks permissions on the project. The backend (Cloud Run) deploy succeeds independently, so backend-only fixes still go through. Resolve by re-logging in with an account that has Firebase roles on `covestudio`, or running `firebase deploy --only hosting` separately with the right account.
 - **Workaround when the Firebase CLI auth can't be refreshed**: `tests/deploy-hosting.js` is a standalone Node script that deploys Hosting via the Firebase Hosting REST API directly, using gcloud's access token (gcloud is authenticated as `clemence.chab@gmail.com`). It walks the public dir per `firebase.json` ignore list, gzips each file, runs the full `createVersion → populateFiles → upload → FINALIZED → release` flow. Run with `node tests/deploy-hosting.js`. Useful when `firebase login` is stuck on a wrong account and you need to ship a frontend change immediately. Critical detail: the REST API field is `glob`, not `source` (as in `firebase.json`) — the script translates it.
 - **`deploy.ps1` hardcodes the service account JSON filename** (`covestudio-firebase-adminsdk-fbsvc-854611e7e9.json`). If the key is rotated, update both the file on disk and the path in `deploy.ps1` line 63.
 
