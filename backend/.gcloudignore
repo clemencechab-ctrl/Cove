@@ -6,3 +6,4 @@ node_modules/
 .env-cloudrun.yaml
 logs/
 *.log
+NUL

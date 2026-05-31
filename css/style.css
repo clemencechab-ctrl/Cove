@@ -81,6 +81,10 @@ img {
     color: var(--color-text-muted);
 }
 
+.nav-admin-only {
+    display: none;
+}
+
 .nav-link:hover {
     color: var(--color-text);
 }

@@ -3,3 +3,19 @@ github-actions-sa-key.json
 firebase-sa-b64.txt
 github-actions-sa-b64.txt
 nul
+
+# Dépendances
+node_modules/
+
+# Fichiers de build / cache
+.firebase/
+playwright-report/
+test-results/
+
+# Fichiers locaux temporaires
+deploy.log
+fix-timestamps.ps1
+plan-md0.md
+
+# Claude interne
+.claude/plans/
