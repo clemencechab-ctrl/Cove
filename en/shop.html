@@ -88,10 +88,14 @@
 
         <div class="shop-grid">
             <!-- Product 1 -->
-            <article class="shop-card" data-category="tops" data-id="1" data-name="T-shirt Cove" data-price="30" data-image="../image/t-shirt-front.JPG">
+            <article class="shop-card" data-category="tops" data-id="1" data-name="Covestudio" data-price="30" data-image="../image/t-shirt-front.JPG" data-image-blanc="../image/t-shirt-front.JPG" data-image-noir="../image/new-front.jpeg">
                 <div class="shop-card-image">
-                    <img src="../image/t-shirt-front.JPG" alt="T-shirt Cove">
+                    <img src="../image/t-shirt-front.JPG" alt="Covestudio">
                     <div class="shop-card-overlay">
+                        <div class="shop-color-selector">
+                            <button type="button" class="shop-color-dot active" style="background:#ffffff;" title="White" onclick="shopSelectColor(this, 'Blanc')"></button>
+                            <button type="button" class="shop-color-dot" style="background:#111111;" title="Black" onclick="shopSelectColor(this, 'Noir')"></button>
+                        </div>
                         <div class="shop-size-selector">
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XS</button>
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
@@ -105,16 +109,20 @@
                     </div>
                 </div>
                 <div class="shop-card-info">
-                    <h3 class="shop-card-name">T-shirt Cove</h3>
+                    <h3 class="shop-card-name">Covestudio</h3>
                     <p class="shop-card-price">30 EUR</p>
                 </div>
             </article>
 
             <!-- Product 2 -->
-            <article class="shop-card" data-category="tops" data-id="2" data-name="Hoodie Picnic" data-price="80" data-image="../image/hoodie-front.JPG">
+            <article class="shop-card" data-category="tops" data-id="2" data-name="Grandir sans bruit" data-price="30" data-image="../image/t-shirt-chat-drole-2.webp" data-image-blanc="../image/t-shirt-chat-drole-2.webp" data-image-noir="../image/t-shirt-front-stripe.jpg">
                 <div class="shop-card-image">
-                    <img src="../image/hoodie-front.JPG" alt="Hoodie Picnic">
+                    <img src="../image/t-shirt-chat-drole-2.webp" alt="Grandir sans bruit">
                     <div class="shop-card-overlay">
+                        <div class="shop-color-selector">
+                            <button type="button" class="shop-color-dot active" style="background:#ffffff;" title="White" onclick="shopSelectColor(this, 'Blanc')"></button>
+                            <button type="button" class="shop-color-dot" style="background:#111111;" title="Black" onclick="shopSelectColor(this, 'Noir')"></button>
+                        </div>
                         <div class="shop-size-selector">
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">XS</button>
                             <button type="button" class="shop-size-btn" onclick="shopSelectSize(this)">S</button>
@@ -128,8 +136,8 @@
                     </div>
                 </div>
                 <div class="shop-card-info">
-                    <h3 class="shop-card-name">Hoodie Picnic</h3>
-                    <p class="shop-card-price">80 EUR</p>
+                    <h3 class="shop-card-name">Grandir sans bruit</h3>
+                    <p class="shop-card-price">30 EUR</p>
                 </div>
             </article>
 
@@ -142,7 +150,7 @@
             <div class="footer-brand">
                 <img src="../image/logo-cove.png" alt="COVE" class="footer-logo-img">
                 <p class="footer-tagline">Premium Streetwear</p>
-                <p class="footer-credit">made by Clemence</p>
+                <p class="footer-credit">made by Clémence</p>
                 <div class="language-selector">
                     <span>Language</span>
                     <div class="language-options">
@@ -188,6 +196,17 @@
             }
         }
 
+        // Select color in shop card
+        function shopSelectColor(btn, color) {
+            const card = btn.closest('.shop-card');
+            card.querySelectorAll('.shop-color-dot').forEach(d => d.classList.remove('active'));
+            btn.classList.add('active');
+            card.dataset.selectedColor = color;
+            const img = card.querySelector('.shop-card-image img');
+            const src = color === 'Noir' ? card.dataset.imageNoir : card.dataset.imageBlanc;
+            if (img && src) img.src = src;
+        }
+
         // Add to cart from shop card
         function shopAddToCart(btn) {
             const card = btn.closest('.shop-card');
@@ -200,9 +219,10 @@
             const id = parseInt(card.dataset.id);
             const name = card.dataset.name;
             const price = parseFloat(card.dataset.price);
-            const image = card.dataset.image;
+            const color = card.dataset.selectedColor || 'Blanc';
+            const image = color === 'Noir' ? card.dataset.imageNoir : card.dataset.imageBlanc;
             const size = activeSize.textContent.trim();
-            addToCart(id, name, price, image, size);
+            addToCart(id, name, price, image, size, color);
         }
 
         // Filter, search & sort

@@ -35,7 +35,7 @@ module.exports = {
         return products.filter(p => p.category === category);
     },
 
-    updateProductStock: async (id, quantity, size = null) => {
+    updateProductStock: async (id, quantity, size = null, color = null) => {
         const snapshot = await productsRef.once('value');
         const data = snapshot.val();
         if (!data) return null;
@@ -60,15 +60,23 @@ module.exports = {
 
         if (!foundKey) return null;
 
-        // Stock par taille si applicable
-        if (size && foundProduct.sizeStock) {
-            const currentSizeStock = foundProduct.sizeStock[size] || 0;
-            const newSizeStock = currentSizeStock - quantity;
-            await productsRef.child(foundKey).child('sizeStock').child(size).set(newSizeStock);
-            // Aussi mettre a jour le stock global
+        const ss = foundProduct.sizeStock;
+
+        // Stock par couleur x taille (nouvelle structure : sizeStock[couleur][taille])
+        if (color && size && ss && ss[color] && typeof ss[color] === 'object') {
+            const newSizeStock = (ss[color][size] || 0) - quantity;
+            await productsRef.child(foundKey).child('sizeStock').child(color).child(size).set(newSizeStock);
             const newStock = (foundProduct.stock || 0) - quantity;
             await productsRef.child(foundKey).update({ stock: newStock });
-            foundProduct.sizeStock[size] = newSizeStock;
+            ss[color][size] = newSizeStock;
+            foundProduct.stock = newStock;
+        // Stock par taille (ancienne structure plate : sizeStock[taille])
+        } else if (size && ss && typeof ss[size] === 'number') {
+            const newSizeStock = ss[size] - quantity;
+            await productsRef.child(foundKey).child('sizeStock').child(size).set(newSizeStock);
+            const newStock = (foundProduct.stock || 0) - quantity;
+            await productsRef.child(foundKey).update({ stock: newStock });
+            ss[size] = newSizeStock;
             foundProduct.stock = newStock;
         } else {
             foundProduct.stock -= quantity;

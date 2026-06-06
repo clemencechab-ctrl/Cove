@@ -111,6 +111,10 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             if (!product) {
                 return res.status(400).json({ success: false, error: `Produit ${item.id} non trouvé` });
             }
+            const color = item.color || null;
+            const colorImage = color && product.images && product.images[color] && product.images[color].main
+                ? product.images[color].main
+                : product.image;
             subtotal += product.price * item.quantity;
             orderItems.push({
                 productId: product.id,
@@ -118,7 +122,8 @@ router.post('/create-session', optionalAuth, async (req, res) => {
                 price: product.price,
                 quantity: item.quantity,
                 size: item.size || null,
-                image: product.image
+                color: color,
+                image: colorImage
             });
         }
 
@@ -178,9 +183,9 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             await store.incrementPromoCodeUses(appliedPromo.code);
         }
 
-        // Decrementer le stock
+        // Decrementer le stock (par couleur x taille si applicable)
         for (const item of items) {
-            await store.updateProductStock(item.id, item.quantity, item.size || null);
+            await store.updateProductStock(item.id, item.quantity, item.size || null, item.color || null);
         }
 
         const frontendUrl = process.env.FRONTEND_URL || 'https://covestudio.fr';
@@ -207,7 +212,10 @@ router.post('/create-session', optionalAuth, async (req, res) => {
         const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
         const lineItems = orderItems.map(item => {
-            const productData = { name: item.name };
+            let label = item.name;
+            if (item.color) label += ` — ${item.color}`;
+            if (item.size) label += ` · ${item.size}`;
+            const productData = { name: label };
             const imageUrl = buildStripeImageUrl(item.image, frontendUrl);
             if (imageUrl) productData.images = [imageUrl];
             return {
@@ -233,10 +241,13 @@ router.post('/create-session', optionalAuth, async (req, res) => {
 
         const session = await stripe.checkout.sessions.create({
             // card inclut Apple Pay et Google Pay automatiquement (wallets).
-            // paypal necessite d'etre active dans le Dashboard Stripe (Settings > Payment methods).
+            // paypal RETIRE : pas active sur le compte Stripe live (le laisser ferait
+            // echouer TOUTE creation de session). Pour le reactiver : activer PayPal dans
+            // le Dashboard Stripe (Settings > Payment methods) en mode live, puis remettre
+            // 'paypal' dans ce tableau.
             // customer_email intentionnellement absent : le passer déclenche le popup
             // Stripe Link automatiquement si l'email est reconnu comme utilisateur Link.
-            payment_method_types: ['card', 'paypal'],
+            payment_method_types: ['card'],
             line_items: lineItems,
             mode: 'payment',
             success_url: `${frontendUrl}/success.html?order=${order.orderNumber}`,

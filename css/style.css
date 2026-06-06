@@ -190,16 +190,24 @@ img {
    Marquee
    ========================================== */
 .marquee {
+    --marquee-gap: 4rem;
+    display: flex;
+    gap: var(--marquee-gap);
     padding: 1.5rem 0;
     border-top: 1px solid var(--color-border);
     border-bottom: 1px solid var(--color-border);
     overflow: hidden;
+    user-select: none;
 }
 
 .marquee-content {
+    flex-shrink: 0;
     display: flex;
-    gap: 4rem;
-    animation: marquee 20s linear infinite;
+    align-items: center;
+    justify-content: space-around;
+    gap: var(--marquee-gap);
+    min-width: 100%;
+    animation: marquee 30s linear infinite;
 }
 
 .marquee-content span {
@@ -212,11 +220,17 @@ img {
 }
 
 @keyframes marquee {
-    0% {
+    from {
         transform: translateX(0);
     }
-    100% {
-        transform: translateX(-50%);
+    to {
+        transform: translateX(calc(-100% - var(--marquee-gap)));
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .marquee-content {
+        animation: none;
     }
 }
 
@@ -3357,6 +3371,74 @@ img {
     height: 60px;
     object-fit: cover;
     background: #111;
+}
+
+/* === Sélecteur de couleur (fiche produit) === */
+.product-color {
+    margin: 1.5rem 0;
+}
+.product-color .color-label {
+    display: block;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 0.6rem;
+}
+.color-options {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.color-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.color-btn:hover {
+    border-color: var(--color-text);
+}
+.color-btn.active {
+    border-color: var(--color-text);
+    background: var(--color-text);
+    color: var(--color-bg);
+}
+.color-swatch {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 1px solid rgba(128, 128, 128, 0.5);
+    flex-shrink: 0;
+}
+
+/* === Pastilles de couleur (cartes boutique / collection) === */
+.shop-color-selector {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 0.6rem;
+}
+.shop-color-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 0;
+    border: 2px solid transparent;
+    box-shadow: 0 0 0 1px rgba(128, 128, 128, 0.6);
+}
+.shop-color-dot.active {
+    border-color: #fff;
+    box-shadow: 0 0 0 1px #000;
 }
 
 .btn-admin-action {

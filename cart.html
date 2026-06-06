@@ -229,7 +229,7 @@
             <div class="footer-brand">
                 <img src="image/logo-cove.png" alt="COVE" class="footer-logo-img">
                 <p class="footer-tagline">Streetwear Premium</p>
-                <p class="footer-credit">made by Clemence</p>
+                <p class="footer-credit">made by Clémence</p>
                 <div class="language-selector">
                     <span>Langue</span>
                     <div class="language-options">
@@ -284,28 +284,33 @@
             cartSummaryEl.style.display = 'block';
             cartEmptyEl.style.display = 'none';
 
-            cartItemsEl.innerHTML = cart.map(item => `
+            cartItemsEl.innerHTML = cart.map(item => {
+                const sizeArg = item.size ? `'${item.size}'` : 'null';
+                const colorArg = item.color ? `'${item.color}'` : 'null';
+                const variant = [item.color, item.size].filter(Boolean).join(' · ');
+                return `
                 <div class="cart-item">
                     <div class="cart-item-image">
                         <img src="${item.image}" alt="${item.name}">
                     </div>
                     <div class="cart-item-details">
-                        <h4>${item.name}${item.size ? ` — Taille ${item.size}` : ''}</h4>
+                        <h4>${item.name}${variant ? ` — ${variant}` : ''}</h4>
                         <p class="cart-item-price">${item.price} EUR</p>
                     </div>
                     <div class="cart-item-quantity">
-                        <button onclick="updateQuantity(${item.id}, -1, ${item.size ? `'${item.size}'` : 'null'})">-</button>
+                        <button onclick="updateQuantity(${item.id}, -1, ${sizeArg}, ${colorArg})">-</button>
                         <span>${item.quantity}</span>
-                        <button onclick="updateQuantity(${item.id}, 1, ${item.size ? `'${item.size}'` : 'null'})">+</button>
+                        <button onclick="updateQuantity(${item.id}, 1, ${sizeArg}, ${colorArg})">+</button>
                     </div>
                     <div class="cart-item-total">
                         ${item.price * item.quantity} EUR
                     </div>
-                    <button class="cart-item-remove" onclick="removeFromCart(${item.id}, ${item.size ? `'${item.size}'` : 'null'})">
+                    <button class="cart-item-remove" onclick="removeFromCart(${item.id}, ${sizeArg}, ${colorArg})">
                         &times;
                     </button>
                 </div>
-            `).join('');
+            `;
+            }).join('');
 
             // Update totals
             const subtotal = getCartTotal();
@@ -426,7 +431,8 @@
             const items = cart.map(item => ({
                 id: item.id,
                 quantity: item.quantity,
-                size: item.size || null
+                size: item.size || null,
+                color: item.color || null
             }));
 
             try {

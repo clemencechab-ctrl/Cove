@@ -18,22 +18,65 @@ function saveCart() {
     updateCartCount();
 }
 
-// Add item to cart (with stock check and size support)
-async function addToCart(id, name, price, image, size) {
+// --- Helpers stock par couleur -------------------------------------------------
+// Le sizeStock peut etre soit plat ({S:10, M:5}) soit par couleur
+// ({Blanc:{S:10...}, Noir:{S:5...}}). Ces helpers gerent les deux formes.
+
+// Retourne le sizeStock {taille: n} pour une couleur donnee.
+function getSizeStockForColor(product, color) {
+    if (!product || !product.sizeStock) return null;
+    const ss = product.sizeStock;
+    const firstVal = Object.values(ss)[0];
+    // Structure plate (valeurs numeriques) : pas de notion de couleur
+    if (typeof firstVal === 'number') return ss;
+    // Structure par couleur
+    if (color && ss[color] && typeof ss[color] === 'object') return ss[color];
+    // Couleur non precisee : agreger toutes les couleurs
+    return aggregateSizeStock(product);
+}
+
+// Somme des stocks par taille sur toutes les couleurs (ou plat tel quel).
+function aggregateSizeStock(product) {
+    if (!product || !product.sizeStock) return null;
+    const ss = product.sizeStock;
+    const firstVal = Object.values(ss)[0];
+    if (typeof firstVal === 'number') return ss; // deja plat
+    const agg = {};
+    Object.values(ss).forEach(perSize => {
+        Object.entries(perSize).forEach(([size, n]) => {
+            agg[size] = (agg[size] || 0) + (n || 0);
+        });
+    });
+    return agg;
+}
+
+// Le produit est-il totalement en rupture (toutes couleurs x tailles) ?
+function isProductOut(product) {
+    if (product.sizeStock) {
+        const agg = aggregateSizeStock(product);
+        return Object.values(agg).every(s => s <= 0);
+    }
+    return (product.stock || 0) <= 0;
+}
+
+// Add item to cart (with stock check, size + color support)
+async function addToCart(id, name, price, image, size, color) {
     const isEN = window.location.pathname.includes('/en/');
+    color = color || null;
     try {
         const res = await fetch(`/api/products/${id}`);
         const data = await res.json();
         if (data.success && data.product) {
             const product = data.product;
-            // Stock par taille
-            if (size && product.sizeStock) {
-                const sizeStk = product.sizeStock[size] || 0;
+            const sizeStock = getSizeStockForColor(product, color);
+            // Stock par taille (et couleur)
+            if (size && sizeStock) {
+                const sizeStk = sizeStock[size] || 0;
                 if (sizeStk <= 0) {
                     showNotification(isEN ? 'Out of stock for this size!' : 'Rupture de stock pour cette taille !');
                     return;
                 }
-                const existingItem = cart.find(item => item.id === id && item.size === size);
+                const existingItem = cart.find(item => item.id === id && item.size === size && item.color === color);
                 const currentQty = existingItem ? existingItem.quantity : 0;
                 if (currentQty >= sizeStk) {
                     showNotification(isEN ? 'Not enough stock for this size!' : 'Stock insuffisant pour cette taille !');
@@ -57,8 +100,8 @@ async function addToCart(id, name, price, image, size) {
         // API indisponible, on laisse ajouter
     }
 
-    // Chercher item existant (meme id ET meme taille)
-    const existingItem = cart.find(item => item.id === id && item.size === (size || null));
+    // Chercher item existant (meme id ET meme taille ET meme couleur)
+    const existingItem = cart.find(item => item.id === id && item.size === (size || null) && item.color === color);
 
     if (existingItem) {
         existingItem.quantity += 1;
@@ -69,6 +112,7 @@ async function addToCart(id, name, price, image, size) {
             price: price,
             image: image,
             size: size || null,
+            color: color,
             quantity: 1
         });
     }
@@ -78,24 +122,26 @@ async function addToCart(id, name, price, image, size) {
     showNotification(isENMsg ? 'Added to cart!' : 'Ajoute au panier !');
 }
 
-// Remove item from cart (by id + size)
-function removeFromCart(id, size) {
-    cart = cart.filter(item => !(item.id === id && item.size === (size || null)));
+// Remove item from cart (by id + size + color)
+function removeFromCart(id, size, color) {
+    color = color || null;
+    cart = cart.filter(item => !(item.id === id && item.size === (size || null) && item.color === color));
     saveCart();
     if (typeof renderCart === 'function') {
         renderCart();
     }
 }
 
-// Update item quantity (by id + size)
-async function updateQuantity(id, change, size) {
-    const item = cart.find(item => item.id === id && item.size === (size || null));
+// Update item quantity (by id + size + color)
+async function updateQuantity(id, change, size, color) {
+    color = color || null;
+    const item = cart.find(item => item.id === id && item.size === (size || null) && item.color === color);
     if (!item) return;
 
     const newQty = item.quantity + change;
 
     if (newQty <= 0) {
-        removeFromCart(id, size);
+        removeFromCart(id, size, color);
         return;
     }
 
@@ -106,8 +152,9 @@ async function updateQuantity(id, change, size) {
             const data = await res.json();
             if (data.success && data.product) {
                 const product = data.product;
-                if (size && product.sizeStock) {
-                    const sizeStk = product.sizeStock[size] || 0;
+                const sizeStock = getSizeStockForColor(product, color);
+                if (size && sizeStock) {
+                    const sizeStk = sizeStock[size] || 0;
                     if (newQty > sizeStk) {
                         const isEN = window.location.pathname.includes('/en/');
                         showNotification(isEN ? 'Not enough stock for this size!' : 'Stock insuffisant pour cette taille !');
@@ -176,21 +223,14 @@ async function checkStock() {
 
         const isEN = window.location.pathname.includes('/en/');
         const outOfStockLabel = isEN ? 'Out of stock' : 'Rupture de stock';
-        const addToCartLabel = isEN ? 'Add to cart' : 'Ajouter au panier';
 
         data.products.forEach(product => {
-            // Shop page cards
+            // Shop page cards (rupture globale + tailles agregees toutes couleurs)
             const card = document.querySelector(`.shop-card[data-id="${product.id}"]`);
             if (card) {
                 const btn = card.querySelector('.btn-add-cart');
                 const overlay = card.querySelector('.shop-card-overlay');
-                // Pour les produits avec tailles, verifier si toutes les tailles sont a 0
-                let totallyOutOfStock = false;
-                if (product.sizeStock) {
-                    totallyOutOfStock = Object.values(product.sizeStock).every(s => s <= 0);
-                } else {
-                    totallyOutOfStock = product.stock <= 0;
-                }
+                const totallyOutOfStock = isProductOut(product);
 
                 if (totallyOutOfStock) {
                     card.classList.add('out-of-stock');
@@ -207,43 +247,38 @@ async function checkStock() {
                             overlay.prepend(badge);
                         }
                     }
-                    // Desactiver les tailles en rupture sur les cartes shop
-                    if (product.sizeStock) {
-                        card.querySelectorAll('.shop-size-btn').forEach(sBtn => {
-                            const sz = sBtn.textContent.trim();
-                            if (product.sizeStock[sz] !== undefined && product.sizeStock[sz] <= 0) {
-                                sBtn.disabled = true;
-                                sBtn.classList.add('size-unavailable');
-                            }
-                        });
-                    }
                 } else {
                     card.classList.remove('out-of-stock');
                     if (btn) {
                         btn.disabled = false;
                     }
-                    // Desactiver les tailles en rupture sur les cartes shop
-                    if (product.sizeStock) {
-                        card.querySelectorAll('.shop-size-btn').forEach(sBtn => {
-                            const sz = sBtn.textContent.trim();
-                            if (product.sizeStock[sz] !== undefined && product.sizeStock[sz] <= 0) {
-                                sBtn.disabled = true;
-                                sBtn.classList.add('size-unavailable');
-                            }
-                        });
-                    }
+                }
+
+                // Desactiver les tailles indisponibles (stock agrege toutes couleurs)
+                const aggStock = aggregateSizeStock(product);
+                if (aggStock) {
+                    card.querySelectorAll('.shop-size-btn').forEach(sBtn => {
+                        const sz = sBtn.textContent.trim();
+                        if (aggStock[sz] !== undefined && aggStock[sz] <= 0) {
+                            sBtn.disabled = true;
+                            sBtn.classList.add('size-unavailable');
+                        } else {
+                            sBtn.disabled = false;
+                            sBtn.classList.remove('size-unavailable');
+                        }
+                    });
                 }
             }
 
-            // Product detail pages - verifier stock par taille pour la taille selectionnee
+            // Product detail page - stock par taille pour la couleur selectionnee
             const addBtn = document.querySelector('.btn-add-to-cart');
             if (addBtn) {
                 const pageProductId = getProductIdFromPage();
                 if (pageProductId === product.id) {
-                    if (product.sizeStock) {
-                        // Mettre a jour les boutons de taille
-                        updateSizeButtons(product.sizeStock, isEN);
-                    } else if (product.stock <= 0) {
+                    const sizeStock = getSizeStockForColor(product, window.selectedColor);
+                    if (sizeStock) {
+                        updateSizeButtons(sizeStock, isEN);
+                    } else if ((product.stock || 0) <= 0) {
                         addBtn.disabled = true;
                         addBtn.textContent = outOfStockLabel;
                         addBtn.classList.add('disabled');
@@ -256,38 +291,39 @@ async function checkStock() {
     }
 }
 
-// Mettre a jour les boutons de taille selon le stock
+// Mettre a jour les boutons de taille selon le stock (reversible : reactive d'abord)
 function updateSizeButtons(sizeStock, isEN) {
     const outLabel = isEN ? 'Out of stock' : 'Rupture de stock';
+    const addLabel = isEN ? 'Add to cart' : 'Ajouter au panier';
+
     document.querySelectorAll('.size-btn').forEach(btn => {
         const size = btn.textContent.trim();
-        if (sizeStock[size] !== undefined && sizeStock[size] <= 0) {
+        const stk = sizeStock && sizeStock[size] !== undefined ? sizeStock[size] : null;
+        if (stk !== null && stk <= 0) {
             btn.classList.add('size-unavailable');
             btn.disabled = true;
             btn.title = outLabel;
+        } else {
+            btn.classList.remove('size-unavailable');
+            btn.disabled = false;
+            btn.title = '';
         }
     });
 
-    // Si la taille active est en rupture, desactiver le bouton ajouter
-    const activeSize = document.querySelector('.size-btn.active');
-    if (activeSize && activeSize.disabled) {
-        const addBtn = document.querySelector('.btn-add-to-cart');
-        if (addBtn) {
-            addBtn.disabled = true;
-            addBtn.textContent = outLabel;
-            addBtn.classList.add('disabled');
-        }
-    }
+    const addBtn = document.querySelector('.btn-add-to-cart');
+    if (!addBtn) return;
 
-    // Si toutes les tailles sont en rupture
-    const allOut = Object.values(sizeStock).every(s => s <= 0);
-    if (allOut) {
-        const addBtn = document.querySelector('.btn-add-to-cart');
-        if (addBtn) {
-            addBtn.disabled = true;
-            addBtn.textContent = outLabel;
-            addBtn.classList.add('disabled');
-        }
+    const activeSize = document.querySelector('.size-btn.active');
+    const allOut = sizeStock && Object.values(sizeStock).every(s => s <= 0);
+
+    if ((activeSize && activeSize.disabled) || allOut) {
+        addBtn.disabled = true;
+        addBtn.textContent = outLabel;
+        addBtn.classList.add('disabled');
+    } else {
+        addBtn.disabled = false;
+        addBtn.textContent = addLabel;
+        addBtn.classList.remove('disabled');
     }
 }
 
@@ -297,7 +333,7 @@ function getProductIdFromPage() {
     if (!btn) return null;
     const onclick = btn.getAttribute('onclick');
     if (!onclick) return null;
-    const match = onclick.match(/addToCart\((\d+)/);
+    const match = onclick.match(/handleAddToCart\((\d+)/) || onclick.match(/addToCart\((\d+)/);
     return match ? parseInt(match[1]) : null;
 }
 

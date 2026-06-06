@@ -64,7 +64,7 @@ npx http-server -p 8080 -c-1   # Serve static files, no cache
 - **Frontend-Backend communication:** All API calls go through `js/api.js` using relative path `/api`. The Express server serves both the static HTML and the API.
 - **Authentication:** Firebase Auth (email/password + Google OAuth). Backend verifies JWT via `admin.auth().verifyIdToken()`. Roles stored in RTDB at `/users/{uid}/role` (`client` or `owner`).
 - **Cart:** Entirely client-side in localStorage (`coveCart` key). No server-side cart.
-- **Products:** Currently 2 products (T-shirt id:1 65 EUR, Hoodie id:2 120 EUR) with per-size stock (`sizeStock: {S, M, L, XL}`).
+- **Products:** Currently 2 products (T-shirt id:1 30 EUR, Hoodie id:2 80 EUR) with per-size stock (`sizeStock: {S, M, L, XL}`). The charged price comes from RTDB `product.price` (the backend recomputes the cart in `checkout.js`, ignoring the client-sent price); the displayed/cart price is hardcoded in the HTML (`data-price`, `.product-price`, `.shop-card-price`, and the `handleAddToCart(...)` arg). To change a price coherently, update **both** RTDB and the HTML. To temporarily lower prices for a real-payment test, use `node tests/set-product-prices.js test|restore` (RTDB only).
 - **Admin:** Protected by `requireRole('owner')` middleware. Admin page has Firebase real-time listener with polling fallback.
 - **i18n:** No framework, just duplicated HTML files in `/en/` with `../` prefixed paths for assets.
 
@@ -97,9 +97,16 @@ npx http-server -p 8080 -c-1   # Serve static files, no cache
 
 ## Environment
 
-- Backend env file: `backend/.env` (see `backend/.env.example` for template)
+- Backend env file: `backend/.env` (see `backend/.env.example` for template) — **mode TEST** (clés `sk_test`, `FRONTEND_URL=http://localhost:3000`) pour le dev local.
+- `backend/.env.production` (gitignored) — **overrides LIVE** poussés sur Cloud Run par le déploiement : `STRIPE_SECRET_KEY=sk_live_...`, `STRIPE_WEBHOOK_SECRET=whsec_...` (webhook live), `FRONTEND_URL=https://covestudio.fr`. Ne jamais committer.
 - Firebase service account JSON at project root (referenced in `backend/src/config/firebase.js`)
 - Firebase project: `covestudio` (europe-west1)
+
+## Stripe — moyens de paiement
+
+- `checkout.js` utilise `payment_method_types: ['card']`. **`card` inclut Apple Pay et Google Pay automatiquement** (wallets), sans vérification de domaine car on utilise Stripe **Checkout hébergé**. Aucune clé publique côté frontend.
+- **PayPal a été retiré** car il n'est **pas activé sur le compte Stripe live** (le laisser dans `payment_method_types` fait échouer TOUTE création de session en live — vérifié). Pour le réactiver : l'activer dans le Dashboard Stripe (Settings > Payment methods) en mode live, **puis** remettre `'paypal'` dans le tableau de `checkout.js`.
+- Le montant débité = `product.price` en RTDB (le backend recalcule, cf. plus haut). Pour un test de paiement réel à bas prix : `node tests/set-product-prices.js test|restore` (RTDB) + baisser les prix en dur dans les 6 HTML produit (`shop.html`, `produit-*.html`, idem `en/`).
 
 ## Admin / Owner account
 
@@ -118,7 +125,7 @@ If a test needs an owner session, **do not** promote `test-owner@cove-test.com` 
 
 - Image filenames: use hyphens, never spaces (e.g. `hoodie-front.JPG` not `hoodie front.JPG`)
 - Language: French is primary. Code comments, commit messages, and UI text are in French.
-- Currency: EUR. Prices are integers (65, 120).
+- Currency: EUR. Prices are integers (normal prices: T-shirt 30, Hoodie 80).
 - Frontend uses no build step, no bundler, no framework — plain HTML/CSS/JS.
 
 ## Production Domain
@@ -131,7 +138,9 @@ If a test needs an owner session, **do not** promote `test-owner@cove-test.com` 
 
 **Claude est en charge de TOUS les déploiements. Ne jamais demander à l'utilisateur de lancer `deploy.ps1` ou `firebase deploy` lui-même.** Dès qu'une modification touche `backend/`, `image/`, ou un fichier HTML/CSS/JS servi en prod, Claude doit lancer le déploiement automatiquement et confirmer le succès avant de rendre la main. Si l'auth gcloud/firebase a expiré, Claude doit le signaler avec la commande exacte à taper, mais jamais déléguer le `deploy.ps1` lui-même à l'utilisateur.
 
-**Mécanisme principal : GitHub Actions** (`.github/workflows/deploy.yml`) — se déclenche automatiquement sur chaque push sur `main`. Déploie Cloud Run + Firebase Hosting en ~2 min. **Mécanisme de secours : `.\deploy.ps1`** exécuté localement (nécessite auth gcloud + firebase interactive).
+**Mécanisme principal : GitHub Actions** (`.github/workflows/deploy.yml`) — se déclenche automatiquement sur chaque push sur `main`. Déploie Cloud Run + Firebase Hosting en ~2 min. **Mécanisme de secours : `.\deploy.ps1`** exécuté localement (nécessite auth gcloud + firebase **interactive**).
+
+**Variante non-interactive : `.\deploy-auto.ps1`** — à utiliser quand gcloud ET firebase sont déjà authentifiés localement (`gcloud auth list`, `firebase login:list` → `clemence.chab@gmail.com`). Ne fait PAS de `gcloud auth login`/`firebase login` (donc exécutable en arrière-plan sans prompt navigateur) : génère le YAML (avec overlay `.env.production`), `gcloud run deploy`, puis Hosting via `node tests/deploy-hosting.js` (API REST, token gcloud). C'est le chemin utilisé pour les déploiements pilotés par Claude. `deploy.ps1` ET `deploy-auto.ps1` appliquent tous deux l'overlay `.env.production`.
 
 ### Required tools (on dev machine)
 - Google Cloud SDK at `%LOCALAPPDATA%\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd` (this exact path is hardcoded in `deploy.ps1`). If missing, install by downloading and extracting https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-windows-x86_64.zip into `%LOCALAPPDATA%\Google\Cloud SDK\` — the archive contains a `google-cloud-sdk/` folder at its root.
@@ -150,9 +159,11 @@ The script performs 7 steps:
 
 ### Key implication
 
-**`backend/.env` is the source of truth for Cloud Run env vars.** When modifying production config, edit `backend/.env` then run `.\deploy.ps1`. In particular, `FRONTEND_URL` must be `https://covestudio.fr` for Stripe `success_url`/`cancel_url` to redirect to the correct domain after payment.
+**`backend/.env` is the base set of Cloud Run env vars, and `backend/.env.production` overrides it for prod.** `deploy.ps1` step 4 reads `.env`, then overlays `.env.production` (same `KEY=VALUE` format) on top, so any key present in `.env.production` wins for the deployed Cloud Run service. `.env.production` is gitignored.
 
-Because `.env` is also read by the local dev backend (`npm run dev`), there is a tension: changing `FRONTEND_URL=https://covestudio.fr` for prod means local Stripe tests also redirect to prod. This is currently accepted since Stripe is rarely tested locally. If it becomes an issue, split into `.env.production` or override `FRONTEND_URL` via Cloud Run secrets directly (which would require modifying `deploy.ps1`).
+This resolves the old test/prod tension: **local dev (`npm run dev`) reads only `.env` → stays in Stripe TEST mode with `FRONTEND_URL=http://localhost:3000`**, while **prod gets the LIVE values from `.env.production`** (`STRIPE_SECRET_KEY=sk_live_...`, `STRIPE_WEBHOOK_SECRET=whsec_...`, `FRONTEND_URL=https://covestudio.fr`). Never put live keys in `.env`. If `.env.production` is absent, `deploy.ps1` falls back to `.env` values unchanged.
+
+`STRIPE_WEBHOOK_SECRET` must be set in `.env.production` to the **live** webhook signing secret (Dashboard → Webhooks endpoint on `…/api/webhooks/stripe`, event `checkout.session.completed`); if empty, the webhook returns 400 and paid-status only resolves via the `/api/checkout/verify` polling fallback.
 
 ### Running the deploy
 
@@ -164,6 +175,8 @@ cd C:\dev\clem\Cove
 Browser opens twice for `gcloud auth login` and `firebase login` — authenticate with the Google account that owns the `covestudio` GCP + Firebase project. After that, steps 4-7 run unattended (~5-8 min total, most of it is Cloud Build in step 6).
 
 Claude can also run this via `powershell.exe -ExecutionPolicy Bypass -NoProfile -File ./deploy.ps1` as a background task, with the user handling the interactive auth prompts in their browser. Use `Monitor` to stream step-transition events from the output file.
+
+**For Claude-driven deploys, prefer `.\deploy-auto.ps1` run in background** (gcloud + firebase already authed as `clemence.chab@gmail.com`). **Critical footgun:** do NOT wrap the invocation in `*>&1 | Tee-Object` (or any `2>&1`/`*>&1` redirection). In PowerShell 5.1, redirecting a native command's stderr wraps each line in a `NativeCommandError` ErrorRecord; combined with the script's `$ErrorActionPreference = "Stop"`, gcloud's perfectly normal stderr (e.g. `Updated property [core/project].`) becomes a terminating error and kills the deploy at step 1. Run it plainly (`& .\deploy-auto.ps1`) — the background task already captures all output to its own file, so no redirection is needed.
 
 ### Known issues
 
