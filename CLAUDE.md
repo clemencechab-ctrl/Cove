@@ -112,6 +112,21 @@ npx http-server -p 8080 -c-1   # Serve static files, no cache
 
 **The sole admin (owner) account for production is `clemence.chab@gmail.com`** (Google OAuth). This must remain the only account with `role: "owner"` in `users/{uid}/role`. Do not grant owner to any other account without explicit instruction; demote any account you accidentally promote during testing.
 
+## Sécurité — posture vérifiée (2026-06-09)
+
+Analyse de la PR #1 (audit Grok du 31/05, hypothétique en *worst-case*) confrontée au code/infra réels. **Vérifié en prod :**
+- **Règles RTDB verrouillées** : `orders/users/contactMessages/promoCodes/products.json` renvoient tous **HTTP 401** en lecture non authentifiée. Le pire scénario de l'audit (« orders.json public ») n'existe pas. Le listener Firebase de `js/admin.js` (`database.ref('orders').on(...)`, non authentifié) est donc **toujours refusé** → bascule sur le polling `/api/admin/orders`. Pas une fuite, juste du code mort.
+- **Tous les endpoints `/api/admin/*` renvoient 401 sans Bearer** — authz owner solide (`requireRole('owner')`).
+- **Stripe prod déjà en live** (`.env.production` `sk_live` + webhook live). Les P0 « migration Stripe » de l'audit sont historiques. Le mode démo (`!STRIPE_SECRET_KEY`) est inerte en prod (clé définie).
+
+**Quick wins appliqués et déployés (commit `29c7afe`) :**
+- Retrait des deps mortes vulnérables `mongoose` + `sharp` de `backend/package.json` (jamais `require()` côté backend — **ne pas les réinstaller**). `npm audit` : 21 → 16 vulns, HIGH 5 → 2 (les 2 critiques + 2 hautes restantes sont transitives profondes du SDK Google/Express, non exploitables ici).
+- `express-rate-limit` 8.2.1 → 8.5.2 (fix HIGH contournement IPv6).
+- **Échappement HTML** de toute donnée user dans `backend/src/utils/email.js` via le helper `escapeHtml()` (surtout le formulaire de contact, attaquant-contrôlé). Les en-têtes `subject` d'email ne sont **pas** échappés en entités (géré par nodemailer).
+- Rate limiter dédié `checkoutLimiter` (30/15min) sur `/api/checkout/create-session` + `/validate-promo` dans `server.js`.
+
+**Reste à traiter (non bloquant, hors quick wins)** : stock/promo décrémentés AVANT paiement sans restauration sur panier abandonné (`checkout.js:183,188`) ; labels Colissimo sur disque éphémère Cloud Run ; CSP désactivée (`helmet contentSecurityPolicy:false`) ; `error.message` renvoyé tel quel sur certaines routes (info disclosure) ; RGPD (rétention/anonymisation commandes). **Recommandation PR #1 : ne pas merger telle quelle** — la réécriture de `plan.md` est périmée (mentionne « T-shirt 65€/Hoodie 120€ ») ; ne garder que `SECURITY_AUDIT_CHECKLIST.md` si besoin.
+
 ## Test Accounts
 
 | Role | Email | Password |
