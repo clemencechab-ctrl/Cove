@@ -1,5 +1,6 @@
 node_modules/
 .env
+.env.production
 src/data/database.json
 *.log
 .DS_Store

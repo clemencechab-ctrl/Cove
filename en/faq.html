@@ -35,7 +35,7 @@
     <link rel="icon" type="image/png" href="../image/logo-cove.png">
     <link rel="apple-touch-icon" href="../image/logo-cove.png">
     <meta name="theme-color" content="#000000">
-<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/style.css?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -78,6 +78,151 @@
         }
         .faq-cta a:hover { opacity: 0.85; }
     </style>
+    <!-- FAQPage structured data (rich results) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What payment methods do you accept?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "We accept all major credit cards (Visa, Mastercard, American Express) as well as Apple Pay and Google Pay, processed securely through Stripe."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I modify or cancel my order?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Any change or cancellation request must reach us within 12 hours of your order, at cove.off@gmail.com , with your order number. Beyond that window, the order is usually already being prepared."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "I didn't receive a confirmation email, what should I do?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Please check your spam or junk folder first. If it's not there, contact us with the email you used to place the order and we'll locate it."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I use a promo code?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, a dedicated field is available at checkout. Promo codes cannot be combined and may be subject to certain conditions (minimum order, validity period, etc.)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How long does delivery take?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Orders are prepared within 1 to 3 business days. Shipping via Colissimo La Poste then takes 2 to 5 business days within metropolitan France, and 7 to 14 days for Europe."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I track my order?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Once your parcel ships, you receive an email with your La Poste tracking number and a direct link to track it. You'll also be notified at every status change (in preparation, shipped, delivered)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do you ship internationally?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "We currently ship to France and within the European Union. For any request outside the EU, please contact us by email and we will assess feasibility on a case-by-case basis."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What if my parcel is lost or damaged?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Contact us within 48 hours after delivery at cove.off@gmail.com with your order number and, ideally, photos of the parcel. We'll open a claim with La Poste and offer a replacement or a refund."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I pick the right size?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Our pieces are designed with an oversized streetwear fit. If you hesitate between two sizes, pick the smaller one for a tighter fit, or the larger one for a relaxed look. Feel free to email us for personalized advice."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "An item is sold out, will it be restocked?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Our collections are produced in limited runs. Some pieces may be restocked occasionally, others won't. Follow us on Instagram @covestudio.off to be the first to know."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I care for my COVE pieces?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Machine wash at 30 °C max, inside out. Avoid the tumble dryer to preserve prints and cuts. Detailed instructions are on each item's label."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I return or exchange an item?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, you have 14 days from receipt to return an unworn, unwashed item with its original tags. See our return policy for full details."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Who pays for return shipping?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Return shipping is at the customer's expense, except for defective items, shipping errors on our side, or mismatches with the description — in those cases we cover the return in full."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "When will I be refunded?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Refunds are issued within 14 days of receiving and inspecting your return, on the original payment method. You'll get an email confirmation as soon as the refund is processed."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Do I need an account to order?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "No, you can check out as a guest. Creating an account lets you track your orders, keep your history and speed up future purchases."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is my payment data secure?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "All payments are handled by Stripe, PCI-DSS Level 1 certified — the industry's strictest security standard. We never see or store your banking information."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I delete my account or data?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Just send us an email at cove.off@gmail.com from the address associated with your account. Per GDPR, we process deletion requests within 30 days. More in our privacy policy ."
+                }
+            }
+        ]
+    }
+    </script>
 </head>
 <body>
     <header class="header">
@@ -258,7 +403,7 @@
             <div class="footer-brand">
                 <img src="../image/logo-cove.png" alt="COVE" class="footer-logo-img">
                 <p class="footer-tagline">Premium Streetwear</p>
-                <p class="footer-credit">made by Clemence</p>
+                <p class="footer-credit">made by Clémence</p>
             </div>
             <div class="footer-links">
                 <div class="footer-column">
@@ -286,7 +431,8 @@
         </div>
     </footer>
 
-    <script src="../js/cart.js"></script>
+    <script src="../js/cart.js?v=2"></script>
+    <script src="../js/nav.js?v=2"></script>
     <script>
         document.querySelectorAll('.faq-question').forEach(btn => {
             btn.addEventListener('click', () => {

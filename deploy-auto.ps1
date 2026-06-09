@@ -33,6 +33,18 @@ Get-Content $envFile | ForEach-Object {
     }
 }
 
+# Overrides production (clés Stripe live, FRONTEND_URL prod) — écrase .env
+$prodEnvFile = Join-Path $BACKEND ".env.production"
+if (Test-Path $prodEnvFile) {
+    Get-Content $prodEnvFile | ForEach-Object {
+        $line = $_.Trim()
+        if ($line -and -not $line.StartsWith("#") -and $line -match "^([^=]+)=(.*)$") {
+            $envVars[$Matches[1].Trim()] = $Matches[2].Trim()
+        }
+    }
+    Write-Host "  overrides .env.production appliques" -ForegroundColor Green
+}
+
 $envVars["NODE_ENV"] = "production"
 $envVars.Remove("PORT")
 

@@ -20,7 +20,7 @@ const IGNORE = HOSTING.ignore || [];
 function log(step, msg) { console.log(`\n[${step}] ${msg}`); }
 
 function getAccessToken() {
-    const gcloud = 'C:\\Users\\cynak\\AppData\\Local\\Google\\Cloud SDK\\google-cloud-sdk\\bin\\gcloud.cmd';
+    const gcloud = `${process.env.LOCALAPPDATA}\\Google\\Cloud SDK\\google-cloud-sdk\\bin\\gcloud.cmd`;
     return execSync(`"${gcloud}" auth print-access-token`, { encoding: 'utf8' }).trim();
 }
 
@@ -113,10 +113,16 @@ async function api(method, url, token, body, headers = {}) {
             if (out.source && !out.glob) { out.glob = out.source; delete out.source; }
             return out;
         });
+        // headers : firebase.json utilise [{key,value}], l'API REST attend un map {cle:valeur}
+        const headers = (HOSTING.headers || []).map(h => {
+            const map = {};
+            (h.headers || []).forEach(kv => { map[kv.key] = kv.value; });
+            return { glob: h.glob || h.source, headers: map };
+        });
         const version = await api('POST',
             `https://firebasehosting.googleapis.com/v1beta1/sites/${SITE}/versions`,
             token,
-            { config: { rewrites } }
+            { config: { rewrites, headers } }
         );
         const versionName = version.name; // sites/X/versions/Y
         console.log(`      version : ${versionName}`);

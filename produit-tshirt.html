@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SEO -->
     <title>Covestudio — T-shirt Streetwear Oversize | COVE Studio</title>
-    <meta name="description" content="T-shirt Covestudio en coton épais 220g/m². Coupe oversize, disponible en blanc et noir. Livraison France sous 2-5 jours. 30 EUR.">
+    <meta name="description" content="T-shirt Covestudio en coton épais 205g/m². Coupe boxy, disponible en blanc et noir. Livraison France sous 2-5 jours. 30 EUR.">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="author" content="COVE Studio">
 
@@ -19,7 +19,7 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="COVE Studio">
     <meta property="og:title" content="Covestudio — T-shirt Streetwear Oversize | COVE Studio">
-    <meta property="og:description" content="T-shirt Covestudio en coton épais 220g/m². Coupe oversize, disponible en blanc et noir. Livraison France sous 2-5 jours. 30 EUR.">
+    <meta property="og:description" content="T-shirt Covestudio en coton épais 205g/m². Coupe boxy, disponible en blanc et noir. Livraison France sous 2-5 jours. 30 EUR.">
     <meta property="og:url" content="https://covestudio.fr/produit-tshirt.html">
     <meta property="og:image" content="https://covestudio.fr/image/t-shirt-front.JPG">
     <meta property="og:locale" content="fr_FR">
@@ -28,14 +28,14 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Covestudio — T-shirt Streetwear Oversize | COVE Studio">
-    <meta name="twitter:description" content="T-shirt Covestudio en coton épais 220g/m². Coupe oversize, disponible en blanc et noir. Livraison France sous 2-5 jours. 30 EUR.">
+    <meta name="twitter:description" content="T-shirt Covestudio en coton épais 205g/m². Coupe boxy, disponible en blanc et noir. Livraison France sous 2-5 jours. 30 EUR.">
     <meta name="twitter:image" content="https://covestudio.fr/image/t-shirt-front.JPG">
 
     <!-- Favicon + theme -->
     <link rel="icon" type="image/png" href="image/logo-cove.png">
     <link rel="apple-touch-icon" href="image/logo-cove.png">
     <meta name="theme-color" content="#000000">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -47,7 +47,7 @@
         "@type": "Product",
         "name": "Covestudio",
         "image": "https://covestudio.fr/image/t-shirt-front.JPG",
-        "description": "T-shirt Covestudio en coton épais 220g/m². Coupe oversize, design exclusif imprimé, disponible en blanc et noir. Fabrication française.",
+        "description": "T-shirt Covestudio en coton épais 205g/m². Coupe boxy, design exclusif imprimé, disponible en blanc et noir. Fabrication française.",
         "brand": { "@type": "Brand", "name": "COVE Studio" },
         "sku": "COVE-COVESTUDIO-01",
         "offers": {
@@ -59,6 +59,33 @@
             "itemCondition": "https://schema.org/NewCondition",
             "seller": { "@type": "Organization", "name": "COVE Studio" }
         }
+    }
+    </script>
+    <!-- BreadcrumbList structured data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Accueil",
+                "item": "https://covestudio.fr/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Boutique",
+                "item": "https://covestudio.fr/shop.html"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Covestudio",
+                "item": "https://covestudio.fr/produit-tshirt.html"
+            }
+        ]
     }
     </script>
 </head>
@@ -111,7 +138,7 @@
                 <p class="product-price">30 EUR</p>
 
                 <div class="product-description">
-                    <p>Le t-shirt Covestudio en coton épais de qualité premium, imprimé avec un design exclusif COVE. Coupe oversize, confortable et durable. Disponible en blanc et noir.</p>
+                    <p>Le t-shirt Covestudio en coton épais de qualité premium, imprimé avec un design en DTF dans un atelier en France. Coupe boxy, confortable et durable. Disponible en blanc et noir.</p>
                 </div>
 
                 <div class="product-details">
@@ -121,15 +148,15 @@
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Grammage</span>
-                        <span class="detail-value">220g/m2</span>
+                        <span class="detail-value">205g/m2</span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Coupe</span>
-                        <span class="detail-value">Oversize</span>
+                        <span class="detail-value">Boxy</span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Entretien</span>
-                        <span class="detail-value">Lavage 30° - Ne pas sécher en machine</span>
+                        <span class="detail-value">Lavage à 30°</span>
                     </div>
                 </div>
 
@@ -154,7 +181,7 @@
                         <button class="size-btn active" onclick="selectSize('L', this)">L</button>
                         <button class="size-btn" onclick="selectSize('XL', this)">XL</button>
                     </div>
-                    <a href="#" class="size-guide-link">Guide des tailles</a>
+                    <a href="#" class="size-guide-link" onclick="openSizeGuide(event)">Guide des tailles</a>
                 </div>
 
                 <div class="product-actions">
@@ -167,7 +194,7 @@
                 <div class="product-extra-info">
                     <div class="extra-item">
                         <span class="extra-icon">&#10003;</span>
-                        <span>Livraison gratuite</span>
+                        <span>Livraison à 5,90 €</span>
                     </div>
                     <div class="extra-item">
                         <span class="extra-icon">&#8634;</span>
@@ -186,8 +213,8 @@
                             <span class="accordion-icon">+</span>
                         </button>
                         <div class="accordion-content">
-                            <p>Ce t-shirt incarne l'esprit COVE : un design unique, une qualité irréprochable et un confort absolu. Fabrique en coton biologique certifie, il offre une douceur exceptionnelle tout en respectant l'environnement.</p>
-                            <p>L'impression haute definition résiste aux lavages répétés. La coupe oversize convient a toutes les morphologies.</p>
+                            <p>Ce t-shirt incarne l'esprit Cove. Un design unique, une qualité irréprochable et un confort absolu. Fabriqué en 100 % coton, ses designs sont imprimés en DTF et offrent une solide résistance aux lavages répétés.</p>
+                            <p>La coupe boxy, tendance du moment, convient à toutes les morphologies.</p>
                         </div>
                     </div>
                     <div class="accordion-item">
@@ -196,7 +223,7 @@
                             <span class="accordion-icon">+</span>
                         </button>
                         <div class="accordion-content">
-                            <p>Livraison gratuite en France metropolitaine, Belgique, Suisse et Luxembourg.</p>
+                            <p>Livraison à 5,90 € en France metropolitaine, Belgique, Suisse et Luxembourg.</p>
                             <p>Délai de livraison : 5-10 jours ouvrables.</p>
                             <p>Suivi de commande par email.</p>
                         </div>
@@ -221,6 +248,33 @@
     <div class="cart-notification" id="cart-notification">
         <span class="notification-icon">&#10003;</span>
         <span>Article ajouté au panier</span>
+    </div>
+
+    <!-- Guide des tailles -->
+    <div class="size-guide-modal" id="size-guide-modal">
+        <div class="size-guide-content">
+            <button class="size-guide-close" onclick="closeSizeGuide()" aria-label="Fermer">&times;</button>
+            <h2>Guide des tailles</h2>
+            <p class="size-guide-note">Mesures en centimètres, vêtement à plat. Valeurs indicatives, en attente des dimensions définitives.</p>
+            <table class="size-guide-table">
+                <thead>
+                    <tr>
+                        <th>Taille</th>
+                        <th>Poitrine</th>
+                        <th>Longueur</th>
+                        <th>Épaules</th>
+                        <th>Manche</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>XS</td><td>52</td><td>66</td><td>50</td><td>19</td></tr>
+                    <tr><td>S</td><td>55</td><td>68</td><td>52</td><td>20</td></tr>
+                    <tr><td>M</td><td>58</td><td>70</td><td>54</td><td>21</td></tr>
+                    <tr><td>L</td><td>61</td><td>72</td><td>56</td><td>22</td></tr>
+                    <tr><td>XL</td><td>64</td><td>74</td><td>58</td><td>23</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Footer -->
@@ -264,7 +318,7 @@
         </div>
     </footer>
 
-    <script src="js/cart.js"></script>
+    <script src="js/cart.js?v=2"></script>
     <script>
         let selectedSize = 'L';
         window.selectedColor = 'Blanc';
@@ -350,6 +404,26 @@
             addToCart(id, name, price, img, selectedSize, window.selectedColor);
         }
 
+        function openSizeGuide(e) {
+            if (e) e.preventDefault();
+            const m = document.getElementById('size-guide-modal');
+            if (m) m.classList.add('active');
+        }
+
+        function closeSizeGuide() {
+            const m = document.getElementById('size-guide-modal');
+            if (m) m.classList.remove('active');
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeSizeGuide();
+        });
+
+        document.addEventListener('click', function(e) {
+            const m = document.getElementById('size-guide-modal');
+            if (m && e.target === m) closeSizeGuide();
+        });
+
         function showNotification() {
             const notification = document.getElementById('cart-notification');
             notification.classList.add('show');
@@ -358,6 +432,6 @@
             }, 3000);
         }
     </script>
-    <script src="js/nav.js"></script>
+    <script src="js/nav.js?v=2"></script>
 </body>
 </html>

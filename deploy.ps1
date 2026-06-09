@@ -55,6 +55,21 @@ Get-Content $envFile | ForEach-Object {
     }
 }
 
+# Overrides production : backend/.env.production (clés Stripe live, FRONTEND_URL prod, etc.)
+# écrase les valeurs de .env. N'existe pas en local => le dev local reste en mode test.
+$prodEnvFile = Join-Path $BACKEND ".env.production"
+if (Test-Path $prodEnvFile) {
+    Get-Content $prodEnvFile | ForEach-Object {
+        $line = $_.Trim()
+        if ($line -and -not $line.StartsWith("#") -and $line -match "^([^=]+)=(.*)$") {
+            $envVars[$Matches[1].Trim()] = $Matches[2].Trim()
+        }
+    }
+    Write-Host "  OK - overrides .env.production appliques" -ForegroundColor Green
+} else {
+    Write-Host "  INFO - pas de .env.production (valeurs de .env utilisees telles quelles)" -ForegroundColor Gray
+}
+
 # Valeurs forcées pour production (PORT est réservé par Cloud Run, ne pas l'inclure)
 $envVars["NODE_ENV"] = "production"
 $envVars.Remove("PORT")

@@ -41,7 +41,7 @@
     <!-- Theme color -->
     <meta name="theme-color" content="#000000">
 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -112,7 +112,7 @@
             <a href="#collection" class="btn-primary">Voir la collection</a>
         </div>
         <div class="hero-image">
-            <img src="image/fond decran site.JPG" alt="Hero Image">
+            <img src="image/hero-cove.webp" alt="COVE Studio — collection streetwear premium française" width="1920" height="1285" fetchpriority="high">
         </div>
     </section>
 
@@ -197,19 +197,27 @@
     <section id="lookbook" class="lookbook">
         <div class="section-header">
             <h2 class="section-title">Lookbook</h2>
-            <p class="section-subtitle">AW26</p>
+            <p class="section-subtitle">SS26</p>
         </div>
         <div class="lookbook-grid">
-            <div class="lookbook-item large"><img src="image/IMG_9239.JPG" alt="Lookbook 1" style="object-position: center 35%;"></div>
-            <div class="lookbook-item"><img src="image/IMG_8739.JPG" alt="Lookbook 2"></div>
-            <div class="lookbook-item"><img src="image/IMG_8755.JPG" alt="Lookbook 3" style="object-position: center 40%;"></div>
+            <div class="lookbook-item large"><img src="image/lookbook-cove-1.webp" alt="Lookbook COVE Studio — t-shirt streetwear oversize" width="1400" height="2060" loading="lazy" style="object-position: center 35%;"></div>
+            <div class="lookbook-item"><img src="image/lookbook-cove-2.webp" alt="Lookbook COVE Studio — collection SS26" width="1400" height="2091" loading="lazy"></div>
+            <div class="lookbook-item"><img src="image/lookbook-cove-3.webp" alt="Lookbook COVE Studio — streetwear français premium" width="1400" height="2091" loading="lazy" style="object-position: center 40%;"></div>
         </div>
     </section>
 
     <section id="about" class="about">
         <div class="about-content">
-            <img src="image/logo-cove.png" alt="COVE" class="about-logo-img">
-            <p class="about-text">Une marque née de la passion pour le streetwear authentique. Chaque pièce est pensée pour allier confort, style et durabilité. COVE, c'est plus qu'une marque, c'est une vision.</p>
+            <div class="about-definition">
+                <img src="image/logo-cove.png" alt="Cove" class="about-def-logo">
+                <p class="about-def-pron">/kōv/</p>
+                <span class="about-def-divider"></span>
+                <p class="about-def-line">Un endroit protégé du bruit extérieur.</p>
+                <p class="about-def-line">Une croissance silencieuse.</p>
+                <p class="about-def-line">La philosophie de devenir sans avoir besoin de paraître.</p>
+                <span class="about-def-divider"></span>
+                <p class="about-def-tagline">Grandir sans bruit</p>
+            </div>
         </div>
     </section>
 
@@ -263,7 +271,7 @@
             <p>&copy; 2026 COVE. Tous droits réservés.</p>
         </div>
     </footer>
-    <script src="js/cart.js"></script>
+    <script src="js/cart.js?v=2"></script>
     <script>
         function shopSelectSize(btn) {
             event.preventDefault();
@@ -303,6 +311,6 @@
             addToCart(id, name, price, image, size, color);
         }
     </script>
-    <script src="js/nav.js"></script>
+    <script src="js/nav.js?v=2"></script>
 </body>
 </html>

@@ -230,7 +230,133 @@ img {
 
 @media (prefers-reduced-motion: reduce) {
     .marquee-content {
-        animation: none;
+        /* On garde le defilement (ralenti) meme si l'utilisateur a active
+           "reduire les animations" : la bande doit rester vivante. */
+        animation: marquee 45s linear infinite;
+    }
+}
+
+/* ==========================================
+   Menu mobile (injecte par js/nav.js)
+   ========================================== */
+.mobile-cart-link {
+    display: none; /* masque sur desktop, affiche en <=768px */
+    position: relative;
+    z-index: 1100;
+    margin-left: auto;
+    margin-right: 1rem;
+    color: var(--color-text);
+    align-items: center;
+}
+
+.mobile-cart-link svg {
+    width: 24px;
+    height: 24px;
+}
+
+.mobile-cart-count {
+    position: absolute;
+    top: -7px;
+    right: -9px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: #fff;
+    color: #000;
+    font-size: 0.62rem;
+    font-weight: 600;
+    line-height: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-menu-toggle {
+    display: none; /* masque sur desktop, affiche en <=768px */
+    position: relative;
+    z-index: 1100;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    margin: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.mobile-menu-toggle span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    margin: 0 auto;
+    background: var(--color-text);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.mobile-menu-toggle.open span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+.mobile-menu-toggle.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-toggle.open span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+.mobile-menu-panel {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.97);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--color-border);
+    transform: translateY(-12px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s;
+}
+
+.mobile-menu-panel.open {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.mobile-menu-panel a {
+    padding: 1.1rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.mobile-menu-panel a:last-child {
+    border-bottom: none;
+}
+
+.mobile-menu-panel a:hover,
+.mobile-menu-panel a:active {
+    color: var(--color-text);
+}
+
+@media (max-width: 768px) {
+    .mobile-menu-toggle {
+        display: flex;
+    }
+
+    .mobile-cart-link {
+        display: inline-flex;
     }
 }
 
@@ -383,6 +509,55 @@ img {
     font-weight: 300;
     line-height: 1.9;
     color: var(--color-text-muted);
+}
+
+.about-definition {
+    max-width: 560px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.about-def-logo {
+    height: 220px;
+    width: auto;
+    display: block;
+    margin: 0 auto 0.5rem;
+    filter: invert(1) brightness(2);
+}
+
+.about-def-pron {
+    font-size: 1.4rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--color-text-muted);
+    margin: -4.5rem 0 0;
+}
+
+.about-def-divider {
+    display: block;
+    width: 120px;
+    height: 1px;
+    background: var(--color-border);
+    margin: 1.3rem auto;
+}
+
+.about-def-line {
+    font-size: 1.25rem;
+    font-weight: 300;
+    line-height: 1.6;
+    color: var(--color-text-muted);
+    margin: 0 0 1.2rem;
+}
+
+.about-def-line:last-of-type {
+    margin-bottom: 0;
+}
+
+.about-def-tagline {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--color-text);
+    margin: 0;
 }
 
 /* ==========================================
@@ -1430,12 +1605,17 @@ img {
         height: auto;
     }
 
-    .lookbook-item.large {
-        grid-row: span 1;
+    /* Sur mobile, on reproduit le cadrage du desktop via des aspect-ratios :
+       la grande image reste quasi carree, les petites restent en paysage.
+       object-fit:cover + object-position conservent le meme rognage. */
+    .lookbook-item {
+        height: auto;
+        aspect-ratio: 3 / 2;
     }
 
-    .lookbook-item {
-        height: 50vh;
+    .lookbook-item.large {
+        grid-row: span 1;
+        aspect-ratio: 8 / 7;
     }
 }
 
@@ -1450,6 +1630,12 @@ img {
 
     .hero-title {
         font-size: 2rem;
+    }
+
+    /* La personne est sur la gauche de l'image paysage : on decale le
+       cadrage portrait mobile pour qu'elle reste visible. */
+    .hero-image img {
+        object-position: 30% center;
     }
 
     .collection, .lookbook, .about {
@@ -1512,8 +1698,24 @@ img {
     }
 
     .cart-item {
+        position: relative;
         grid-template-columns: 80px 1fr;
         gap: 1rem;
+    }
+
+    /* L'image est figee a 100px : on la ramene a 80px pour qu'elle tienne
+       dans sa colonne et ne deborde pas sous le nom de l'article. */
+    .cart-item-image {
+        width: 80px;
+        height: 80px;
+    }
+
+    .cart-item-details {
+        min-width: 0;
+    }
+
+    .cart-item-details h4 {
+        overflow-wrap: anywhere;
     }
 
     .cart-item-quantity,
@@ -2048,6 +2250,93 @@ img {
 
 .size-guide-link:hover {
     color: var(--color-text);
+}
+
+/* Size Guide Modal */
+.size-guide-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 2000;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.size-guide-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.size-guide-content {
+    background: #0a0a0a;
+    border: 1px solid var(--color-border);
+    padding: 3rem;
+    max-width: 560px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.size-guide-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    color: var(--color-text);
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.size-guide-content h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.size-guide-note {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+}
+
+.size-guide-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.size-guide-table th,
+.size-guide-table td {
+    padding: 0.85rem 0.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.size-guide-table thead th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.size-guide-table tbody td:first-child {
+    font-weight: 600;
+}
+
+.size-guide-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
 .size-error {
