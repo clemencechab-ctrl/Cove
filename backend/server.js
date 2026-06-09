@@ -60,10 +60,22 @@ const authLimiter = rateLimit({
     message: { error: 'Trop de tentatives, veuillez réessayer plus tard' }
 });
 
+// Rate limiting pour le checkout et la validation de promo
+// (anti-abus / énumération de codes promo) — 30 req / 15 min par IP
+const checkoutLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Trop de tentatives de paiement, veuillez réessayer plus tard' }
+});
+
 app.use('/api/', generalLimiter);
 app.use('/api/users/login', authLimiter);
 app.use('/api/users/register', authLimiter);
 app.use('/api/users/forgot-password', authLimiter);
+app.use('/api/checkout/create-session', checkoutLimiter);
+app.use('/api/checkout/validate-promo', checkoutLimiter);
 
 // Parse JSON (sauf pour les webhooks Stripe qui ont besoin du raw body)
 app.use((req, res, next) => {

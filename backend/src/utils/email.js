@@ -16,6 +16,19 @@ function getImageUrl(image) {
     return image.startsWith('http') ? image : `${PUBLIC_URL}/${image}`;
 }
 
+// Échappe les données contrôlées par l'utilisateur avant interpolation dans le
+// HTML des emails (anti-injection / rendu cassé). À utiliser sur tout champ
+// provenant du client : nom, email, adresse, message de contact, etc.
+function escapeHtml(value) {
+    if (value === null || value === undefined) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 // Bandeau complet en UNE image : noir avec logo blanc. Aucun fond CSS, aucun
 // texte HTML — Gmail Android ne pourra pas inverser les couleurs.
 function getEmailHeader() {
@@ -38,7 +51,7 @@ function wrapEmailHtml(bodyHtml, subject = 'COVE') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <meta name="supported-color-schemes" content="light dark">
-    <title>${subject}</title>
+    <title>${escapeHtml(subject)}</title>
     <style>${EMAIL_HEAD_STYLES}</style>
 </head>
 <body style="margin: 0; padding: 0;">
@@ -109,23 +122,23 @@ async function sendOrderConfirmation(order) {
         const itemsHtml = order.items.map(item => `
             <tr>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; width: 60px;">
-                    ${item.image ? `<img src="${getImageUrl(item.image)}" alt="${item.name}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 4px;">` : ''}
+                    ${item.image ? `<img src="${getImageUrl(item.image)}" alt="${escapeHtml(item.name)}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 4px;">` : ''}
                 </td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}${item.size ? ' — ' + item.size : ''}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(item.name)}${item.size ? ' — ' + escapeHtml(item.size) : ''}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity).toFixed(2)} &euro;</td>
             </tr>
         `).join('');
 
         const shippingAddress = order.shipping
-            ? `${order.shipping.address || ''}, ${order.shipping.postalCode || ''} ${order.shipping.city || ''}, ${order.shipping.country || 'FR'}`
+            ? `${escapeHtml(order.shipping.address || '')}, ${escapeHtml(order.shipping.postalCode || '')} ${escapeHtml(order.shipping.city || '')}, ${escapeHtml(order.shipping.country || 'FR')}`
             : 'Non renseignée';
 
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 ${getEmailHeader()}
                 <h2>Confirmation de commande</h2>
-                <p>Bonjour ${order.customer.firstName},</p>
+                <p>Bonjour ${escapeHtml(order.customer.firstName)},</p>
                 <p>Merci pour votre commande ! Voici le récapitulatif :</p>
 
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
@@ -194,7 +207,7 @@ async function sendOrderStatusUpdate(order, newStatus) {
                 subject: `COVE — Votre commande #${order.orderNumber} a été expédiée`,
                 title: 'Commande expédiée',
                 message: order.trackingNumber
-                    ? `Votre commande a été expédiée ! Numéro de suivi : <strong>${order.trackingNumber}</strong><br><a href="https://www.laposte.fr/outils/suivre-vos-envois?code=${order.trackingNumber}" style="color: #333;">Suivre mon colis sur La Poste</a>`
+                    ? `Votre commande a été expédiée ! Numéro de suivi : <strong>${escapeHtml(order.trackingNumber)}</strong><br><a href="https://www.laposte.fr/outils/suivre-vos-envois?code=${encodeURIComponent(order.trackingNumber)}" style="color: #333;">Suivre mon colis sur La Poste</a>`
                     : 'Votre commande a été expédiée ! Vous la recevrez bientôt.'
             },
             delivered: {
@@ -216,7 +229,7 @@ async function sendOrderStatusUpdate(order, newStatus) {
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 ${getEmailHeader()}
                 <h2>${info.title}</h2>
-                <p>Bonjour ${order.customer.firstName},</p>
+                <p>Bonjour ${escapeHtml(order.customer.firstName)},</p>
                 <p>${info.message}</p>
                 <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
                     <p><strong>Commande :</strong> ${order.orderNumber}</p>
@@ -254,11 +267,11 @@ async function sendContactNotification(contactData) {
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 ${getEmailHeader()}
                 <h2>Nouveau message de contact</h2>
-                <p><strong>Nom:</strong> ${name}</p>
-                <p><strong>Email:</strong> ${email}</p>
-                <p><strong>Sujet:</strong> ${subject || 'Non spécifié'}</p>
+                <p><strong>Nom:</strong> ${escapeHtml(name)}</p>
+                <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+                <p><strong>Sujet:</strong> ${escapeHtml(subject || 'Non spécifié')}</p>
                 <p><strong>Message:</strong></p>
-                <p>${message.replace(/\n/g, '<br>')}</p>
+                <p>${escapeHtml(message).replace(/\n/g, '<br>')}</p>
                 <hr>
                 <p><small>Message envoyé depuis le site COVE</small></p>
                 </div>
@@ -274,11 +287,11 @@ async function sendContactNotification(contactData) {
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 ${getEmailHeader()}
                 <h2>Merci pour votre message !</h2>
-                <p>Bonjour ${name},</p>
+                <p>Bonjour ${escapeHtml(name)},</p>
                 <p>Nous avons bien reçu votre message et nous vous répondrons dans les plus brefs délais.</p>
                 <p>Voici un récapitulatif de votre message :</p>
                 <blockquote style="border-left: 3px solid #ccc; padding-left: 15px; margin: 20px 0;">
-                    ${message.replace(/\n/g, '<br>')}
+                    ${escapeHtml(message).replace(/\n/g, '<br>')}
                 </blockquote>
                 <p>À bientôt,<br>L'équipe COVE</p>
                 </div>
@@ -301,16 +314,16 @@ async function sendOrderNotificationToOwner(order) {
         const itemsHtml = order.items.map(item => `
             <tr>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; width: 60px;">
-                    ${item.image ? `<img src="${getImageUrl(item.image)}" alt="${item.name}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 4px;">` : ''}
+                    ${item.image ? `<img src="${getImageUrl(item.image)}" alt="${escapeHtml(item.name)}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 4px;">` : ''}
                 </td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}${item.size ? ' — ' + item.size : ''}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(item.name)}${item.size ? ' — ' + escapeHtml(item.size) : ''}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
                 <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity).toFixed(2)} &euro;</td>
             </tr>
         `).join('');
 
         const shippingAddress = order.shipping
-            ? `${order.shipping.address || ''}, ${order.shipping.postalCode || ''} ${order.shipping.city || ''}, ${order.shipping.country || 'FR'}`
+            ? `${escapeHtml(order.shipping.address || '')}, ${escapeHtml(order.shipping.postalCode || '')} ${escapeHtml(order.shipping.city || '')}, ${escapeHtml(order.shipping.country || 'FR')}`
             : 'Non renseignée';
 
         const html = `
@@ -321,9 +334,9 @@ async function sendOrderNotificationToOwner(order) {
 
                 <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
                     <p><strong>Commande :</strong> ${order.orderNumber}</p>
-                    <p><strong>Client :</strong> ${order.customer.firstName} ${order.customer.lastName}</p>
-                    <p><strong>Email :</strong> ${order.customer.email}</p>
-                    <p><strong>Téléphone :</strong> ${order.customer.phone || 'Non renseigné'}</p>
+                    <p><strong>Client :</strong> ${escapeHtml(order.customer.firstName)} ${escapeHtml(order.customer.lastName)}</p>
+                    <p><strong>Email :</strong> ${escapeHtml(order.customer.email)}</p>
+                    <p><strong>Téléphone :</strong> ${escapeHtml(order.customer.phone || 'Non renseigné')}</p>
                 </div>
 
                 <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
@@ -387,13 +400,13 @@ async function sendCancelReturnRequest(order, type, reason, customerEmail) {
                     <h2>Demande de ${typeLabel}</h2>
                     <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
                         <p><strong>Commande :</strong> ${order.orderNumber}</p>
-                        <p><strong>Client :</strong> ${customerName}</p>
-                        <p><strong>Email :</strong> ${customerEmail}</p>
+                        <p><strong>Client :</strong> ${escapeHtml(customerName)}</p>
+                        <p><strong>Email :</strong> ${escapeHtml(customerEmail)}</p>
                         <p><strong>Type :</strong> ${typeLabelCap}</p>
                     </div>
                     <div style="background: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #ffc107;">
                         <p><strong>Raison :</strong></p>
-                        <p>${reason.replace(/\n/g, '<br>')}</p>
+                        <p>${escapeHtml(reason || '').replace(/\n/g, '<br>')}</p>
                     </div>
                     <p>Merci de traiter cette demande dans les plus brefs délais.</p>
                 </div>
@@ -409,7 +422,7 @@ async function sendCancelReturnRequest(order, type, reason, customerEmail) {
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                     ${getEmailHeader()}
                     <h2>Demande de ${typeLabel} reçue</h2>
-                    <p>Bonjour${order.customer?.firstName ? ' ' + order.customer.firstName : ''},</p>
+                    <p>Bonjour${order.customer?.firstName ? ' ' + escapeHtml(order.customer.firstName) : ''},</p>
                     <p>Nous avons bien reçu votre demande de ${typeLabel} pour la commande <strong>${order.orderNumber}</strong>.</p>
                     <p>Notre équipe va étudier votre demande et vous recontactera dans les plus brefs délais.</p>
                     <p>À bientôt,<br>L'équipe COVE</p>
