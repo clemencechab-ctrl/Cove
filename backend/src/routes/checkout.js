@@ -114,7 +114,8 @@ router.post('/validate-promo', async (req, res) => {
         });
     } catch (error) {
         console.error('Validate promo error:', error);
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -309,7 +310,8 @@ router.post('/create-session', optionalAuth, async (req, res) => {
         });
     } catch (error) {
         console.error('Checkout error:', error);
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -333,7 +335,7 @@ router.post('/verify', async (req, res) => {
             return res.json({
                 success: true,
                 paid: true,
-                order: { orderNumber: order.orderNumber, total: order.total, status: 'paid' }
+                order: { orderNumber: order.orderNumber, status: 'paid' }
             });
         }
 
@@ -357,7 +359,7 @@ router.post('/verify', async (req, res) => {
                     return res.json({
                         success: true,
                         paid: true,
-                        order: { orderNumber: order.orderNumber, total: order.total, status: 'paid' }
+                        order: { orderNumber: order.orderNumber, status: 'paid' }
                     });
                 }
             } catch (stripeErr) {
@@ -368,10 +370,11 @@ router.post('/verify', async (req, res) => {
         res.json({
             success: true,
             paid: false,
-            order: { orderNumber: order.orderNumber, total: order.total, status: order.status }
+            order: { orderNumber: order.orderNumber, status: order.status }
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 

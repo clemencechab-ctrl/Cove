@@ -266,6 +266,38 @@ module.exports = {
         return snapshot.val();
     },
 
+    // RGPD — droit a l'effacement. Anonymise les donnees personnelles de l'utilisateur
+    // dans ses commandes (on conserve montants / articles / dates / numero de commande
+    // pour l'obligation legale de conservation 10 ans, cf. confidentialite.html) et
+    // supprime sa fiche utilisateur RTDB. Idempotent. Ne touche PAS a Firebase Auth
+    // (a faire par l'appelant via admin.auth().deleteUser).
+    eraseUserData: async (uid) => {
+        const userSnap = await usersRef.child(uid).once('value');
+        const user = userSnap.val();
+        const email = user && user.email ? user.email : null;
+
+        const ordersSnap = await ordersRef.once('value');
+        const ordersData = ordersSnap.val() || {};
+        let anonymized = 0;
+        for (const [key, order] of Object.entries(ordersData)) {
+            const belongs = order.userId === uid
+                || (email && order.customer && order.customer.email === email);
+            if (!belongs || order.anonymizedAt) continue;
+            await ordersRef.child(key).update({
+                userId: null,
+                customer: { email: 'anonymise@rgpd.local', firstName: 'Anonymise', lastName: 'RGPD', phone: '' },
+                shipping: {
+                    address: 'Anonymise', city: '', postalCode: '',
+                    country: order.shipping ? (order.shipping.country || '') : ''
+                },
+                anonymizedAt: new Date().toISOString()
+            });
+            anonymized++;
+        }
+        await usersRef.child(uid).remove();
+        return { email, anonymizedOrders: anonymized };
+    },
+
     updateOrderStripeSession: async (id, sessionId) => {
         const snapshot = await ordersRef.once('value');
         const data = snapshot.val();

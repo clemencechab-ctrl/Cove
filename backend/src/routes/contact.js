@@ -55,7 +55,8 @@ router.post('/', async (req, res) => {
             emailSent
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -69,7 +70,8 @@ router.get('/messages', authenticate, requireRole('owner'), async (req, res) => 
             messages
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 

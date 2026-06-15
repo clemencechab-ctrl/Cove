@@ -83,7 +83,8 @@ router.get('/stats', async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -130,7 +131,33 @@ router.get('/clients', async (req, res) => {
             clients
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
+    }
+});
+
+// DELETE /api/admin/clients/:uid - RGPD : droit a l'effacement d'un client
+// Anonymise les donnees personnelles dans ses commandes (montants/dates conserves
+// pour l'obligation legale 10 ans) et supprime le compte (RTDB + Firebase Auth).
+router.delete('/clients/:uid', async (req, res) => {
+    try {
+        const uid = req.params.uid;
+        const result = await store.eraseUserData(uid);
+        // Supprimer aussi le compte Firebase Auth (best effort)
+        try {
+            const { admin } = require('../config/firebase');
+            await admin.auth().deleteUser(uid);
+        } catch (e) {
+            console.error('RGPD: suppression Firebase Auth echouee:', e && e.message);
+        }
+        res.json({
+            success: true,
+            message: `Client anonymise (${result.anonymizedOrders} commande(s)) et compte supprime`,
+            email: result.email
+        });
+    } catch (error) {
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -143,7 +170,8 @@ router.get('/orders', async (req, res) => {
         );
         res.json({ success: true, count: orders.length, orders: sortedOrders });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -177,7 +205,8 @@ router.put('/orders/:id/status', async (req, res) => {
 
         res.json({ success: true, order });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -209,7 +238,8 @@ router.put('/orders/:id/tracking', async (req, res) => {
 
         res.json({ success: true, order });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -247,7 +277,8 @@ router.post('/orders/:id/generate-label', async (req, res) => {
         });
     } catch (error) {
         console.error('Erreur generation etiquette Colissimo:', error.message);
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -279,7 +310,8 @@ router.get('/products', async (req, res) => {
             products
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -314,7 +346,8 @@ router.post('/products', async (req, res) => {
 
         res.status(201).json({ success: true, product });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -351,7 +384,8 @@ router.put('/products/:id', async (req, res) => {
 
         res.json({ success: true, product });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -369,7 +403,8 @@ router.delete('/products/:id', async (req, res) => {
 
         res.json({ success: true, message: 'Produit supprimé', product });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -385,7 +420,8 @@ router.get('/messages', async (req, res) => {
             messages
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -413,7 +449,8 @@ router.put('/messages/:id/status', async (req, res) => {
 
         res.json({ success: true, message });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -429,7 +466,8 @@ router.get('/promo-codes', async (req, res) => {
             promoCodes
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -485,7 +523,8 @@ router.post('/promo-codes', async (req, res) => {
 
         res.status(201).json({ success: true, promoCode });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -503,7 +542,8 @@ router.delete('/promo-codes/:id', async (req, res) => {
 
         res.json({ success: true, message: 'Code promo supprimé', promoCode });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 

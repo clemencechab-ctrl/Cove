@@ -32,8 +32,30 @@ const accessLogStream = fs.createWriteStream(path.join(logsDir, 'access.log'), {
 app.use(morgan('combined', { stream: accessLogStream }));
 
 // Middleware
+// CSP : doit autoriser scripts/styles inline (le front est du HTML statique sans build,
+// avec des handlers onclick et des <script>/style= inline) + les origines reellement
+// utilisees (Firebase SDK via gstatic, Google Fonts, GoatCounter, RTDB, OAuth Google).
+// useDefaults:false pour eviter le defaut helmet `script-src-attr 'none'` qui casserait
+// les handlers onclick. NB : en prod les pages sont servies par Firebase Hosting, donc la
+// CSP de reference est celle de firebase.json ; celle-ci couvre l'acces direct au backend
+// Cloud Run et les reponses API (defense en profondeur). Garder les deux synchronisees.
 app.use(helmet({
-    contentSecurityPolicy: false,
+    contentSecurityPolicy: {
+        useDefaults: false,
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://www.gstatic.com", "https://gc.zgo.at"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "https:"],
+            connectSrc: ["'self'", "https://*.googleapis.com", "https://*.firebaseio.com", "https://covestudio-default-rtdb.europe-west1.firebasedatabase.app", "wss://covestudio-default-rtdb.europe-west1.firebasedatabase.app", "https://covestudio.goatcounter.com", "https://gc.zgo.at"],
+            frameSrc: ["'self'", "https://covestudio.firebaseapp.com", "https://accounts.google.com"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            frameAncestors: ["'self'"]
+        }
+    },
     crossOriginEmbedderPolicy: false
 }));
 

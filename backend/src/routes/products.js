@@ -20,7 +20,8 @@ router.get('/', async (req, res) => {
             products
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -38,7 +39,8 @@ router.get('/:id', async (req, res) => {
 
         res.json({ success: true, product });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -53,7 +55,8 @@ router.get('/category/:category', async (req, res) => {
             products
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 

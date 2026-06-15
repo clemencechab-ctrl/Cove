@@ -113,7 +113,8 @@ router.post('/', authenticate, requireRole('owner'), async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -138,7 +139,8 @@ router.get('/my-orders', authenticate, async (req, res) => {
             }))
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -180,7 +182,8 @@ router.post('/:id/cancel-request', authenticate, async (req, res) => {
 
         res.json({ success: true, message: 'Demande envoyée avec succès' });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -248,7 +251,8 @@ router.get('/:id/tracking-status', authenticate, async (req, res) => {
             events
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -263,7 +267,8 @@ router.get('/customer/:email', authenticate, requireRole('owner'), async (req, r
             orders
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -288,7 +293,8 @@ router.get('/:orderNumber', authenticate, async (req, res) => {
 
         res.json({ success: true, order });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
@@ -338,7 +344,8 @@ router.put('/:id/status', authenticate, async (req, res) => {
             }
         });
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        console.error('Erreur serveur:', error && error.message);
+        res.status(500).json({ success: false, error: 'Erreur serveur' });
     }
 });
 
