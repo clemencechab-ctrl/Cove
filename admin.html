@@ -249,15 +249,16 @@
                     .btn-file-picker:hover { opacity: 0.85; }
                 </style>
                 <div class="form-group">
-                    <label>Stock par taille</label>
-                    <div class="size-stock-grid">
-                        <div><label>XS</label><input type="number" id="stock-xs" min="0" value="0"></div>
-                        <div><label>S</label><input type="number" id="stock-s" min="0" value="0"></div>
-                        <div><label>M</label><input type="number" id="stock-m" min="0" value="0"></div>
-                        <div><label>L</label><input type="number" id="stock-l" min="0" value="0"></div>
-                        <div><label>XL</label><input type="number" id="stock-xl" min="0" value="0"></div>
-                    </div>
+                    <label>Stock par taille et par couleur</label>
+                    <div id="size-stock-container"></div>
                 </div>
+                <style>
+                    .color-stock-block { margin-bottom: 1rem; }
+                    .color-stock-title {
+                        font-size: 0.85rem; font-weight: 600; letter-spacing: 0.03em;
+                        margin-bottom: 0.4rem; color: var(--color-text);
+                    }
+                </style>
                 <p id="product-form-message" class="admin-form-message"></p>
                 <button type="submit" class="btn-primary" style="width:100%; margin-top:1rem;">Enregistrer</button>
             </form>
@@ -670,24 +671,37 @@
                     </thead>
                     <tbody>
                         ${result.products.map(p => {
-                            const ss = p.sizeStock || {};
-                            const stockStr = `${ss.XS || 0} / ${ss.S || 0} / ${ss.M || 0} / ${ss.L || 0} / ${ss.XL || 0}`;
-                            const totalStock = (ss.XS || 0) + (ss.S || 0) + (ss.M || 0) + (ss.L || 0) + (ss.XL || 0);
                             const cat = categoryLabels[p.category] || p.category;
-                            const imgSrc = p.image || 'https://via.placeholder.com/60';
-                            return `
+                            const ss = p.sizeStock || {};
+                            const colors = (Array.isArray(p.colors) && p.colors.length) ? p.colors : [null];
+                            const safeName = p.name.replace(/'/g, "\\'");
+                            return colors.map((color, idx) => {
+                                const cs = color
+                                    ? ((ss[color] && typeof ss[color] === 'object') ? ss[color] : {})
+                                    : ss;
+                                const stockStr = `${cs.XS || 0} / ${cs.S || 0} / ${cs.M || 0} / ${cs.L || 0} / ${cs.XL || 0}`;
+                                const totalStock = (cs.XS || 0) + (cs.S || 0) + (cs.M || 0) + (cs.L || 0) + (cs.XL || 0);
+                                const imgSrc = (color && p.images && p.images[color] && p.images[color].main)
+                                    ? p.images[color].main
+                                    : (p.image || 'https://via.placeholder.com/60');
+                                const label = color ? `${p.name} — ${color}` : p.name;
+                                const deleteBtn = idx === 0
+                                    ? `<button class="btn-admin-action btn-admin-danger" onclick="deleteProduct('${p.id}', '${safeName}')">Supprimer</button>`
+                                    : '';
+                                return `
                                 <tr>
-                                    <td><img src="${imgSrc}" alt="${p.name}" class="admin-product-thumb"></td>
-                                    <td>${p.name}</td>
+                                    <td><img src="${imgSrc}" alt="${label}" class="admin-product-thumb"></td>
+                                    <td>${label}</td>
                                     <td>${p.price} EUR</td>
                                     <td>${cat}</td>
                                     <td>${stockStr} <span style="color:var(--color-text-muted);">(${totalStock})</span></td>
                                     <td>
                                         <button class="btn-admin-action" onclick="editProduct('${p.id}')">Modifier</button>
-                                        <button class="btn-admin-action btn-admin-danger" onclick="deleteProduct('${p.id}', '${p.name.replace(/'/g, "\\'")}')">Supprimer</button>
+                                        ${deleteBtn}
                                     </td>
                                 </tr>
-                            `;
+                                `;
+                            }).join('');
                         }).join('')}
                     </tbody>
                 </table>
@@ -718,22 +732,74 @@
                     previewEl.src = product.image;
                     previewEl.style.display = 'block';
                 }
-                const ss = product.sizeStock || {};
-                document.getElementById('stock-xs').value = ss.XS || 0;
-                document.getElementById('stock-s').value = ss.S || 0;
-                document.getElementById('stock-m').value = ss.M || 0;
-                document.getElementById('stock-l').value = ss.L || 0;
-                document.getElementById('stock-xl').value = ss.XL || 0;
+                renderSizeStockGrids(product);
             } else {
                 document.getElementById('product-modal-title').textContent = 'Ajouter un produit';
                 document.getElementById('product-edit-id').value = '';
                 document.getElementById('product-form').reset();
-                document.getElementById('stock-xs').value = 0;
-                document.getElementById('stock-s').value = 0;
-                document.getElementById('stock-m').value = 0;
-                document.getElementById('stock-l').value = 0;
-                document.getElementById('stock-xl').value = 0;
+                renderSizeStockGrids(null);
             }
+        }
+
+        // Tailles gérées
+        var STOCK_SIZES = ['XS', 'S', 'M', 'L', 'XL'];
+
+        function escHtml(s) {
+            if (s === null || s === undefined) return '';
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        // Rend une grille de stock par couleur (ou une grille plate si le produit
+        // n'a pas de couleurs). Les valeurs sont lues dans sizeStock imbriqué
+        // (sizeStock[couleur][taille]) ou plat (sizeStock[taille]).
+        function renderSizeStockGrids(product) {
+            const container = document.getElementById('size-stock-container');
+            const colors = (product && Array.isArray(product.colors) && product.colors.length) ? product.colors : [];
+            const ss = (product && product.sizeStock) || {};
+            let html = '';
+            if (colors.length) {
+                colors.forEach(function (color) {
+                    const cs = (ss[color] && typeof ss[color] === 'object') ? ss[color] : {};
+                    html += '<div class="color-stock-block"><div class="color-stock-title">' + escHtml(color) + '</div><div class="size-stock-grid">';
+                    STOCK_SIZES.forEach(function (size) {
+                        const val = parseInt(cs[size]) || 0;
+                        html += '<div><label>' + size + '</label><input type="number" data-color="' + escHtml(color) + '" data-size="' + size + '" min="0" value="' + val + '"></div>';
+                    });
+                    html += '</div></div>';
+                });
+            } else {
+                html += '<div class="size-stock-grid">';
+                STOCK_SIZES.forEach(function (size) {
+                    const val = parseInt(ss[size]) || 0;
+                    html += '<div><label>' + size + '</label><input type="number" data-size="' + size + '" min="0" value="' + val + '"></div>';
+                });
+                html += '</div>';
+            }
+            container.innerHTML = html;
+        }
+
+        // Reconstruit sizeStock (imbriqué par couleur si data-color présent, sinon
+        // plat) + le total `stock`, à partir des inputs rendus.
+        function collectSizeStock() {
+            const container = document.getElementById('size-stock-container');
+            const inputs = container.querySelectorAll('input[type="number"]');
+            const hasColor = !!container.querySelector('input[data-color]');
+            let sizeStock = {};
+            let total = 0;
+            inputs.forEach(function (inp) {
+                const size = inp.getAttribute('data-size');
+                const v = parseInt(inp.value) || 0;
+                total += v;
+                if (hasColor) {
+                    const color = inp.getAttribute('data-color');
+                    if (!sizeStock[color]) sizeStock[color] = {};
+                    sizeStock[color][size] = v;
+                } else {
+                    sizeStock[size] = v;
+                }
+            });
+            return { sizeStock: sizeStock, total: total };
         }
 
         function closeProductModal() {
@@ -819,19 +885,15 @@
             const msgEl = document.getElementById('product-form-message');
             const editId = document.getElementById('product-edit-id').value;
 
+            const collected = collectSizeStock();
             const data = {
                 name: document.getElementById('product-name').value.trim(),
                 price: parseFloat(document.getElementById('product-price').value),
                 category: document.getElementById('product-category').value,
                 description: document.getElementById('product-description').value.trim(),
                 image: document.getElementById('product-image').value.trim(),
-                sizeStock: {
-                    XS: parseInt(document.getElementById('stock-xs').value) || 0,
-                    S: parseInt(document.getElementById('stock-s').value) || 0,
-                    M: parseInt(document.getElementById('stock-m').value) || 0,
-                    L: parseInt(document.getElementById('stock-l').value) || 0,
-                    XL: parseInt(document.getElementById('stock-xl').value) || 0
-                }
+                sizeStock: collected.sizeStock,
+                stock: collected.total
             };
 
             let result;
