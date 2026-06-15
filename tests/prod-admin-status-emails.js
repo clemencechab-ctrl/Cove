@@ -72,7 +72,7 @@ function fetchCloudRunLogs() {
             customer: { email: customerEmail, firstName: 'Prod', lastName: 'Test', phone: '0612345678' },
             items: [{ id: 1, name: 'T-shirt Cove', price: 30, size: 'XL', quantity: 1, image: 'image/t-shirt-front.JPG' }],
             shipping: { address: '1 Rue Test', city: 'Paris', postalCode: '75008', country: 'FR' }
-        });
+        }, token);
         if (!co.data.order) throw new Error(`Creation fail: ${JSON.stringify(co.data)}`);
         orderId = co.data.order.id;
         orderNumber = co.data.order.orderNumber;

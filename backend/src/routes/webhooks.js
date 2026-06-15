@@ -39,6 +39,7 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
                 await store.updateOrderPayment(orderId, {
                     paymentIntentId: session.payment_intent
                 });
+                await store.applyOrderInventory(orderId);
 
                 console.log(`Webhook Stripe: commande ${orderNumber} marquee comme payee`);
 

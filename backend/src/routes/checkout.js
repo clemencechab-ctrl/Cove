@@ -224,17 +224,12 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             orderData.userId = req.user.uid;
         }
 
-        // Creer la commande dans Firebase
+        // Creer la commande dans Firebase (statut pending). Le stock et l'usage du
+        // code promo ne sont PAS decrementes ici : ils le sont seulement apres
+        // confirmation du paiement (store.applyOrderInventory), pour qu'un panier
+        // abandonne ne vide pas l'inventaire ni ne brule un code promo. La verification
+        // de disponibilite (409) plus haut reste un garde-fou a la creation.
         const order = await store.createOrder(orderData);
-
-        if (appliedPromo) {
-            await store.incrementPromoCodeUses(appliedPromo.code);
-        }
-
-        // Decrementer le stock (par couleur x taille si applicable)
-        for (const item of items) {
-            await store.updateProductStock(item.id, item.quantity, item.size || null, item.color || null);
-        }
 
         const frontendUrl = process.env.FRONTEND_URL || 'https://covestudio.fr';
 
@@ -243,6 +238,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             await store.updateOrderPayment(order.id, {
                 paymentIntentId: 'demo_' + Date.now()
             });
+            await store.applyOrderInventory(order.id);
 
             const fullOrder = await store.getOrderById(order.id);
             sendOrderConfirmation(fullOrder);
@@ -351,6 +347,7 @@ router.post('/verify', async (req, res) => {
                     await store.updateOrderPayment(order.id, {
                         paymentIntentId: session.payment_intent
                     });
+                    await store.applyOrderInventory(order.id);
                     const { sendOrderConfirmation, sendOrderNotificationToOwner } = require('../utils/email');
                     const fullOrder = await store.getOrderById(order.id);
                     if (fullOrder) {

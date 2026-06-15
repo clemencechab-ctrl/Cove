@@ -4,31 +4,12 @@ const store = require('../data/store');
 const { authenticate, requireRole } = require('../middleware/auth');
 const { sendOrderStatusUpdate, sendCancelReturnRequest } = require('../utils/email');
 
-// Middleware optionnel pour récupérer l'utilisateur si connecté
-const optionalAuth = async (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return next();
-    }
-
-    const token = authHeader.split('Bearer ')[1];
-    try {
-        const { admin } = require('../config/firebase');
-        const decoded = await admin.auth().verifyIdToken(token);
-        const userProfile = await store.getUserByUid(decoded.uid);
-        req.user = {
-            uid: decoded.uid,
-            email: decoded.email,
-            role: userProfile ? userProfile.role : 'client'
-        };
-    } catch (error) {
-        // Token invalide, continuer sans utilisateur
-    }
-    next();
-};
-
-// POST /api/orders - Creer une commande
-router.post('/', optionalAuth, async (req, res) => {
+// POST /api/orders - Creer une commande manuellement (owner uniquement)
+// N'est PAS le flux d'achat client (celui-ci passe par /api/checkout/create-session,
+// qui paie via Stripe). Cette route servait historiquement de creation de commande sans
+// paiement et etait ANONYME : elle permettait a n'importe qui de creer des commandes et
+// de vider le stock sans payer. Verrouillee en owner-only ; ne decremente plus le stock.
+router.post('/', authenticate, requireRole('owner'), async (req, res) => {
     try {
         const { customer, items, shipping } = req.body;
 
@@ -118,13 +99,8 @@ router.post('/', optionalAuth, async (req, res) => {
             orderData.userId = req.user.uid;
         }
 
-        // Creer la commande
+        // Creer la commande (le stock n'est pas decremente ici : creation manuelle owner)
         const order = await store.createOrder(orderData);
-
-        // Mettre a jour le stock (par taille si applicable)
-        for (const item of items) {
-            await store.updateProductStock(item.id, item.quantity, item.size || null);
-        }
 
         res.status(201).json({
             success: true,
@@ -214,6 +190,15 @@ router.get('/:id/tracking-status', authenticate, async (req, res) => {
         const order = await store.getOrderById(req.params.id);
         if (!order) {
             return res.status(404).json({ success: false, error: 'Commande non trouvée' });
+        }
+
+        // Verifier que l'utilisateur est admin ou proprietaire de la commande (anti-IDOR :
+        // les id sont sequentiels, sans ce controle n'importe quel compte pourrait lire le
+        // suivi et l'adresse de livraison de toutes les commandes).
+        const isAdmin = req.user.role === 'owner' || req.user.role === 'admin';
+        const isOrderOwner = order.userId === req.user.uid || order.customer?.email === req.user.email;
+        if (!isAdmin && !isOrderOwner) {
+            return res.status(403).json({ success: false, error: 'Accès refusé' });
         }
 
         if (!order.trackingNumber) {

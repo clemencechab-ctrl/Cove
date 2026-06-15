@@ -78,7 +78,7 @@ function tailLog() {
                 postalCode: '75008',
                 country: 'FR'
             }
-        });
+        }, token);
         if (!createOrder.data.order) throw new Error(`Creation fail: ${JSON.stringify(createOrder.data)}`);
         orderId = createOrder.data.order.id;
         orderNumber = createOrder.data.order.orderNumber;

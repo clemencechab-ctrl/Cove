@@ -30,22 +30,9 @@ const api = {
     },
 
     // Commandes
-    async createOrder(orderData) {
-        try {
-            const response = await fetch(`${API_URL}/orders`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(orderData)
-            });
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('API Error:', error);
-            return { success: false, error: error.message };
-        }
-    },
+    // NB : la creation de commande cote client passe par checkout/create-session
+    // (paiement Stripe). POST /api/orders est desormais reserve a l'owner (saisie
+    // manuelle), donc pas de helper client ici.
 
     async getOrder(orderNumber) {
         try {

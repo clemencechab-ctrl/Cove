@@ -306,6 +306,37 @@ module.exports = {
         return { ...foundOrder, ...updates };
     },
 
+    // Applique le stock + l'usage du code promo d'une commande, UNE SEULE FOIS.
+    // Idempotent (flag `inventoryApplied`) pour resister a la double notification
+    // webhook + verify. Appele UNIQUEMENT apres confirmation du paiement, jamais a
+    // la creation de session : un panier abandonne ne doit pas consommer le stock.
+    applyOrderInventory: async (id) => {
+        const snapshot = await ordersRef.once('value');
+        const data = snapshot.val();
+        if (!data) return false;
+
+        let foundKey = null;
+        let order = null;
+        for (const [key, val] of Object.entries(data)) {
+            if (val.id === parseInt(id)) { foundKey = key; order = val; break; }
+        }
+        if (!foundKey || !order) return false;
+        if (order.inventoryApplied) return false; // deja applique
+
+        // Marquer d'abord pour reduire la fenetre de double-application (webhook + verify)
+        await ordersRef.child(foundKey).update({ inventoryApplied: true });
+
+        for (const item of (order.items || [])) {
+            await module.exports.updateProductStock(
+                item.productId, item.quantity, item.size || null, item.color || null
+            );
+        }
+        if (order.promoCode) {
+            await module.exports.incrementPromoCodeUses(order.promoCode);
+        }
+        return true;
+    },
+
     // Contact Messages
     createContactMessage: async (messageData) => {
         const newCounter = await contactCounterRef.transaction(current => (current || 0) + 1);
