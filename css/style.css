@@ -2372,10 +2372,34 @@ img {
     margin-bottom: 2rem;
 }
 
+.size-guide-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 .size-guide-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9rem;
+}
+
+/* Les colonnes tailles restent sur une ligne ; seul le libellé (1re colonne)
+   peut passer sur 2 lignes pour libérer de la largeur. */
+.size-guide-table th,
+.size-guide-table td {
+    white-space: nowrap;
+}
+
+.size-guide-table tbody td:first-child,
+.size-guide-table thead th:first-child {
+    text-align: left;
+    white-space: normal;
+    padding-left: 0;
+}
+
+.size-guide-table th,
+.size-guide-table td {
+    padding: 0.7rem 0.45rem;
 }
 
 .size-guide-table th,
