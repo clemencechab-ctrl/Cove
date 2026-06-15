@@ -80,7 +80,7 @@ const api = {
     },
 
     // Checkout
-    async checkout(items, customer, shipping, promoCode = null) {
+    async checkout(items, customer, shipping, promoCode = null, deliveryMethod = 'delivery', pickupCode = null) {
         try {
             const token = localStorage.getItem('coveToken');
             const headers = {
@@ -90,8 +90,9 @@ const api = {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const body = { items, customer, shipping };
+            const body = { items, customer, shipping, deliveryMethod };
             if (promoCode) body.promoCode = promoCode;
+            if (deliveryMethod === 'pickup' && pickupCode) body.pickupCode = pickupCode;
 
             const response = await fetch(`${API_URL}/checkout/create-session`, {
                 method: 'POST',

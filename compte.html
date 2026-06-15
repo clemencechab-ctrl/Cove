@@ -306,7 +306,15 @@
             // Address
             const shipping = order.shipping || {};
             const customer = order.customer || {};
-            const addressHtml = (shipping.address || customer.email) ? `
+            const isPickup = order.deliveryMethod === 'pickup';
+            const addressHtml = isPickup ? `
+                <div class="detail-address">
+                    ${customer.firstName || customer.lastName ? `<p>${customer.firstName || ''} ${customer.lastName || ''}</p>` : ''}
+                    <p>Remise en main propre</p>
+                    ${customer.email ? `<p>${customer.email}</p>` : ''}
+                    ${customer.phone ? `<p>${customer.phone}</p>` : ''}
+                </div>
+            ` : (shipping.address || customer.email) ? `
                 <div class="detail-address">
                     ${customer.firstName || customer.lastName ? `<p>${customer.firstName || ''} ${customer.lastName || ''}</p>` : ''}
                     ${shipping.address ? `<p>${shipping.address}</p>` : ''}
@@ -325,7 +333,7 @@
                 <div class="detail-totals">
                     <div class="detail-total-row"><span>Sous-total</span><span>${subtotal.toFixed(2)} EUR</span></div>
                     ${discount > 0 ? `<div class="detail-total-row discount"><span>Reduction</span><span>-${discount.toFixed(2)} EUR</span></div>` : ''}
-                    <div class="detail-total-row"><span>Livraison</span><span>Gratuite</span></div>
+                    <div class="detail-total-row"><span>${isPickup ? 'Remise en main propre' : 'Livraison'}</span><span>${order.shippingCost ? order.shippingCost.toFixed(2) + ' EUR' : 'Gratuite'}</span></div>
                     <div class="detail-total-row final"><span>Total</span><span>${total.toFixed(2)} EUR</span></div>
                 </div>
             `;
@@ -373,7 +381,7 @@
                 </div>
 
                 <div class="order-detail-section">
-                    <h3>Adresse de livraison</h3>
+                    <h3>${isPickup ? 'Mode de réception' : 'Adresse de livraison'}</h3>
                     ${addressHtml}
                 </div>
 

@@ -96,10 +96,22 @@ router.post('/validate-promo', async (req, res) => {
 // POST /api/checkout/create-session - Creer une session Stripe et retourner l'URL de checkout
 router.post('/create-session', optionalAuth, async (req, res) => {
     try {
-        const { items, customer, shipping, promoCode } = req.body;
+        const { items, customer, shipping, promoCode, deliveryMethod, pickupCode } = req.body;
 
         if (!items || items.length === 0) {
             return res.status(400).json({ success: false, error: 'Panier vide' });
+        }
+
+        // Mode de réception : 'pickup' (remise en main propre, gratuite, protégée par
+        // un code) ou 'delivery' (livraison à domicile, frais standards). Le code est
+        // revérifié ICI côté serveur : la validation client ne peut pas être contournée
+        // pour s'offrir la livraison gratuite.
+        const isPickup = deliveryMethod === 'pickup';
+        if (isPickup) {
+            const PICKUP_CODE = process.env.PICKUP_CODE || '1234';
+            if (String(pickupCode || '').trim() !== PICKUP_CODE) {
+                return res.status(403).json({ success: false, error: 'Code de remise en main propre invalide' });
+            }
         }
 
         // Verifier les produits et calculer le sous-total
@@ -148,7 +160,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
         }
 
         const subtotalAfterDiscount = subtotal - discountAmount;
-        const shippingCost = subtotalAfterDiscount >= 100 ? 0 : 5.90;
+        const shippingCost = isPickup ? 0 : (subtotalAfterDiscount >= 100 ? 0 : 5.90);
         const total = subtotalAfterDiscount + shippingCost;
 
         const orderData = {
@@ -168,6 +180,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             subtotal,
             discountAmount,
             promoCode: appliedPromo ? appliedPromo.code : null,
+            deliveryMethod: isPickup ? 'pickup' : 'delivery',
             shippingCost,
             total
         };

@@ -90,7 +90,35 @@
 
             <form id="checkout-form" onsubmit="submitOrder(event)">
                 <div class="checkout-section">
-                    <h3>Informations de livraison</h3>
+                    <h3>Mode de réception</h3>
+                    <div class="delivery-options">
+                        <label class="delivery-option">
+                            <input type="radio" name="deliveryMethod" value="delivery" checked onchange="onDeliveryMethodChange()">
+                            <span class="delivery-option-body">
+                                <span class="delivery-option-title">Livraison à domicile</span>
+                                <span class="delivery-option-desc">Colissimo — 5,90 EUR (offerte dès 100 EUR)</span>
+                            </span>
+                        </label>
+                        <label class="delivery-option">
+                            <input type="radio" name="deliveryMethod" value="pickup" onchange="onDeliveryMethodChange()">
+                            <span class="delivery-option-body">
+                                <span class="delivery-option-title">Remise en main propre</span>
+                                <span class="delivery-option-desc">Gratuit — code de validation requis</span>
+                            </span>
+                        </label>
+                    </div>
+                    <div id="pickup-code-section" class="pickup-code-section" style="display: none;">
+                        <label for="pickup-code-input">Code de validation</label>
+                        <div class="promo-code-row">
+                            <input type="text" id="pickup-code-input" inputmode="numeric" autocomplete="off" placeholder="Entrer le code">
+                            <button type="button" class="btn-apply-promo" onclick="validatePickupCode()">Valider</button>
+                        </div>
+                        <div id="pickup-code-message" class="promo-message"></div>
+                    </div>
+                </div>
+
+                <div class="checkout-section">
+                    <h3>Vos coordonnées</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="firstName">Prénom</label>
@@ -109,6 +137,7 @@
                         <label for="phone">Téléphone</label>
                         <input type="tel" id="phone" name="phone" required>
                     </div>
+                    <div id="shipping-address-fields">
                     <div class="form-group">
                         <label for="address">Adresse</label>
                         <input type="text" id="address" name="address" required>
@@ -177,6 +206,7 @@
                             <option value="VA">Vatican</option>
                         </select>
                     </div>
+                    </div>
                 </div>
 
                 <div class="checkout-section">
@@ -201,6 +231,10 @@
                     <div class="checkout-total-row promo-discount-row" id="checkout-discount-row" style="display: none;">
                         <span>Reduction (<span id="checkout-promo-code"></span>):</span>
                         <span id="checkout-discount">-0 EUR</span>
+                    </div>
+                    <div class="checkout-total-row">
+                        <span id="checkout-shipping-label">Livraison:</span>
+                        <span id="checkout-shipping">5.90 EUR</span>
                     </div>
                     <div class="checkout-total-row checkout-total-final">
                         <span>Total à payer:</span>
@@ -326,6 +360,13 @@
 
         // Promo code state
         let appliedPromo = null;
+        // Etat remise en main propre : true une fois le code validé côté client
+        let pickupValidated = false;
+
+        function getDeliveryMethod() {
+            const el = document.querySelector('input[name="deliveryMethod"]:checked');
+            return el ? el.value : 'delivery';
+        }
 
         function updateCheckoutTotal() {
             const subtotal = getCartTotal();
@@ -341,9 +382,70 @@
                 document.getElementById('checkout-discount-row').style.display = 'none';
             }
 
-            const shippingCost = total >= 100 ? 0 : 5.90;
+            const isPickup = getDeliveryMethod() === 'pickup';
+            const shippingCost = isPickup ? 0 : (total >= 100 ? 0 : 5.90);
+            const shippingLabelEl = document.getElementById('checkout-shipping-label');
+            const shippingValueEl = document.getElementById('checkout-shipping');
+            if (shippingLabelEl) shippingLabelEl.textContent = isPickup ? 'Remise en main propre:' : 'Livraison:';
+            if (shippingValueEl) shippingValueEl.textContent = shippingCost === 0 ? 'Gratuite' : shippingCost.toFixed(2) + ' EUR';
+
             total = total + shippingCost;
             document.getElementById('checkout-total').textContent = total.toFixed(2) + ' EUR';
+        }
+
+        // Bascule livraison / remise en main propre
+        function onDeliveryMethodChange() {
+            const isPickup = getDeliveryMethod() === 'pickup';
+            document.getElementById('pickup-code-section').style.display = isPickup ? 'block' : 'none';
+            const addrFields = document.getElementById('shipping-address-fields');
+            if (addrFields) addrFields.style.display = isPickup ? 'none' : 'block';
+            // Les champs adresse ne sont obligatoires que pour la livraison
+            ['address', 'city', 'postalCode', 'country'].forEach(function (id) {
+                const f = document.getElementById(id);
+                if (!f) return;
+                if (isPickup) f.removeAttribute('required');
+                else f.setAttribute('required', 'required');
+            });
+            updateCheckoutTotal();
+            updatePayButtonState();
+        }
+
+        // Validation côté client du code de remise en main propre (le backend revérifie)
+        function validatePickupCode() {
+            const input = document.getElementById('pickup-code-input');
+            const msg = document.getElementById('pickup-code-message');
+            const code = (input.value || '').trim();
+            if (code === '1234') {
+                pickupValidated = true;
+                msg.textContent = 'Code validé — remise en main propre débloquée.';
+                msg.className = 'promo-message promo-success';
+                input.disabled = true;
+            } else {
+                pickupValidated = false;
+                msg.textContent = 'Code invalide.';
+                msg.className = 'promo-message promo-error';
+            }
+            updatePayButtonState();
+        }
+
+        // Bloque le bouton payer tant que le code pickup n'est pas validé
+        function updatePayButtonState() {
+            const payBtn = document.querySelector('#checkout-form button[type="submit"]');
+            if (!payBtn) return;
+            const blocked = getDeliveryMethod() === 'pickup' && !pickupValidated;
+            payBtn.disabled = blocked;
+            payBtn.classList.toggle('btn-pay-disabled', blocked);
+        }
+
+        function resetDeliveryMethod() {
+            pickupValidated = false;
+            const deliveryRadio = document.querySelector('input[name="deliveryMethod"][value="delivery"]');
+            if (deliveryRadio) deliveryRadio.checked = true;
+            const codeInput = document.getElementById('pickup-code-input');
+            if (codeInput) { codeInput.value = ''; codeInput.disabled = false; }
+            const codeMsg = document.getElementById('pickup-code-message');
+            if (codeMsg) { codeMsg.textContent = ''; codeMsg.className = 'promo-message'; }
+            onDeliveryMethodChange();
         }
 
         async function applyPromoCode() {
@@ -403,11 +505,22 @@
             document.getElementById('checkout-modal').classList.remove('active');
             document.body.style.overflow = '';
             resetPromoCode();
+            resetDeliveryMethod();
         }
 
         // Submit order
         async function submitOrder(e) {
             e.preventDefault();
+
+            const deliveryMethod = getDeliveryMethod();
+            const pickupCode = deliveryMethod === 'pickup'
+                ? (document.getElementById('pickup-code-input').value || '').trim()
+                : null;
+
+            if (deliveryMethod === 'pickup' && !pickupValidated) {
+                alert('Veuillez valider le code de remise en main propre avant de payer.');
+                return;
+            }
 
             const submitBtn = e.target.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
@@ -438,7 +551,7 @@
 
             try {
                 const promoCode = appliedPromo ? appliedPromo.code : null;
-                const result = await api.checkout(items, customer, shipping, promoCode);
+                const result = await api.checkout(items, customer, shipping, promoCode, deliveryMethod, pickupCode);
 
                 if (result.success) {
                     clearCart();

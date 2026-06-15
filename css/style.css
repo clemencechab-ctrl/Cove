@@ -1326,6 +1326,68 @@ img {
     font-size: 0.85rem;
 }
 
+/* Mode de réception (livraison / remise en main propre) */
+.delivery-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.delivery-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.delivery-option:hover {
+    border-color: var(--color-text);
+}
+
+.delivery-option input[type="radio"] {
+    margin-top: 0.2rem;
+    accent-color: var(--color-text);
+    cursor: pointer;
+}
+
+.delivery-option-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.delivery-option-title {
+    font-size: 0.9rem;
+    color: var(--color-text);
+}
+
+.delivery-option-desc {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+}
+
+.pickup-code-section {
+    margin-top: 0.5rem;
+}
+
+.pickup-code-section label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-pay-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* Promo Code */
 .promo-code-row {
     display: flex;

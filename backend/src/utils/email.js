@@ -29,6 +29,11 @@ function escapeHtml(value) {
         .replace(/'/g, '&#39;');
 }
 
+// true si la commande est une remise en main propre (pas d'expédition)
+function isPickupOrder(order) {
+    return order && order.deliveryMethod === 'pickup';
+}
+
 // Bandeau complet en UNE image : noir avec logo blanc. Aucun fond CSS, aucun
 // texte HTML — Gmail Android ne pourra pas inverser les couleurs.
 function getEmailHeader() {
@@ -130,9 +135,23 @@ async function sendOrderConfirmation(order) {
             </tr>
         `).join('');
 
+        const pickup = isPickupOrder(order);
         const shippingAddress = order.shipping
             ? `${escapeHtml(order.shipping.address || '')}, ${escapeHtml(order.shipping.postalCode || '')} ${escapeHtml(order.shipping.city || '')}, ${escapeHtml(order.shipping.country || 'FR')}`
             : 'Non renseignée';
+        const shippingLineLabel = pickup ? 'Remise en main propre' : 'Livraison';
+        const receptionBlock = pickup
+            ? `<div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                    <h3 style="margin-top: 0;">Mode de réception</h3>
+                    <p>Remise en main propre — vous serez contacté(e) pour convenir d'un rendez-vous.</p>
+               </div>`
+            : `<div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                    <h3 style="margin-top: 0;">Adresse de livraison</h3>
+                    <p>${shippingAddress}</p>
+               </div>`;
+        const closingLine = pickup
+            ? 'Nous vous contacterons pour organiser la remise de votre commande.'
+            : 'Vous recevrez un email lorsque votre commande sera expédiée.';
 
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -157,16 +176,13 @@ async function sendOrderConfirmation(order) {
 
                 <div style="text-align: right; margin: 20px 0;">
                     <p>Sous-total : ${(order.subtotal || 0).toFixed(2)} &euro;</p>
-                    <p>Livraison : ${(order.shippingCost || 0).toFixed(2)} &euro;</p>
+                    <p>${shippingLineLabel} : ${(order.shippingCost || 0).toFixed(2)} &euro;</p>
                     <p style="font-size: 1.2em; font-weight: bold;">Total : ${(order.total || 0).toFixed(2)} &euro;</p>
                 </div>
 
-                <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
-                    <h3 style="margin-top: 0;">Adresse de livraison</h3>
-                    <p>${shippingAddress}</p>
-                </div>
+                ${receptionBlock}
 
-                <p>Vous recevrez un email lorsque votre commande sera expédiée.</p>
+                <p>${closingLine}</p>
                 <p>À bientôt,<br>L'équipe COVE</p>
             </div>
         `;
@@ -322,15 +338,31 @@ async function sendOrderNotificationToOwner(order) {
             </tr>
         `).join('');
 
+        const pickup = isPickupOrder(order);
         const shippingAddress = order.shipping
             ? `${escapeHtml(order.shipping.address || '')}, ${escapeHtml(order.shipping.postalCode || '')} ${escapeHtml(order.shipping.city || '')}, ${escapeHtml(order.shipping.country || 'FR')}`
             : 'Non renseignée';
+        const pickupBanner = pickup
+            ? `<div style="background: #fff3cd; padding: 15px; margin: 20px 0; border-radius: 5px; border-left: 4px solid #ffc107;">
+                    <p style="margin: 0;"><strong>⚠ REMISE EN MAIN PROPRE</strong> — ne pas expédier. Contacter le client pour convenir d'un rendez-vous.</p>
+               </div>`
+            : '';
+        const receptionBlock = pickup
+            ? `<div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                    <h3 style="margin-top: 0;">Mode de réception</h3>
+                    <p>Remise en main propre (pas de livraison)</p>
+               </div>`
+            : `<div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                    <h3 style="margin-top: 0;">Adresse de livraison</h3>
+                    <p>${shippingAddress}</p>
+               </div>`;
 
         const html = `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                 ${getEmailHeader()}
                 <h2>Nouvelle commande</h2>
                 <p>Une nouvelle commande vient d'être passée !</p>
+                ${pickupBanner}
 
                 <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
                     <p><strong>Commande :</strong> ${order.orderNumber}</p>
@@ -356,14 +388,11 @@ async function sendOrderNotificationToOwner(order) {
                 <div style="text-align: right; margin: 20px 0;">
                     <p>Sous-total : ${(order.subtotal || 0).toFixed(2)} &euro;</p>
                     ${order.discountAmount ? `<p>Réduction : -${order.discountAmount.toFixed(2)} &euro;</p>` : ''}
-                    <p>Livraison : ${(order.shippingCost || 0).toFixed(2)} &euro;</p>
+                    <p>${pickup ? 'Remise en main propre' : 'Livraison'} : ${(order.shippingCost || 0).toFixed(2)} &euro;</p>
                     <p style="font-size: 1.2em; font-weight: bold;">Total : ${(order.total || 0).toFixed(2)} &euro;</p>
                 </div>
 
-                <div style="background: #f9f9f9; padding: 15px; margin: 20px 0; border-radius: 5px;">
-                    <h3 style="margin-top: 0;">Adresse de livraison</h3>
-                    <p>${shippingAddress}</p>
-                </div>
+                ${receptionBlock}
             </div>
         `;
 
