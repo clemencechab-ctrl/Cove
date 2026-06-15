@@ -18,6 +18,31 @@ function buildStripeImageUrl(image, frontendUrl) {
     return `${frontendUrl}/${path}`;
 }
 
+// Stock disponible pour un produit selon couleur/taille. Gère sizeStock
+// imbriqué {couleur:{taille:n}}, plat {taille:n}, ou le stock global `stock`.
+function getAvailableStock(product, size, color) {
+    const ss = product.sizeStock;
+    if (ss && typeof ss === 'object' && Object.keys(ss).length) {
+        const firstVal = Object.values(ss)[0];
+        if (firstVal && typeof firstVal === 'object') {
+            // Imbriqué par couleur
+            if (color && ss[color] && typeof ss[color] === 'object') {
+                return size ? (ss[color][size] || 0)
+                    : Object.values(ss[color]).reduce((a, b) => a + (b || 0), 0);
+            }
+            // Couleur non précisée : agréger toutes les couleurs
+            let total = 0;
+            Object.values(ss).forEach(per => {
+                total += size ? (per[size] || 0) : Object.values(per).reduce((a, b) => a + (b || 0), 0);
+            });
+            return total;
+        }
+        // Plat {taille:n}
+        return size ? (ss[size] || 0) : Object.values(ss).reduce((a, b) => a + (b || 0), 0);
+    }
+    return product.stock || 0;
+}
+
 // Middleware optionnel pour recuperer l'utilisateur si connecte
 const optionalAuth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -124,6 +149,16 @@ router.post('/create-session', optionalAuth, async (req, res) => {
                 return res.status(400).json({ success: false, error: `Produit ${item.id} non trouvé` });
             }
             const color = item.color || null;
+            // Vérifie le stock disponible (par couleur/taille). Empêche un oversell
+            // même si le client est contourné.
+            const available = getAvailableStock(product, item.size || null, color);
+            if ((item.quantity || 0) > available) {
+                const label = product.name + (color ? ` ${color}` : '') + (item.size ? ` ${item.size}` : '');
+                return res.status(409).json({
+                    success: false,
+                    error: `Stock insuffisant pour ${label} (reste ${available})`
+                });
+            }
             const colorImage = color && product.images && product.images[color] && product.images[color].main
                 ? product.images[color].main
                 : product.image;
