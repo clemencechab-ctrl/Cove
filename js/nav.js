@@ -20,8 +20,15 @@
 
         const isEn = /\/en\//.test(window.location.pathname);
         const labels = isEn
-            ? { compte: 'Account', panier: 'Cart', contact: 'Contact', faq: 'FAQ' }
-            : { compte: 'Compte', panier: 'Panier', contact: 'Contact', faq: 'FAQ' };
+            ? { compte: 'Account', panier: 'Cart', contact: 'Contact', faq: 'FAQ', about: 'About', admin: 'Administration' }
+            : { compte: 'Compte', panier: 'Panier', contact: 'Contact', faq: 'FAQ', about: 'À propos', admin: 'Administration' };
+
+        // L'owner voit le lien Administration dans le panneau mobile
+        let isOwner = false;
+        try {
+            const user = JSON.parse(localStorage.getItem('coveUser') || 'null');
+            isOwner = !!(user && user.role === 'owner');
+        } catch (e) {}
 
         // Icone panier cliquable (acces direct au panier sur mobile)
         const cartLink = document.createElement('a');
@@ -52,8 +59,10 @@
         panel.innerHTML =
             '<a href="compte.html">' + labels.compte + '</a>' +
             '<a href="cart.html">' + labels.panier + ' (<span id="cart-count-mobile">0</span>)</a>' +
+            '<a href="about.html">' + labels.about + '</a>' +
             '<a href="contact.html">' + labels.contact + '</a>' +
-            '<a href="faq.html">' + labels.faq + '</a>';
+            '<a href="faq.html">' + labels.faq + '</a>' +
+            (isOwner ? '<a href="admin.html">' + labels.admin + '</a>' : '');
         header.appendChild(panel);
 
         function close() {
