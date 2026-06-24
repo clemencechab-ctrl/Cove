@@ -153,12 +153,46 @@ function renderClients(orders) {
             var statusLabel = statusLabels[order.status] || order.status;
             var statusColor = statusColors[order.status] || '#888';
 
-            html += '<div class="order-row">';
+            var isPickup = order.deliveryMethod === 'pickup';
+            var accent = isPickup ? '#f59e0b' : '#3b82f6';
+            var methodLabel = isPickup
+                ? (isEnglish ? '🤝 HAND DELIVERY (in person)' : '🤝 REMISE EN MAIN PROPRE')
+                : (isEnglish ? '📦 POSTAL SHIPPING (La Poste)' : '📦 ENVOI LA POSTE (à expédier)');
+
+            html += '<div class="order-row" style="border-left:4px solid ' + accent + ';">';
+
+            // Bandeau du mode de réception — bien visible
+            html += '<div class="order-method" style="background:' + accent + ';">' + methodLabel + '</div>';
+
             html += '<div class="order-info">';
             html += '<span class="order-number">' + escapeHtml(order.orderNumber || '-') + '</span>';
             html += '<span class="order-date">' + date + '</span>';
             html += '<span class="order-total">' + (order.total ? order.total.toFixed(2) : '0') + ' EUR</span>';
             html += '</div>';
+
+            // Coordonnées du client / destinataire
+            var cust = order.customer || {};
+            var ship = order.shipping || {};
+            var fullName = ((cust.firstName || '') + ' ' + (cust.lastName || '')).trim();
+            html += '<div class="order-customer">';
+            html += '<div class="order-customer-title">' + (isEnglish ? 'Customer details' : 'Coordonnées client') + '</div>';
+            html += '<div><span class="oc-label">' + (isEnglish ? 'Name' : 'Nom') + '</span>' + escapeHtml(fullName || '-') + '</div>';
+            html += '<div><span class="oc-label">Email</span>' + escapeHtml(cust.email || '-') + '</div>';
+            if (cust.phone) {
+                html += '<div><span class="oc-label">' + (isEnglish ? 'Phone' : 'Téléphone') + '</span>' + escapeHtml(cust.phone) + '</div>';
+            }
+            if (isPickup) {
+                html += '<div class="order-pickup-note">' + (isEnglish
+                    ? '⚠ Hand delivery — do NOT ship this order' : '⚠ Remise en main propre — NE PAS expédier') + '</div>';
+            } else {
+                var addrLine = escapeHtml(ship.address || '-');
+                var cityLine = escapeHtml(((ship.postalCode || '') + ' ' + (ship.city || '')).trim() || '-');
+                var countryLine = escapeHtml(ship.country || '');
+                html += '<div class="order-address"><span class="oc-label">' + (isEnglish ? 'Address' : 'Adresse') + '</span>'
+                    + '<span class="oc-address-block">' + addrLine + '<br>' + cityLine + (countryLine ? '<br>' + countryLine : '') + '</span></div>';
+            }
+            html += '</div>';
+
             html += '<div class="order-actions">';
             html += '<span class="status-badge" style="background:' + statusColor + ';">' + statusLabel + '</span>';
             html += '<select class="status-select" data-order-id="' + order.id + '" onchange="changeStatus(this)">';
@@ -172,21 +206,29 @@ function renderClients(orders) {
             html += '</select>';
             html += '</div>';
 
-            // Tracking + Colissimo
-            html += '<div class="order-tracking" style="display:flex; gap:0.5rem; align-items:center; margin-top:0.5rem;">';
-            html += '<input type="text" class="tracking-input" id="tracking-' + order.id + '" placeholder="' + (isEnglish ? 'Tracking number' : 'N° suivi La Poste') + '" value="' + (order.trackingNumber || '') + '" />';
-            html += '<button class="btn-admin-action btn-tracking" onclick="setTrackingFirebase(\'' + order.id + '\', this)">' + (isEnglish ? 'Track' : 'Suivi') + '</button>';
-            html += '<button class="btn-admin-action" onclick="generateColissimoLabelFirebase(\'' + order.id + '\', this)" style="background:#6366f1; color:#fff;">Colissimo</button>';
-            if (order.labelFile) {
-                html += '<a href="/api/admin/labels/' + order.labelFile + '" class="btn-admin-action" style="text-decoration:none; background:#8b5cf6; color:#fff;" target="_blank">PDF</a>';
+            // Tracking + Colissimo — uniquement pour les envois postaux
+            if (!isPickup) {
+                html += '<div class="order-tracking" style="display:flex; gap:0.5rem; align-items:center; margin-top:0.5rem;">';
+                html += '<input type="text" class="tracking-input" id="tracking-' + order.id + '" placeholder="' + (isEnglish ? 'Tracking number' : 'N° suivi La Poste') + '" value="' + (order.trackingNumber || '') + '" />';
+                html += '<button class="btn-admin-action btn-tracking" onclick="setTrackingFirebase(\'' + order.id + '\', this)">' + (isEnglish ? 'Track' : 'Suivi') + '</button>';
+                html += '<button class="btn-admin-action" onclick="generateColissimoLabelFirebase(\'' + order.id + '\', this)" style="background:#6366f1; color:#fff;">Colissimo</button>';
+                if (order.labelFile) {
+                    html += '<a href="/api/admin/labels/' + order.labelFile + '" class="btn-admin-action" style="text-decoration:none; background:#8b5cf6; color:#fff;" target="_blank">PDF</a>';
+                }
+                html += '</div>';
             }
-            html += '</div>';
 
-            // Order items
+            // Articles de la commande — avec couleur et taille bien visibles
             if (order.items && order.items.length > 0) {
+                html += '<div class="order-items-title">' + (isEnglish ? 'Items' : 'Articles') + '</div>';
                 html += '<div class="order-items">';
                 order.items.forEach(function(item) {
-                    html += '<span class="order-item-pill">' + escapeHtml(item.name) + ' x' + item.quantity + '</span>';
+                    html += '<span class="order-item-pill">';
+                    html += '<span class="oi-name">' + escapeHtml(item.name) + '</span>';
+                    if (item.color) { html += '<span class="oi-color">' + escapeHtml(item.color) + '</span>'; }
+                    if (item.size) { html += '<span class="oi-size">' + (isEnglish ? 'Size ' : 'Taille ') + escapeHtml(item.size) + '</span>'; }
+                    html += '<span class="oi-qty">×' + item.quantity + '</span>';
+                    html += '</span>';
                 });
                 html += '</div>';
             }

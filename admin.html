@@ -489,6 +489,10 @@
         }
 
         // ============ Render : Commandes (liste plate) ============
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
         function renderOrders(orders) {
             const container = document.getElementById('admin-orders');
 
@@ -500,14 +504,59 @@
             container.innerHTML = orders.map(order => {
                 const status = statusLabels[order.status] || { label: order.status, class: '' };
                 const orderDate = new Date(order.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+
+                const isPickup = order.deliveryMethod === 'pickup';
+                const accent = isPickup ? '#f59e0b' : '#3b82f6';
+                const methodLabel = isPickup ? '🤝 REMISE EN MAIN PROPRE' : '📦 ENVOI LA POSTE (à expédier)';
+
+                const cust = order.customer || {};
+                const ship = order.shipping || {};
+                const fullName = ((cust.firstName || '') + ' ' + (cust.lastName || '')).trim();
+
+                let customerBlock = '<div class="order-customer">'
+                    + '<div class="order-customer-title">Coordonnées client</div>'
+                    + '<div><span class="oc-label">Nom</span>' + esc(fullName || '-') + '</div>'
+                    + '<div><span class="oc-label">Email</span>' + esc(cust.email || order.clientEmail || '-') + '</div>';
+                if (cust.phone) {
+                    customerBlock += '<div><span class="oc-label">Téléphone</span>' + esc(cust.phone) + '</div>';
+                }
+                if (isPickup) {
+                    customerBlock += '<div class="order-pickup-note">⚠ Remise en main propre — NE PAS expédier</div>';
+                } else {
+                    const cityLine = ((ship.postalCode || '') + ' ' + (ship.city || '')).trim();
+                    customerBlock += '<div class="order-address"><span class="oc-label">Adresse</span>'
+                        + '<span class="oc-address-block">' + esc(ship.address || '-')
+                        + '<br>' + esc(cityLine || '-')
+                        + (ship.country ? '<br>' + esc(ship.country) : '')
+                        + '</span></div>';
+                }
+                customerBlock += '</div>';
+
+                const itemsHtml = (order.items || []).map(i => {
+                    let pill = '<span class="order-item-pill"><span class="oi-name">' + esc(i.name) + '</span>';
+                    if (i.color) pill += '<span class="oi-color">' + esc(i.color) + '</span>';
+                    if (i.size) pill += '<span class="oi-size">Taille ' + esc(i.size) + '</span>';
+                    pill += '<span class="oi-qty">×' + esc(i.quantity) + '</span></span>';
+                    return pill;
+                }).join('');
+
+                const trackingHtml = isPickup ? '' : `
+                        <div class="order-tracking">
+                            <input type="text" class="tracking-input" id="tracking-${order.id}" placeholder="N° suivi La Poste" value="${esc(order.trackingNumber || '')}" />
+                            <button class="btn-admin-action btn-tracking" onclick="setTracking('${order.id}', this)">Suivi</button>
+                            <button class="btn-admin-action" onclick="generateColissimoLabel('${order.id}', this)" style="background:#6366f1; color:#fff;">Colissimo</button>
+                            ${order.labelFile ? `<a href="/api/admin/labels/${esc(order.labelFile)}" class="btn-admin-action" style="text-decoration:none; background:#8b5cf6; color:#fff;" target="_blank">PDF</a>` : ''}
+                        </div>`;
+
                 return `
-                    <div class="order-row" data-status="${order.status}" data-order-number="${order.orderNumber}" data-client-email="${order.clientEmail || ''}">
+                    <div class="order-row" data-status="${esc(order.status)}" data-order-number="${esc(order.orderNumber)}" data-client-email="${esc(order.clientEmail || '')}" style="border-left:4px solid ${accent};">
+                        <div class="order-method" style="background:${accent};">${methodLabel}</div>
                         <div class="order-info">
-                            <span class="order-number">${order.orderNumber}</span>
+                            <span class="order-number">${esc(order.orderNumber)}</span>
                             <span class="order-date">${orderDate}</span>
-                            <span class="order-client" style="color: var(--color-text-muted); font-size: 0.9rem;">${order.clientEmail || ''}</span>
-                            <span class="order-total">${order.total} EUR</span>
+                            <span class="order-total">${esc(order.total)} EUR</span>
                         </div>
+                        ${customerBlock}
                         <div class="order-actions">
                             <span class="status-badge ${status.class}">${status.label}</span>
                             <select class="status-select" data-order-id="${order.id}" onchange="updateStatus(this)">
@@ -520,15 +569,9 @@
                                 <option value="cancelled">Annuler</option>
                             </select>
                         </div>
-                        <div class="order-tracking">
-                            <input type="text" class="tracking-input" id="tracking-${order.id}" placeholder="N° suivi La Poste" value="${order.trackingNumber || ''}" />
-                            <button class="btn-admin-action btn-tracking" onclick="setTracking('${order.id}', this)">Suivi</button>
-                            <button class="btn-admin-action" onclick="generateColissimoLabel('${order.id}', this)" style="background:#6366f1; color:#fff;">Colissimo</button>
-                            ${order.labelFile ? `<a href="/api/admin/labels/${order.labelFile}" class="btn-admin-action" style="text-decoration:none; background:#8b5cf6; color:#fff;" target="_blank">PDF</a>` : ''}
-                        </div>
-                        <div class="order-items">
-                            ${order.items.map(i => `<span class="order-item-pill">${i.name} x${i.quantity}</span>`).join('')}
-                        </div>
+                        ${trackingHtml}
+                        <div class="order-items-title">Articles</div>
+                        <div class="order-items">${itemsHtml}</div>
                     </div>
                 `;
             }).join('');

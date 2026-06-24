@@ -356,13 +356,59 @@
                     ? client.orders.map(order => {
                         const status = statusLabels[order.status] || { label: order.status, class: '' };
                         const orderDate = new Date(order.createdAt).toLocaleDateString('en-US');
+
+                        const isPickup = order.deliveryMethod === 'pickup';
+                        const accent = isPickup ? '#f59e0b' : '#3b82f6';
+                        const methodLabel = isPickup ? '🤝 HAND DELIVERY (in person)' : '📦 POSTAL SHIPPING (La Poste)';
+
+                        const cust = order.customer || {};
+                        const ship = order.shipping || {};
+                        const fullName = ((cust.firstName || '') + ' ' + (cust.lastName || '')).trim();
+
+                        let customerBlock = '<div class="order-customer">'
+                            + '<div class="order-customer-title">Customer details</div>'
+                            + '<div><span class="oc-label">Name</span>' + escHtml(fullName || '-') + '</div>'
+                            + '<div><span class="oc-label">Email</span>' + escHtml(cust.email || '-') + '</div>';
+                        if (cust.phone) {
+                            customerBlock += '<div><span class="oc-label">Phone</span>' + escHtml(cust.phone) + '</div>';
+                        }
+                        if (isPickup) {
+                            customerBlock += '<div class="order-pickup-note">⚠ Hand delivery — do NOT ship this order</div>';
+                        } else {
+                            const cityLine = ((ship.postalCode || '') + ' ' + (ship.city || '')).trim();
+                            customerBlock += '<div class="order-address"><span class="oc-label">Address</span>'
+                                + '<span class="oc-address-block">' + escHtml(ship.address || '-')
+                                + '<br>' + escHtml(cityLine || '-')
+                                + (ship.country ? '<br>' + escHtml(ship.country) : '')
+                                + '</span></div>';
+                        }
+                        customerBlock += '</div>';
+
+                        const itemsHtml = (order.items || []).map(i => {
+                            let pill = '<span class="order-item-pill"><span class="oi-name">' + escHtml(i.name) + '</span>';
+                            if (i.color) pill += '<span class="oi-color">' + escHtml(i.color) + '</span>';
+                            if (i.size) pill += '<span class="oi-size">Size ' + escHtml(i.size) + '</span>';
+                            pill += '<span class="oi-qty">×' + escHtml(i.quantity) + '</span></span>';
+                            return pill;
+                        }).join('');
+
+                        const trackingHtml = isPickup ? '' : `
+                                <div class="order-tracking">
+                                    <input type="text" class="tracking-input" id="tracking-${order.id}" placeholder="Tracking number" value="${escHtml(order.trackingNumber || '')}" />
+                                    <button class="btn-admin-action btn-tracking" onclick="setTracking('${order.id}', this)">Track</button>
+                                    <button class="btn-admin-action" onclick="generateColissimoLabel('${order.id}', this)" style="background:#6366f1; color:#fff;">Colissimo</button>
+                                    ${order.labelFile ? `<a href="/api/admin/labels/${escHtml(order.labelFile)}" class="btn-admin-action" style="text-decoration:none; background:#8b5cf6; color:#fff;" target="_blank">PDF</a>` : ''}
+                                </div>`;
+
                         return `
-                            <div class="order-row" data-status="${order.status}" data-order-number="${order.orderNumber}">
+                            <div class="order-row" data-status="${escHtml(order.status)}" data-order-number="${escHtml(order.orderNumber)}" style="border-left:4px solid ${accent};">
+                                <div class="order-method" style="background:${accent};">${methodLabel}</div>
                                 <div class="order-info">
-                                    <span class="order-number">${order.orderNumber}</span>
+                                    <span class="order-number">${escHtml(order.orderNumber)}</span>
                                     <span class="order-date">${orderDate}</span>
-                                    <span class="order-total">${order.total} EUR</span>
+                                    <span class="order-total">${escHtml(order.total)} EUR</span>
                                 </div>
+                                ${customerBlock}
                                 <div class="order-actions">
                                     <span class="status-badge ${status.class}">${status.label}</span>
                                     <select class="status-select" data-order-id="${order.id}" onchange="updateStatus(this)">
@@ -375,15 +421,9 @@
                                         <option value="cancelled">Cancel</option>
                                     </select>
                                 </div>
-                                <div class="order-tracking">
-                                    <input type="text" class="tracking-input" id="tracking-${order.id}" placeholder="Tracking number" value="${order.trackingNumber || ''}" />
-                                    <button class="btn-admin-action btn-tracking" onclick="setTracking('${order.id}', this)">Track</button>
-                                    <button class="btn-admin-action" onclick="generateColissimoLabel('${order.id}', this)" style="background:#6366f1; color:#fff;">Colissimo</button>
-                                    ${order.labelFile ? `<a href="/api/admin/labels/${order.labelFile}" class="btn-admin-action" style="text-decoration:none; background:#8b5cf6; color:#fff;" target="_blank">PDF</a>` : ''}
-                                </div>
-                                <div class="order-items">
-                                    ${order.items.map(i => `<span class="order-item-pill">${i.name} x${i.quantity}</span>`).join('')}
-                                </div>
+                                ${trackingHtml}
+                                <div class="order-items-title">Items</div>
+                                <div class="order-items">${itemsHtml}</div>
                             </div>
                         `;
                     }).join('')

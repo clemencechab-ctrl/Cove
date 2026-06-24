@@ -2974,11 +2974,110 @@ img {
 }
 
 .order-item-pill {
-    padding: 0.25rem 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.6rem;
     background: #1a1a1a;
     border: 1px solid var(--color-border);
     font-size: 0.75rem;
     color: var(--color-text-muted);
+}
+
+.oi-name {
+    color: var(--color-text);
+    font-weight: 500;
+}
+
+.oi-color {
+    padding: 0.1rem 0.45rem;
+    background: #2a2a2a;
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    font-size: 0.7rem;
+    color: var(--color-text);
+}
+
+.oi-size {
+    padding: 0.1rem 0.45rem;
+    background: #fff;
+    color: #000;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+.oi-qty {
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* Bandeau mode de réception (livraison vs remise en main propre) */
+.order-method {
+    display: block;
+    margin: -1rem -1rem 0.85rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #000;
+}
+
+/* Bloc coordonnées client par commande */
+.order-customer {
+    margin: 0 0 0.85rem;
+    padding: 0.75rem 0.9rem;
+    background: #0d0d0d;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-size: 0.82rem;
+    line-height: 1.6;
+}
+
+.order-customer-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    margin-bottom: 0.4rem;
+}
+
+.oc-label {
+    display: inline-block;
+    min-width: 90px;
+    color: var(--color-text-muted);
+}
+
+.order-address {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 0.2rem;
+}
+
+.oc-address-block {
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.order-pickup-note {
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    border-radius: 4px;
+    color: #f59e0b;
+    font-weight: 600;
+    font-size: 0.78rem;
+}
+
+.order-items-title {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    margin: 0.75rem 0 0.4rem;
 }
 
 /* Access Denied */
