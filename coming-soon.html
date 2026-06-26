@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cove. — Bientôt disponible</title>
+    <meta name="description" content="Cove. — marque indépendante française. Ouverture le 01/07/2026.">
+    <!-- Pendant la phase privée, on évite l'indexation de la page d'attente -->
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Open Graph : c'est ce que verront les réseaux sociaux quand tu partages le lien -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="COVE Studio">
+    <meta property="og:title" content="Cove. — Ouverture le 01/07/2026">
+    <meta property="og:description" content="Marque indépendante française. La boutique ouvre le 01/07/2026.">
+    <meta property="og:url" content="https://covestudio.fr/">
+    <meta property="og:image" content="https://covestudio.fr/image/logo-cove.png">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" type="image/png" href="image/logo-cove.png">
+    <link rel="apple-touch-icon" href="image/logo-cove.png">
+    <meta name="theme-color" content="#000000">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-bg: #000000;
+            --color-text: #ffffff;
+            --color-text-muted: #888888;
+            --color-border: #222222;
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: var(--font-main);
+            background: var(--color-bg);
+            color: var(--color-text);
+            min-height: 100vh;
+            display: flex;
+            padding: 2.5rem 1.5rem;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .wrap {
+            width: 100%;
+            max-width: 540px;
+            margin: auto;            /* centre, et reste accessible au scroll si trop haut */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2.1rem;
+            animation: fade 0.8s ease;
+        }
+        @keyframes fade { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        .logo { width: 300px; max-width: 70vw; height: auto; }
+        .opening {
+            font-size: 1.7rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: var(--color-text);
+        }
+        .opening strong { font-weight: 600; }
+        .divider {
+            width: 56px;
+            height: 1px;
+            background: var(--color-border);
+        }
+        .gate, .notify { width: 100%; }
+        .gate-label, .notify-label {
+            font-size: 0.95rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            margin-bottom: 1.1rem;
+        }
+        .gate-row { display: flex; gap: 0.5rem; }
+        input[type="password"], input[type="email"] {
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            font-family: inherit;
+            font-size: 1.05rem;
+            padding: 1rem 1.1rem;
+            outline: none;
+            transition: border-color 0.25s ease;
+        }
+        input:focus { border-color: var(--color-text); }
+        input::placeholder { color: #555; }
+        button {
+            background: var(--color-text);
+            color: var(--color-bg);
+            border: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 0 1.6rem;
+            cursor: pointer;
+            transition: opacity 0.25s ease;
+            white-space: nowrap;
+        }
+        button:hover { opacity: 0.8; }
+        button:disabled { opacity: 0.5; cursor: default; }
+        .error {
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            color: #ef4444;
+            min-height: 1rem;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .error.show { opacity: 1; }
+        .social {
+            font-size: 0.95rem;
+            color: var(--color-text-muted);
+            letter-spacing: 0.05em;
+        }
+        .notify { margin-top: -0.8rem; }
+        .notify-msg {
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            min-height: 1rem;
+            color: var(--color-text-muted);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .notify-msg.show { opacity: 1; }
+        .notify-msg.ok { color: #22c55e; }
+        .notify-msg.err { color: #ef4444; }
+    </style>
+</head>
+<body>
+    <main class="wrap">
+        <img src="image/logo-cove-white.png" alt="Cove." class="logo">
+
+        <p class="opening">La boutique ouvre le<br><strong>01 / 07 / 2026</strong></p>
+
+        <div class="divider"></div>
+
+        <form class="gate" id="gate-form" autocomplete="off">
+            <p class="gate-label">Accès privé</p>
+            <div class="gate-row">
+                <input type="password" id="access-code" placeholder="Code d'accès" autocomplete="off" aria-label="Code d'accès">
+                <button type="submit">Entrer</button>
+            </div>
+            <p class="error" id="error-msg">Code incorrect</p>
+        </form>
+
+        <p class="social">Suivez-nous pour le lancement</p>
+
+        <form class="notify" id="notify-form" autocomplete="off">
+            <p class="notify-label">Préviens-moi du drop</p>
+            <div class="gate-row">
+                <input type="email" id="notify-email" placeholder="ton@email.com" aria-label="Ton email" required>
+                <button type="submit" id="notify-btn">Me prévenir</button>
+            </div>
+            <p class="notify-msg" id="notify-msg"></p>
+        </form>
+    </main>
+
+    <script>
+        // ─────────────────────────────────────────────────────────────
+        //  CODE D'ACCÈS — change cette valeur quand tu veux.
+        //  C'est le SEUL endroit où le code est défini.
+        // ─────────────────────────────────────────────────────────────
+        var ACCESS_CODE = 'jetapinelecode12';
+
+        var form = document.getElementById('gate-form');
+        var input = document.getElementById('access-code');
+        var error = document.getElementById('error-msg');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (input.value.trim() === ACCESS_CODE) {
+                try { localStorage.setItem('coveAccess', 'GRANTED'); } catch (err) {}
+                window.location.replace('/');
+            } else {
+                error.classList.add('show');
+                input.value = '';
+                input.focus();
+            }
+        });
+
+        input.addEventListener('input', function () {
+            error.classList.remove('show');
+        });
+
+        // ─── Liste d'attente : le client laisse son email pour être prévenu au lancement ───
+        var notifyForm = document.getElementById('notify-form');
+        var notifyEmail = document.getElementById('notify-email');
+        var notifyBtn = document.getElementById('notify-btn');
+        var notifyMsg = document.getElementById('notify-msg');
+
+        function showNotify(text, kind) {
+            notifyMsg.textContent = text;
+            notifyMsg.className = 'notify-msg show ' + (kind || '');
+        }
+
+        notifyForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var email = notifyEmail.value.trim();
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showNotify('Email invalide', 'err');
+                return;
+            }
+            notifyBtn.disabled = true;
+            showNotify('Envoi…', '');
+            fetch('/api/waitlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email })
+            })
+            .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+            .then(function (res) {
+                if (res.ok && res.d.success) {
+                    showNotify(res.d.message || 'Inscription confirmée, on te préviendra au lancement.', 'ok');
+                    notifyEmail.value = '';
+                    notifyForm.querySelector('.gate-row').style.display = 'none';
+                } else {
+                    showNotify((res.d && res.d.error) || 'Une erreur est survenue, réessaie.', 'err');
+                    notifyBtn.disabled = false;
+                }
+            })
+            .catch(function () {
+                showNotify('Connexion impossible, réessaie.', 'err');
+                notifyBtn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>

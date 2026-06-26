@@ -9,6 +9,7 @@ const contactMessagesRef = db.ref('contactMessages');
 const contactCounterRef = db.ref('contactCounter');
 const promoCodesRef = db.ref('promoCodes');
 const promoCounterRef = db.ref('promoCounter');
+const waitlistRef = db.ref('waitlist');
 
 module.exports = {
     // Products
@@ -563,5 +564,42 @@ module.exports = {
             }
         }
         return null;
+    },
+
+    // Liste d'attente (pré-lancement) — emails des clients qui veulent être
+    // prévenus à l'ouverture de la boutique. Dé-doublonné par email (normalisé
+    // en minuscules). Retourne { created: true } si nouvel email, { created:false,
+    // already:true } si déjà inscrit.
+    addWaitlistEmail: async (email) => {
+        const normalized = String(email).trim().toLowerCase();
+        const snapshot = await waitlistRef.once('value');
+        const data = snapshot.val() || {};
+        for (const val of Object.values(data)) {
+            if (val && val.email === normalized) {
+                return { created: false, already: true };
+            }
+        }
+        await waitlistRef.push({
+            email: normalized,
+            notified: false,
+            createdAt: new Date().toISOString()
+        });
+        return { created: true };
+    },
+
+    getWaitlist: async () => {
+        const snapshot = await waitlistRef.once('value');
+        const data = snapshot.val();
+        if (!data) return [];
+        return Object.entries(data).map(([key, val]) => ({ ...val, _key: key }))
+            .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    },
+
+    markWaitlistNotified: async (key) => {
+        await waitlistRef.child(key).update({
+            notified: true,
+            notifiedAt: new Date().toISOString()
+        });
+        return true;
     }
 };

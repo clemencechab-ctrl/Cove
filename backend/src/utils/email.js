@@ -467,10 +467,33 @@ async function sendCancelReturnRequest(order, type, reason, customerEmail) {
     }
 }
 
+// Alerte "drop" : envoyée aux inscrits de la liste d'attente le jour du lancement.
+// Appelée par le script tests/notify-waitlist.js après la levée du verrou privé.
+async function sendDropAlert(email) {
+    const url = process.env.FRONTEND_URL || 'https://covestudio.fr';
+    await sendMail({
+        from: getFromAddress(),
+        to: email,
+        subject: 'COVE — La boutique est ouverte 🖤',
+        html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            ${getEmailHeader()}
+            <h2 style="text-align:center;">C'est ouvert.</h2>
+            <p style="text-align:center;">La boutique COVE est désormais en ligne. Tu étais sur la liste — tu fais partie des premiers prévenus.</p>
+            <p style="text-align:center; margin: 32px 0;">
+                <a href="${url}" style="display:inline-block; background:#000; color:#fff; text-decoration:none; padding:14px 32px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; font-size:14px;">Découvrir la collection</a>
+            </p>
+            <p style="text-align:center; color:#888; font-size:13px;">À très vite,<br>L'équipe COVE</p>
+            </div>
+        `
+    });
+}
+
 module.exports = {
     sendOrderConfirmation,
     sendOrderStatusUpdate,
     sendContactNotification,
     sendOrderNotificationToOwner,
-    sendCancelReturnRequest
+    sendCancelReturnRequest,
+    sendDropAlert
 };

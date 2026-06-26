@@ -15,6 +15,7 @@ const contactRoutes = require('./src/routes/contact');
 const adminRoutes = require('./src/routes/admin');
 const userRoutes = require('./src/routes/users');
 const webhookRoutes = require('./src/routes/webhooks');
+const waitlistRoutes = require('./src/routes/waitlist');
 
 // Initialize Express
 const app = express();
@@ -99,6 +100,16 @@ app.use('/api/users/forgot-password', authLimiter);
 app.use('/api/checkout/create-session', checkoutLimiter);
 app.use('/api/checkout/validate-promo', checkoutLimiter);
 
+// Rate limiting pour l'inscription liste d'attente (anti-spam) — 15 / 15 min par IP
+const waitlistLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 15,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Trop de tentatives, veuillez réessayer plus tard' }
+});
+app.use('/api/waitlist', waitlistLimiter);
+
 // Parse JSON (sauf pour les webhooks Stripe qui ont besoin du raw body)
 app.use((req, res, next) => {
     if (req.originalUrl === '/api/webhooks/stripe') {
@@ -116,6 +127,7 @@ app.use('/api/checkout', checkoutRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/waitlist', waitlistRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

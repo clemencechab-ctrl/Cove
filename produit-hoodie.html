@@ -90,6 +90,14 @@
     </script>
     <!-- GoatCounter analytics -->
     <script data-goatcounter="https://covestudio.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+    <!-- COVE-GATE-START — verrou pré-lancement, retiré via `node tests/gate.js remove` -->
+    <script>
+    (function () {
+        try { if (localStorage.getItem('coveAccess') === 'GRANTED') return; } catch (e) {}
+        window.location.replace('/coming-soon.html');
+    })();
+    </script>
+    <!-- COVE-GATE-END -->
 </head>
 <body>
     <!-- Header -->

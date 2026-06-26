@@ -17,8 +17,5 @@ deploy.log
 fix-timestamps.ps1
 plan-md0.md
 
-# Claude interne
-.claude/plans/
-
-.claude/scheduled_tasks.lock
-.claude/scheduled_tasks.lock
+# Claude interne / config locale développeur
+.claude/

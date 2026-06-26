@@ -84,6 +84,8 @@ npx http-server -p 8080 -c-1   # Serve static files, no cache
 | POST | /api/checkout/create-session | No | Stripe checkout |
 | POST | /api/checkout/validate-promo | No | Validate promo code |
 | POST | /api/contact | No | Contact form |
+| POST | /api/waitlist | No | Inscription liste d'attente (pré-lancement) |
+| GET | /api/waitlist | Owner | Liste des inscrits liste d'attente |
 | POST | /api/orders | No | Create order |
 | GET | /api/orders/:orderNumber | Bearer | Order details |
 | GET | /api/orders/my-orders | Bearer | User's orders |
@@ -95,6 +97,16 @@ npx http-server -p 8080 -c-1   # Serve static files, no cache
 | ALL | /api/admin/promo-codes | Owner | Promo code CRUD |
 | GET | /api/admin/messages | Owner | Contact messages |
 | POST | /api/webhooks/stripe | No | Stripe webhook |
+
+## Verrou d'accès privé (pré-lancement, jusqu'au 01/07/2026)
+
+Pendant la phase de teaser réseaux sociaux, le site est rendu **privé** : tout visiteur est redirigé vers **`coming-soon.html`** (page d'attente autonome : logo blanc, « Ouverture le 01/07/2026 », champ code d'accès, **+ formulaire d'inscription liste d'attente par email**) tant qu'il n'a pas saisi le code. Le bon code pose `localStorage.coveAccess = 'GRANTED'` et débloque **tout le site** (mémorisé par appareil).
+
+- **Code d'accès actuel : `jetapinelecode12`** — défini à **un seul endroit**, la const `ACCESS_CODE` en haut du `<script>` de `coming-soon.html`. Pour le changer, éditer cette ligne uniquement.
+- **Le verrou** est un petit `<script>` inline injecté avant `</head>` de **26 pages** (FR + EN), encadré par les marqueurs `COVE-GATE-START` / `COVE-GATE-END`. Il redirige vers `/coming-soon.html` si le flag n'est pas posé. **Limite assumée** : protection côté client (contournable par inspection du source) — suffisant pour empêcher les clients de commander pendant le teaser, pas une sécurité serveur.
+- **Pose / retrait via `node tests/gate.js add|remove`** (idempotent, liste des pages en dur dans le script). `coming-soon.html` n'est jamais verrouillée.
+- **Liste d'attente (notify au lancement)** : `coming-soon.html` poste l'email saisi vers **`POST /api/waitlist`** (public, rate-limité 15/15min, dé-doublonné par email en minuscules → RTDB `/waitlist/{pushId}` = `{email, notified, createdAt}`). Fonctions store : `addWaitlistEmail` / `getWaitlist` / `markWaitlistNotified` ([store.js](backend/src/data/store.js)). `GET /api/waitlist` (owner) liste les inscrits. **Le jour J, envoyer l'alerte** : `node tests/notify-waitlist.js` (dry-run, liste les destinataires) puis `--send` (envoie réellement via `sendDropAlert` de [email.js](backend/src/utils/email.js), idempotent via le flag `notified`, force `FRONTEND_URL=https://covestudio.fr` pour que le bouton de l'email pointe vers la prod et pas le localhost du `.env`).
+- **Le jour de l'ouverture (01/07/2026)** : (1) `node tests/notify-waitlist.js --send` pour prévenir les inscrits ; (2) `node tests/gate.js remove` ; (3) redéployer ; (4) supprimer `coming-soon.html` + la route/limiter waitlist si plus utile. Retirer aussi cette section.
 
 ## Environment
 
