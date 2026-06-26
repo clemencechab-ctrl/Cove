@@ -136,6 +136,22 @@
         .notify-msg.show { opacity: 1; }
         .notify-msg.ok { color: #22c55e; }
         .notify-msg.err { color: #ef4444; }
+
+        /* Mobile : tout doit tenir sans avoir à scroller. On réduit logo, textes
+           et espacements. Les champs restent à 16px pour éviter le zoom auto iOS. */
+        @media (max-width: 600px) {
+            body { padding: 1.5rem 1.25rem; }
+            .wrap { gap: 1.3rem; max-width: 100%; }
+            .logo { width: 165px; }
+            .opening { font-size: 1.3rem; line-height: 1.45; }
+            .divider { width: 44px; }
+            .gate-label, .notify-label { font-size: 0.8rem; letter-spacing: 0.12em; margin-bottom: 0.7rem; }
+            input[type="password"], input[type="email"] { font-size: 1rem; padding: 0.8rem 0.9rem; }
+            button { font-size: 0.85rem; padding: 0 1.05rem; }
+            .social { font-size: 0.85rem; }
+            .error, .notify-msg { font-size: 0.8rem; margin-top: 0.55rem; }
+            .notify { margin-top: -0.3rem; }
+        }
     </style>
 </head>
 <body>
