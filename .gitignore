@@ -4,6 +4,17 @@ firebase-sa-b64.txt
 github-actions-sa-b64.txt
 nul
 
+# Secrets — ne JAMAIS committer (motifs génériques pour les futurs fichiers)
+*adminsdk*.json
+*-sa-key.json
+*-sa-b64.txt
+*-b64.txt
+backend/.env-cloudrun.yaml
+*-cloudrun.yaml
+.env
+.env.*
+!.env.example
+
 # Dépendances
 node_modules/
 

@@ -4,6 +4,13 @@
     "ignore": [
       "firebase.json",
       ".firebaserc",
+      "**/.git/**",
+      ".git/**",
+      ".github/**",
+      ".gitignore",
+      ".gitattributes",
+      ".gcloudignore",
+      "**/.*",
       "backend/**",
       "tests/**",
       "node_modules/**",
@@ -14,7 +21,15 @@
       "playwright.config.js",
       "test-results/**",
       "playwright-report/**",
-      "*.json"
+      "*.json",
+      "*.ps1",
+      "*.log",
+      "*.md",
+      "*-b64.txt",
+      "*-sa-key*",
+      "*adminsdk*",
+      "nul",
+      "NUL"
     ],
     "rewrites": [
       {
