@@ -241,11 +241,21 @@ const auth = {
             }
         } catch (error) {
             console.error('Google signin error:', error);
-            if (errorEl) {
+            if (error.code === 'auth/popup-blocked' || error.code === 'auth/operation-not-supported-in-this-environment') {
+                // Popup bloqué par le navigateur (fréquent sur localhost, où le popup
+                // vise un autre domaine covestudio.firebaseapp.com) → repli sur la
+                // redirection plein écran. handleGoogleRedirectResult() (appelé à
+                // l'init) finalise la connexion au retour sur la page.
+                try {
+                    await firebase.auth().signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+                    return;
+                } catch (redirErr) {
+                    console.error('Google redirect fallback error:', redirErr);
+                    if (errorEl) errorEl.textContent = 'Connexion Google indisponible — autorisez les popups pour ce site et réessayez.';
+                }
+            } else if (errorEl) {
                 if (error.code === 'auth/cancelled-popup-request' || error.code === 'auth/popup-closed-by-user') {
                     errorEl.textContent = '';
-                } else if (error.code === 'auth/popup-blocked') {
-                    errorEl.textContent = 'Popup bloqué par le navigateur — autorisez les popups pour ce site.';
                 } else if (error.code === 'auth/unauthorized-domain') {
                     errorEl.textContent = 'Domaine non autorisé dans Firebase Auth.';
                 } else {
