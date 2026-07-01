@@ -318,7 +318,7 @@ router.get('/products', async (req, res) => {
 // POST /api/admin/products - Creer un produit
 router.post('/products', async (req, res) => {
     try {
-        const { name, price, category, description, image, stock, sizeStock } = req.body;
+        const { name, price, category, description, image, stock, sizeStock, images, colors } = req.body;
 
         if (!name || price === undefined || !category) {
             return res.status(400).json({
@@ -341,7 +341,9 @@ router.post('/products', async (req, res) => {
             description: description || '',
             image: image || '',
             stock: stock !== undefined ? parseInt(stock) : 0,
-            sizeStock: sizeStock || {}
+            sizeStock: sizeStock || {},
+            images: images || {},
+            colors: colors || []
         });
 
         res.status(201).json({ success: true, product });
@@ -354,7 +356,7 @@ router.post('/products', async (req, res) => {
 // PUT /api/admin/products/:id - Modifier un produit
 router.put('/products/:id', async (req, res) => {
     try {
-        const { name, price, category, description, image, stock, sizeStock } = req.body;
+        const { name, price, category, description, image, stock, sizeStock, images, colors } = req.body;
 
         const updates = {};
         if (name !== undefined) updates.name = name;
@@ -372,6 +374,8 @@ router.put('/products/:id', async (req, res) => {
         if (image !== undefined) updates.image = image;
         if (stock !== undefined) updates.stock = parseInt(stock);
         if (sizeStock !== undefined) updates.sizeStock = sizeStock;
+        if (images !== undefined) updates.images = images;
+        if (colors !== undefined) updates.colors = colors;
 
         const product = await store.updateProduct(req.params.id, updates);
 
