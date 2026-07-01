@@ -35,11 +35,11 @@ const BLOCK = `    ${START}
 // elle-même) et tout ce qui n'est pas une vraie page client.
 const FILES = [
     'index.html', 'shop.html', 'cart.html', 'compte.html', 'success.html',
-    'about.html', 'contact.html', 'faq.html', 'cgv.html', 'retours.html',
+    'contact.html', 'faq.html', 'cgv.html', 'retours.html',
     'confidentialite.html', 'mentions-legales.html',
     'produit-tshirt.html', 'produit-hoodie.html', 'admin.html',
     'en/index.html', 'en/shop.html', 'en/cart.html', 'en/compte.html',
-    'en/success.html', 'en/about.html', 'en/contact.html', 'en/faq.html',
+    'en/success.html', 'en/contact.html', 'en/faq.html',
     'en/produit-tshirt.html', 'en/produit-hoodie.html', 'en/admin.html',
 ];
 

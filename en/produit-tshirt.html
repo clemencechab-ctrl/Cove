@@ -111,7 +111,6 @@
             <div class="nav-left">
                 <a href="index.html#collection" class="nav-link">Collection</a>
                 <a href="index.html#lookbook" class="nav-link">Lookbook</a>
-                <a href="about.html" class="nav-link">About</a>
             </div>
             <div class="logo">
                 <a href="index.html"><img src="../image/logo-cove.png" alt="COVE"></a>
@@ -287,8 +286,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>Body length (from HPS)</td><td>67.31</td><td>69.85</td><td>71.12</td><td>73.66</td><td>76.83</td><td>80.64</td><td>83.18</td></tr>
-                    <tr><td>Chest</td><td>48.57</td><td>51.11</td><td>53.65</td><td>58.73</td><td>63.81</td><td>68.89</td><td>73.97</td></tr>
+                    <tr><td>Body length (from HPS)</td><td>67</td><td>69</td><td>71</td><td>73</td><td>76</td><td>80</td><td>83</td></tr>
+                    <tr><td>Chest</td><td>48</td><td>51</td><td>53</td><td>58</td><td>63</td><td>68</td><td>73</td></tr>
                 </tbody>
             </table>
             </div>
@@ -315,7 +314,6 @@
                     <h4>Navigation</h4>
                     <a href="index.html#collection">Collection</a>
                     <a href="index.html#lookbook">Lookbook</a>
-                    <a href="about.html">About</a>
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
@@ -341,12 +339,44 @@
         let selectedSize = 'L';
         window.selectedColor = 'Blanc';
 
-        // Images par couleur (provisoire). La VALEUR couleur reste FR (Blanc/Noir)
-        // pour rester coherente avec la RTDB ; seul le libelle affiche est EN.
+        // Images par couleur (repli). La VALEUR couleur reste FR (Blanc/Noir) pour
+        // rester coherente avec la RTDB ; seul le libelle affiche est EN. Remplacé au
+        // chargement par les visuels gérés dans l'admin via loadProductImages().
+        const PRODUCT_ID = 1;
         const COLOR_IMAGES = {
             'Blanc': { main: '../image/t-shirt-front.JPG', thumbs: ['../image/t-shirt-front.JPG', '../image/tshirt-back.JPG'] },
             'Noir':  { main: '../image/new-front.jpeg',    thumbs: ['../image/new-front.jpeg', '../image/tshirt-back.JPG'] }
         };
+
+        // Page EN servie sous /en/ : préfixe ../ les chemins relatifs image/.
+        // Les URLs absolues (uploads admin) sont laissées telles quelles.
+        function resolveImgSrc(src) {
+            if (!src) return src;
+            if (/^https?:\/\//.test(src)) return src;
+            if (src.indexOf('image/') === 0) return '../' + src;
+            return src;
+        }
+
+        async function loadProductImages() {
+            try {
+                const res = await fetch('/api/products/' + PRODUCT_ID);
+                const data = await res.json();
+                const p = data && data.product;
+                if (!p || !p.images) return;
+                Object.keys(p.images).forEach(function (color) {
+                    const entry = p.images[color] || {};
+                    let thumbs = Array.isArray(entry.thumbnails) && entry.thumbnails.length
+                        ? entry.thumbnails
+                        : (entry.main ? [entry.main] : []);
+                    thumbs = thumbs.map(resolveImgSrc);
+                    if (thumbs.length) {
+                        COLOR_IMAGES[color] = { main: resolveImgSrc(entry.main) || thumbs[0], thumbs: thumbs };
+                    }
+                });
+                renderThumbnails(window.selectedColor);
+            } catch (e) { /* garde les visuels de repli */ }
+        }
+        document.addEventListener('DOMContentLoaded', loadProductImages);
 
         function changeImage(src, thumb) {
             document.getElementById('main-image').src = src;

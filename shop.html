@@ -57,7 +57,6 @@
             <div class="nav-left">
                 <a href="shop.html" class="nav-link active">Boutique</a>
                 <a href="index.html#lookbook" class="nav-link">Lookbook</a>
-                <a href="about.html" class="nav-link">À propos</a>
             </div>
             <div class="logo">
                 <a href="index.html">COVE</a>
@@ -174,7 +173,6 @@
                     <h4>Navigation</h4>
                     <a href="shop.html">Boutique</a>
                     <a href="index.html#lookbook">Lookbook</a>
-                    <a href="about.html">About</a>
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
@@ -273,6 +271,36 @@
         // Search & sort events
         document.getElementById('shop-search').addEventListener('input', filterAndSort);
         document.getElementById('shop-sort').addEventListener('change', filterAndSort);
+
+        // Normalise une source d'image pour la page courante (FR : racine /).
+        function resolveCardImg(src) { return src; }
+
+        // Met à jour les images des cartes produit depuis l'admin (RTDB product.images).
+        async function loadCardImages() {
+            try {
+                const res = await fetch('/api/products');
+                const data = await res.json();
+                if (!data || !data.products) return;
+                const byId = {};
+                data.products.forEach(function (p) { byId[p.id] = p; });
+                document.querySelectorAll('.shop-card[data-id]').forEach(function (card) {
+                    const p = byId[parseInt(card.dataset.id)];
+                    if (!p || !p.images) return;
+                    const b = p.images.Blanc && (p.images.Blanc.main || (p.images.Blanc.thumbnails || [])[0]);
+                    const n = p.images.Noir && (p.images.Noir.main || (p.images.Noir.thumbnails || [])[0]);
+                    if (b) card.dataset.imageBlanc = resolveCardImg(b);
+                    if (n) card.dataset.imageNoir = resolveCardImg(n);
+                    const sel = card.dataset.selectedColor || 'Blanc';
+                    const cur = sel === 'Noir' ? card.dataset.imageNoir : card.dataset.imageBlanc;
+                    if (cur) {
+                        card.dataset.image = card.dataset.imageBlanc || cur;
+                        const img = card.querySelector('.shop-card-image img');
+                        if (img) img.src = cur;
+                    }
+                });
+            } catch (e) { /* garde les images par défaut */ }
+        }
+        document.addEventListener('DOMContentLoaded', loadCardImages);
     </script>
     <script src="js/nav.js?v=2"></script>
 </body>

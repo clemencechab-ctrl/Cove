@@ -27,7 +27,6 @@
             <div class="nav-left">
                 <a href="index.html#collection" class="nav-link">Collection</a>
                 <a href="index.html#lookbook" class="nav-link">Lookbook</a>
-                <a href="about.html" class="nav-link">À propos</a>
             </div>
             <div class="logo">
                 <a href="index.html"><img src="image/logo-cove.png" alt="COVE"></a>
@@ -229,34 +228,49 @@
                     <textarea id="product-description" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Image du produit (PNG, JPEG, WEBP, GIF ou PDF — max 10 Mo)</label>
-                    <!-- Input fichier masqué : texte du bouton natif varie selon la langue du navigateur.
-                         On utilise un label stylé en FR qui le déclenche. -->
-                    <input type="file" id="product-image-file" accept="image/png,image/jpeg,image/webp,image/gif,application/pdf" onchange="uploadProductImage(this)" style="display:none;">
-                    <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
-                        <label for="product-image-file" class="btn-file-picker">Choisir un fichier</label>
-                        <span id="product-image-filename" style="color: var(--color-text-muted); font-size:0.9rem;">Aucun fichier sélectionné</span>
-                    </div>
-                    <!-- URL stockee en interne (input hidden) — remplie apres upload -->
+                    <label>Photos du produit (PNG, JPEG, WEBP, GIF — max 10 Mo chacune)</label>
+                    <p style="font-size:0.85rem; color: var(--color-text-muted); margin:0 0 0.6rem;">
+                        Une galerie par couleur. La <strong>1re photo (★)</strong> est l'image principale affichée d'abord. Tu peux en sélectionner plusieurs à la fois.
+                    </p>
+                    <div id="product-gallery-container"></div>
+                    <!-- Image legacy (1re photo) conservée pour la vignette du tableau admin -->
                     <input type="hidden" id="product-image">
-                    <p id="product-image-status" style="font-size:0.85rem; color: var(--color-text-muted); margin:0.5rem 0 0;"></p>
-                    <img id="product-image-preview" src="" alt="" style="display:none; max-width:150px; margin-top:0.5rem; border-radius:4px;">
                 </div>
                 <style>
-                    .btn-file-picker {
-                        display: inline-block;
-                        padding: 0.55rem 1.1rem;
-                        background: var(--color-text, #fff);
-                        color: var(--color-bg, #000);
-                        border-radius: 4px;
-                        font-size: 0.9rem;
-                        font-weight: 500;
-                        letter-spacing: 0.03em;
-                        cursor: pointer;
-                        transition: opacity 0.2s ease;
-                        user-select: none;
+                    .gallery-color-block { margin-bottom: 1.25rem; }
+                    .gallery-color-title {
+                        font-size: 0.85rem; font-weight: 600; letter-spacing: 0.03em;
+                        margin-bottom: 0.5rem; color: var(--color-text);
                     }
-                    .btn-file-picker:hover { opacity: 0.85; }
+                    .gallery-grid {
+                        display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center;
+                    }
+                    .gallery-thumb {
+                        position: relative; width: 84px; height: 84px; border-radius: 6px;
+                        overflow: hidden; border: 1px solid rgba(255,255,255,0.15);
+                    }
+                    .gallery-thumb.is-main { border-color: #f1c40f; }
+                    .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+                    .gallery-badge {
+                        position: absolute; bottom: 0; left: 0; right: 0;
+                        background: rgba(241,196,15,0.92); color: #000; font-size: 0.7rem;
+                        text-align: center; padding: 1px 0; letter-spacing: 0.02em;
+                    }
+                    .gallery-btn {
+                        position: absolute; width: 20px; height: 20px; line-height: 18px;
+                        text-align: center; border: none; border-radius: 50%; cursor: pointer;
+                        font-size: 0.8rem; padding: 0;
+                    }
+                    .gallery-remove { top: 3px; right: 3px; background: rgba(231,76,60,0.95); color: #fff; }
+                    .gallery-setmain { top: 3px; left: 3px; background: rgba(0,0,0,0.6); color: #f1c40f; }
+                    .gallery-add {
+                        display: inline-flex; align-items: center; justify-content: center;
+                        width: 84px; height: 84px; border: 1px dashed rgba(255,255,255,0.35);
+                        border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+                        color: var(--color-text-muted); user-select: none;
+                    }
+                    .gallery-add:hover { border-color: var(--color-text); color: var(--color-text); }
+                    .gallery-status { font-size: 0.8rem; margin: 0.4rem 0 0; min-height: 1em; }
                 </style>
                 <div class="form-group">
                     <label>Stock par taille et par couleur</label>
@@ -295,7 +309,6 @@
                     <h4>Navigation</h4>
                     <a href="index.html#collection">Collection</a>
                     <a href="index.html#lookbook">Lookbook</a>
-                    <a href="about.html">About</a>
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
@@ -764,15 +777,6 @@
         function openProductModal(product = null) {
             document.getElementById('product-modal').classList.add('active');
             document.getElementById('product-form-message').textContent = '';
-            // Reset preview/status des uploads
-            const statusEl = document.getElementById('product-image-status');
-            const previewEl = document.getElementById('product-image-preview');
-            const fileInput = document.getElementById('product-image-file');
-            const filenameEl = document.getElementById('product-image-filename');
-            if (statusEl) statusEl.textContent = '';
-            if (previewEl) { previewEl.src = ''; previewEl.style.display = 'none'; }
-            if (fileInput) fileInput.value = '';
-            if (filenameEl) filenameEl.textContent = 'Aucun fichier sélectionné';
             if (product) {
                 document.getElementById('product-modal-title').textContent = 'Modifier le produit';
                 document.getElementById('product-edit-id').value = product.id;
@@ -781,16 +785,15 @@
                 document.getElementById('product-category').value = product.category || 'tops';
                 document.getElementById('product-description').value = product.description || '';
                 document.getElementById('product-image').value = product.image || '';
-                if (product.image && previewEl && /\.(png|jpe?g|webp|gif)$/i.test(product.image)) {
-                    previewEl.src = product.image;
-                    previewEl.style.display = 'block';
-                }
                 renderSizeStockGrids(product);
+                initGalleryState(product);
             } else {
                 document.getElementById('product-modal-title').textContent = 'Ajouter un produit';
                 document.getElementById('product-edit-id').value = '';
                 document.getElementById('product-form').reset();
+                document.getElementById('product-image').value = '';
                 renderSizeStockGrids(null);
+                initGalleryState(null);
             }
         }
 
@@ -859,63 +862,141 @@
             document.getElementById('product-modal').classList.remove('active');
         }
 
-        // Upload d'un fichier image/PDF pour le produit
-        async function uploadProductImage(input) {
-            const file = input.files && input.files[0];
-            const statusEl = document.getElementById('product-image-status');
-            const previewEl = document.getElementById('product-image-preview');
-            const urlInput = document.getElementById('product-image');
-            const filenameEl = document.getElementById('product-image-filename');
-            if (!file) {
-                if (filenameEl) filenameEl.textContent = 'Aucun fichier sélectionné';
-                return;
-            }
+        // ----- Gestionnaire de galerie multi-photos par couleur -----
+        // État d'édition : { couleur: [url, ...] }  (la 1re = image principale).
+        // Clé spéciale 'default' pour un produit sans couleurs (1 seule galerie).
+        var galleryState = {};
 
-            // Affiche immediatement le nom du fichier choisi
-            if (filenameEl) filenameEl.textContent = `${file.name} (${(file.size/1024).toFixed(0)} Ko)`;
+        function galleryColorKeys(product) {
+            return (product && Array.isArray(product.colors) && product.colors.length)
+                ? product.colors.slice() : ['default'];
+        }
 
-            const MAX_SIZE = 10 * 1024 * 1024;
-            if (file.size > MAX_SIZE) {
-                statusEl.textContent = `Fichier trop lourd (${(file.size/1024/1024).toFixed(1)} Mo, max 10 Mo).`;
-                statusEl.style.color = '#e74c3c';
-                input.value = '';
-                if (filenameEl) filenameEl.textContent = 'Aucun fichier sélectionné';
-                return;
-            }
+        // Initialise galleryState depuis product.images (ou l'image legacy unique).
+        function initGalleryState(product) {
+            galleryState = {};
+            const keys = galleryColorKeys(product);
+            const imgs = (product && product.images) || {};
+            keys.forEach(function (color) {
+                const entry = imgs[color] || {};
+                let arr = Array.isArray(entry.thumbnails) && entry.thumbnails.length
+                    ? entry.thumbnails.slice()
+                    : (entry.main ? [entry.main] : []);
+                if (!arr.length && color === 'default' && product && product.image) {
+                    arr = [product.image];
+                }
+                galleryState[color] = arr.filter(Boolean);
+            });
+            renderGalleryManager();
+        }
 
-            statusEl.textContent = `Téléversement en cours...`;
-            statusEl.style.color = 'var(--color-text-muted)';
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const token = localStorage.getItem('coveToken');
-                const resp = await fetch('/api/admin/upload', {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}` },
-                    body: formData
+        function renderGalleryManager() {
+            const container = document.getElementById('product-gallery-container');
+            if (!container) return;
+            let html = '';
+            Object.keys(galleryState).forEach(function (color) {
+                const photos = galleryState[color] || [];
+                const titled = color !== 'default';
+                html += '<div class="gallery-color-block">';
+                if (titled) html += '<div class="gallery-color-title">' + escHtml(color) + '</div>';
+                html += '<div class="gallery-grid">';
+                photos.forEach(function (url, i) {
+                    html += '<div class="gallery-thumb' + (i === 0 ? ' is-main' : '') + '">'
+                        + '<img src="' + escHtml(url) + '" alt="">'
+                        + (i === 0
+                            ? '<span class="gallery-badge">★</span>'
+                            : '<button type="button" class="gallery-btn gallery-setmain" data-action="main" data-color="' + escHtml(color) + '" data-index="' + i + '" title="Définir comme principale">★</button>')
+                        + '<button type="button" class="gallery-btn gallery-remove" data-action="remove" data-color="' + escHtml(color) + '" data-index="' + i + '" title="Retirer">×</button>'
+                        + '</div>';
                 });
-                const data = await resp.json();
-                if (!resp.ok || !data.success) {
-                    throw new Error(data.error || `HTTP ${resp.status}`);
+                const inputId = 'gallery-file-' + color;
+                html += '<label class="gallery-add" for="' + inputId + '">+ Ajouter</label>';
+                html += '</div>';
+                html += '<input type="file" id="' + inputId + '" data-color="' + escHtml(color) + '" multiple accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">';
+                html += '<p class="gallery-status" data-color="' + escHtml(color) + '"></p>';
+                html += '</div>';
+            });
+            container.innerHTML = html;
+            container.querySelectorAll('.gallery-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const color = btn.getAttribute('data-color');
+                    const idx = parseInt(btn.getAttribute('data-index'));
+                    if (btn.getAttribute('data-action') === 'remove') galleryRemove(color, idx);
+                    else gallerySetMain(color, idx);
+                });
+            });
+            container.querySelectorAll('input[type=file]').forEach(function (inp) {
+                inp.addEventListener('change', function () { galleryUpload(inp, inp.getAttribute('data-color')); });
+            });
+        }
+
+        function galleryStatusEl(color) {
+            return document.querySelector('#product-gallery-container .gallery-status[data-color="' + color + '"]');
+        }
+
+        function galleryRemove(color, idx) {
+            if (!galleryState[color]) return;
+            galleryState[color].splice(idx, 1);
+            renderGalleryManager();
+        }
+
+        function gallerySetMain(color, idx) {
+            const arr = galleryState[color];
+            if (!arr || idx <= 0 || idx >= arr.length) return;
+            const item = arr.splice(idx, 1)[0];
+            arr.unshift(item);
+            renderGalleryManager();
+        }
+
+        async function galleryUpload(input, color) {
+            const files = Array.prototype.slice.call(input.files || []);
+            input.value = '';
+            if (!files.length) return;
+            const MAX_SIZE = 10 * 1024 * 1024;
+            const token = localStorage.getItem('coveToken');
+            let statusEl = galleryStatusEl(color);
+            for (let k = 0; k < files.length; k++) {
+                const file = files[k];
+                if (file.size > MAX_SIZE) {
+                    if (statusEl) { statusEl.textContent = file.name + ' trop lourd (max 10 Mo) — ignoré.'; statusEl.style.color = '#e74c3c'; }
+                    continue;
                 }
-                urlInput.value = data.url;
-                statusEl.textContent = `✓ Fichier téléversé avec succès (${(data.size/1024).toFixed(0)} Ko)`;
-                statusEl.style.color = '#2ecc71';
-                // Apercu si image
-                if (data.mimetype && data.mimetype.startsWith('image/')) {
-                    previewEl.src = data.url;
-                    previewEl.style.display = 'block';
-                } else if (data.mimetype === 'application/pdf') {
-                    previewEl.style.display = 'none';
-                    statusEl.textContent += ' (PDF — aperçu non disponible)';
+                if (statusEl) { statusEl.textContent = 'Téléversement ' + (k + 1) + '/' + files.length + '…'; statusEl.style.color = 'var(--color-text-muted)'; }
+                try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    const resp = await fetch('/api/admin/upload', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: fd
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok || !data.success) throw new Error(data.error || ('HTTP ' + resp.status));
+                    if (!galleryState[color]) galleryState[color] = [];
+                    galleryState[color].push(data.url);
+                    renderGalleryManager();
+                    statusEl = galleryStatusEl(color);
+                } catch (err) {
+                    if (statusEl) { statusEl.textContent = 'Erreur : ' + err.message; statusEl.style.color = '#e74c3c'; }
+                    return;
                 }
-            } catch (err) {
-                statusEl.textContent = 'Erreur : ' + err.message;
-                statusEl.style.color = '#e74c3c';
-                previewEl.style.display = 'none';
             }
+            if (statusEl) { statusEl.textContent = '✓ Photos ajoutées.'; statusEl.style.color = '#2ecc71'; }
+        }
+
+        // Construit l'objet images (par couleur) + l'image legacy, depuis galleryState.
+        function collectGallery() {
+            const images = {};
+            let firstPhoto = '';
+            Object.keys(galleryState).forEach(function (color) {
+                const arr = (galleryState[color] || []).filter(Boolean);
+                if (!arr.length) return;
+                if (!firstPhoto) firstPhoto = arr[0];
+                if (color !== 'default') {
+                    images[color] = { main: arr[0], thumbnails: arr };
+                }
+            });
+            return { images: images, image: firstPhoto };
         }
 
         async function editProduct(id) {
@@ -939,12 +1020,14 @@
             const editId = document.getElementById('product-edit-id').value;
 
             const collected = collectSizeStock();
+            const gallery = collectGallery();
             const data = {
                 name: document.getElementById('product-name').value.trim(),
                 price: parseFloat(document.getElementById('product-price').value),
                 category: document.getElementById('product-category').value,
                 description: document.getElementById('product-description').value.trim(),
-                image: document.getElementById('product-image').value.trim(),
+                image: gallery.image,
+                images: gallery.images,
                 sizeStock: collected.sizeStock,
                 stock: collected.total
             };

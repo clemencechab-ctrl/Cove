@@ -27,7 +27,6 @@
             <div class="nav-left">
                 <a href="index.html#collection" class="nav-link">Collection</a>
                 <a href="index.html#lookbook" class="nav-link">Lookbook</a>
-                <a href="about.html" class="nav-link">About</a>
             </div>
             <div class="logo">
                 <a href="index.html"><img src="../image/logo-cove.png" alt="COVE"></a>
@@ -210,9 +209,47 @@
                     <textarea id="product-description" rows="3"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Image URL</label>
-                    <input type="text" id="product-image" placeholder="image/myproduct.jpg">
+                    <label>Product photos (PNG, JPEG, WEBP, GIF — max 10 MB each)</label>
+                    <p style="font-size:0.85rem; color: var(--color-text-muted); margin:0 0 0.6rem;">
+                        One gallery per color. The <strong>1st photo (★)</strong> is the main image shown first. You can select several at once.
+                    </p>
+                    <div id="product-gallery-container"></div>
+                    <input type="hidden" id="product-image">
                 </div>
+                <style>
+                    .gallery-color-block { margin-bottom: 1.25rem; }
+                    .gallery-color-title {
+                        font-size: 0.85rem; font-weight: 600; letter-spacing: 0.03em;
+                        margin-bottom: 0.5rem; color: var(--color-text);
+                    }
+                    .gallery-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+                    .gallery-thumb {
+                        position: relative; width: 84px; height: 84px; border-radius: 6px;
+                        overflow: hidden; border: 1px solid rgba(255,255,255,0.15);
+                    }
+                    .gallery-thumb.is-main { border-color: #f1c40f; }
+                    .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+                    .gallery-badge {
+                        position: absolute; bottom: 0; left: 0; right: 0;
+                        background: rgba(241,196,15,0.92); color: #000; font-size: 0.7rem;
+                        text-align: center; padding: 1px 0;
+                    }
+                    .gallery-btn {
+                        position: absolute; width: 20px; height: 20px; line-height: 18px;
+                        text-align: center; border: none; border-radius: 50%; cursor: pointer;
+                        font-size: 0.8rem; padding: 0;
+                    }
+                    .gallery-remove { top: 3px; right: 3px; background: rgba(231,76,60,0.95); color: #fff; }
+                    .gallery-setmain { top: 3px; left: 3px; background: rgba(0,0,0,0.6); color: #f1c40f; }
+                    .gallery-add {
+                        display: inline-flex; align-items: center; justify-content: center;
+                        width: 84px; height: 84px; border: 1px dashed rgba(255,255,255,0.35);
+                        border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+                        color: var(--color-text-muted); user-select: none;
+                    }
+                    .gallery-add:hover { border-color: var(--color-text); color: var(--color-text); }
+                    .gallery-status { font-size: 0.8rem; margin: 0.4rem 0 0; min-height: 1em; }
+                </style>
                 <div class="form-group">
                     <label>Stock per size and color</label>
                     <div id="size-stock-container"></div>
@@ -250,7 +287,6 @@
                     <h4>Navigation</h4>
                     <a href="index.html#collection">Collection</a>
                     <a href="index.html#lookbook">Lookbook</a>
-                    <a href="about.html">About</a>
                 </div>
                 <div class="footer-column">
                     <h4>Contact</h4>
@@ -652,11 +688,14 @@
                 document.getElementById('product-description').value = product.description || '';
                 document.getElementById('product-image').value = product.image || '';
                 renderSizeStockGrids(product);
+                initGalleryState(product);
             } else {
                 document.getElementById('product-modal-title').textContent = 'Add product';
                 document.getElementById('product-edit-id').value = '';
                 document.getElementById('product-form').reset();
+                document.getElementById('product-image').value = '';
                 renderSizeStockGrids(null);
+                initGalleryState(null);
             }
         }
 
@@ -721,6 +760,141 @@
             document.getElementById('product-modal').classList.remove('active');
         }
 
+        // ----- Multi-photo gallery manager (per color) -----
+        // Edit state: { color: [url, ...] }  (1st = main image).
+        // Special key 'default' for a product without colors (single gallery).
+        var galleryState = {};
+
+        function galleryColorKeys(product) {
+            return (product && Array.isArray(product.colors) && product.colors.length)
+                ? product.colors.slice() : ['default'];
+        }
+
+        function initGalleryState(product) {
+            galleryState = {};
+            const keys = galleryColorKeys(product);
+            const imgs = (product && product.images) || {};
+            keys.forEach(function (color) {
+                const entry = imgs[color] || {};
+                let arr = Array.isArray(entry.thumbnails) && entry.thumbnails.length
+                    ? entry.thumbnails.slice()
+                    : (entry.main ? [entry.main] : []);
+                if (!arr.length && color === 'default' && product && product.image) {
+                    arr = [product.image];
+                }
+                galleryState[color] = arr.filter(Boolean);
+            });
+            renderGalleryManager();
+        }
+
+        function renderGalleryManager() {
+            const container = document.getElementById('product-gallery-container');
+            if (!container) return;
+            let html = '';
+            Object.keys(galleryState).forEach(function (color) {
+                const photos = galleryState[color] || [];
+                const titled = color !== 'default';
+                html += '<div class="gallery-color-block">';
+                if (titled) html += '<div class="gallery-color-title">' + escHtml(color) + '</div>';
+                html += '<div class="gallery-grid">';
+                photos.forEach(function (url, i) {
+                    html += '<div class="gallery-thumb' + (i === 0 ? ' is-main' : '') + '">'
+                        + '<img src="' + escHtml(url) + '" alt="">'
+                        + (i === 0
+                            ? '<span class="gallery-badge">★</span>'
+                            : '<button type="button" class="gallery-btn gallery-setmain" data-action="main" data-color="' + escHtml(color) + '" data-index="' + i + '" title="Set as main">★</button>')
+                        + '<button type="button" class="gallery-btn gallery-remove" data-action="remove" data-color="' + escHtml(color) + '" data-index="' + i + '" title="Remove">×</button>'
+                        + '</div>';
+                });
+                const inputId = 'gallery-file-' + color;
+                html += '<label class="gallery-add" for="' + inputId + '">+ Add</label>';
+                html += '</div>';
+                html += '<input type="file" id="' + inputId + '" data-color="' + escHtml(color) + '" multiple accept="image/png,image/jpeg,image/webp,image/gif" style="display:none">';
+                html += '<p class="gallery-status" data-color="' + escHtml(color) + '"></p>';
+                html += '</div>';
+            });
+            container.innerHTML = html;
+            container.querySelectorAll('.gallery-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    const color = btn.getAttribute('data-color');
+                    const idx = parseInt(btn.getAttribute('data-index'));
+                    if (btn.getAttribute('data-action') === 'remove') galleryRemove(color, idx);
+                    else gallerySetMain(color, idx);
+                });
+            });
+            container.querySelectorAll('input[type=file]').forEach(function (inp) {
+                inp.addEventListener('change', function () { galleryUpload(inp, inp.getAttribute('data-color')); });
+            });
+        }
+
+        function galleryStatusEl(color) {
+            return document.querySelector('#product-gallery-container .gallery-status[data-color="' + color + '"]');
+        }
+
+        function galleryRemove(color, idx) {
+            if (!galleryState[color]) return;
+            galleryState[color].splice(idx, 1);
+            renderGalleryManager();
+        }
+
+        function gallerySetMain(color, idx) {
+            const arr = galleryState[color];
+            if (!arr || idx <= 0 || idx >= arr.length) return;
+            const item = arr.splice(idx, 1)[0];
+            arr.unshift(item);
+            renderGalleryManager();
+        }
+
+        async function galleryUpload(input, color) {
+            const files = Array.prototype.slice.call(input.files || []);
+            input.value = '';
+            if (!files.length) return;
+            const MAX_SIZE = 10 * 1024 * 1024;
+            const token = localStorage.getItem('coveToken');
+            let statusEl = galleryStatusEl(color);
+            for (let k = 0; k < files.length; k++) {
+                const file = files[k];
+                if (file.size > MAX_SIZE) {
+                    if (statusEl) { statusEl.textContent = file.name + ' too large (max 10 MB) — skipped.'; statusEl.style.color = '#e74c3c'; }
+                    continue;
+                }
+                if (statusEl) { statusEl.textContent = 'Uploading ' + (k + 1) + '/' + files.length + '…'; statusEl.style.color = 'var(--color-text-muted)'; }
+                try {
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    const resp = await fetch('/api/admin/upload', {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${token}` },
+                        body: fd
+                    });
+                    const data = await resp.json();
+                    if (!resp.ok || !data.success) throw new Error(data.error || ('HTTP ' + resp.status));
+                    if (!galleryState[color]) galleryState[color] = [];
+                    galleryState[color].push(data.url);
+                    renderGalleryManager();
+                    statusEl = galleryStatusEl(color);
+                } catch (err) {
+                    if (statusEl) { statusEl.textContent = 'Error: ' + err.message; statusEl.style.color = '#e74c3c'; }
+                    return;
+                }
+            }
+            if (statusEl) { statusEl.textContent = '✓ Photos added.'; statusEl.style.color = '#2ecc71'; }
+        }
+
+        function collectGallery() {
+            const images = {};
+            let firstPhoto = '';
+            Object.keys(galleryState).forEach(function (color) {
+                const arr = (galleryState[color] || []).filter(Boolean);
+                if (!arr.length) return;
+                if (!firstPhoto) firstPhoto = arr[0];
+                if (color !== 'default') {
+                    images[color] = { main: arr[0], thumbnails: arr };
+                }
+            });
+            return { images: images, image: firstPhoto };
+        }
+
         async function editProduct(id) {
             const result = await api.getAdminProducts();
             if (!result.success) {
@@ -742,12 +916,14 @@
             const editId = document.getElementById('product-edit-id').value;
 
             const collected = collectSizeStock();
+            const gallery = collectGallery();
             const data = {
                 name: document.getElementById('product-name').value.trim(),
                 price: parseFloat(document.getElementById('product-price').value),
                 category: document.getElementById('product-category').value,
                 description: document.getElementById('product-description').value.trim(),
-                image: document.getElementById('product-image').value.trim(),
+                image: gallery.image,
+                images: gallery.images,
                 sizeStock: collected.sizeStock,
                 stock: collected.total
             };

@@ -82,25 +82,6 @@
     <priority>0.8</priority>
   </url>
 
-  <!-- ===== À propos ===== -->
-  <url>
-    <loc>https://covestudio.fr/about.html</loc>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://covestudio.fr/about.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://covestudio.fr/en/about.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://covestudio.fr/about.html"/>
-    <lastmod>2026-06-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://covestudio.fr/en/about.html</loc>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://covestudio.fr/about.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://covestudio.fr/en/about.html"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://covestudio.fr/about.html"/>
-    <lastmod>2026-06-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
 
   <!-- ===== FAQ ===== -->
   <url>
