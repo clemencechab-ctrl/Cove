@@ -73,7 +73,14 @@ jobs:
             --allow-unauthenticated \
             --quiet
 
+      # continue-on-error : le déploiement Hosting est souvent fait manuellement
+      # (tests/deploy-hosting.js) AVANT le push. Quand Actions arrive, la version
+      # identique est déjà en ligne et Firebase renvoie une 400 « supplied version
+      # is the current active version ». C'est un no-op inoffensif, pas un vrai
+      # échec — on ne veut donc pas faire échouer le job (ni envoyer un mail d'alerte).
+      # Le backend Cloud Run, lui, est déployé à l'étape précédente (bloquante).
       - name: Deploy frontend sur Firebase Hosting
+        continue-on-error: true
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
