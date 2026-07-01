@@ -20,8 +20,8 @@
 
         const isEn = /\/en\//.test(window.location.pathname);
         const labels = isEn
-            ? { compte: 'Account', panier: 'Cart', contact: 'Contact', faq: 'FAQ', about: 'About', admin: 'Administration' }
-            : { compte: 'Compte', panier: 'Panier', contact: 'Contact', faq: 'FAQ', about: 'À propos', admin: 'Administration' };
+            ? { compte: 'Account', panier: 'Cart', contact: 'Contact', faq: 'FAQ', admin: 'Administration' }
+            : { compte: 'Compte', panier: 'Panier', contact: 'Contact', faq: 'FAQ', admin: 'Administration' };
 
         // L'owner voit le lien Administration dans le panneau mobile
         let isOwner = false;
@@ -59,7 +59,6 @@
         panel.innerHTML =
             '<a href="compte.html">' + labels.compte + '</a>' +
             '<a href="cart.html">' + labels.panier + ' (<span id="cart-count-mobile">0</span>)</a>' +
-            '<a href="about.html">' + labels.about + '</a>' +
             '<a href="contact.html">' + labels.contact + '</a>' +
             '<a href="faq.html">' + labels.faq + '</a>' +
             (isOwner ? '<a href="admin.html">' + labels.admin + '</a>' : '');
