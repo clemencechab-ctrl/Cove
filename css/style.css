@@ -449,19 +449,21 @@ img {
 .lookbook-grid {
     display: grid;
     grid-template-columns: 1.5fr 1fr;
-    grid-template-rows: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
     gap: 1rem;
     max-width: 1400px;
     margin: 0 auto;
-    height: 80vh;
+    height: 88vh;
 }
 
 .lookbook-item {
     overflow: hidden;
 }
 
+/* Grande photo héro : 1re colonne, toute la hauteur (3 lignes) ;
+   les 3 autres photos s'empilent dans la colonne de droite. */
 .lookbook-item.large {
-    grid-row: span 2;
+    grid-row: span 3;
 }
 
 .lookbook-item img {
