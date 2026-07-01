@@ -10,6 +10,30 @@ const contactCounterRef = db.ref('contactCounter');
 const promoCodesRef = db.ref('promoCodes');
 const promoCounterRef = db.ref('promoCounter');
 const waitlistRef = db.ref('waitlist');
+const reservationsRef = db.ref('reservations');
+
+// Stock d'un variant precis (couleur/taille) — gere sizeStock imbriqué
+// {couleur:{taille:n}}, plat {taille:n}, ou le stock global `stock`.
+// (miroir de getAvailableStock dans checkout.js, pour la detection de survente)
+function variantStock(product, size, color) {
+    const ss = product && product.sizeStock;
+    if (ss && typeof ss === 'object' && Object.keys(ss).length) {
+        const firstVal = Object.values(ss)[0];
+        if (firstVal && typeof firstVal === 'object') {
+            if (color && ss[color] && typeof ss[color] === 'object') {
+                return size ? (ss[color][size] || 0)
+                    : Object.values(ss[color]).reduce((a, b) => a + (b || 0), 0);
+            }
+            let total = 0;
+            Object.values(ss).forEach(per => {
+                total += size ? (per[size] || 0) : Object.values(per).reduce((a, b) => a + (b || 0), 0);
+            });
+            return total;
+        }
+        return size ? (ss[size] || 0) : Object.values(ss).reduce((a, b) => a + (b || 0), 0);
+    }
+    return (product && product.stock) || 0;
+}
 
 module.exports = {
     // Products
@@ -367,7 +391,68 @@ module.exports = {
         if (order.promoCode) {
             await module.exports.incrementPromoCodeUses(order.promoCode);
         }
+
+        // Liberer le hold de stock de cette commande (paye → decrement reel applique)
+        await reservationsRef.child(String(order.id)).remove().catch(() => {});
+
+        // Detection survente : si un variant est passe en negatif, c'est qu'un autre
+        // acheteur avait pris l'unite (hold expire). On marque la commande pour revue
+        // manuelle (pas de remboursement auto) et on logge une alerte owner.
+        let oversold = false;
+        for (const item of (order.items || [])) {
+            const product = await module.exports.getProductById(item.productId);
+            if (product && variantStock(product, item.size || null, item.color || null) < 0) {
+                oversold = true;
+            }
+        }
+        if (oversold) {
+            await ordersRef.child(foundKey).update({ oversold: true });
+            console.error(`⚠️ SURVENTE — commande ${order.orderNumber} payee mais stock insuffisant (variant en negatif). Verifier/rembourser manuellement.`);
+        }
         return true;
+    },
+
+    // ===== Reservations de stock (holds entre creation de session et paiement) =====
+    // Pose un hold expirant dans ttlMinutes. Empeche un 2e acheteur de prendre la
+    // meme unite tant que le hold est actif (cf. getHeldQuantity).
+    addReservation: async (orderId, items, ttlMinutes) => {
+        await reservationsRef.child(String(orderId)).set({
+            items: (items || []).map(i => ({
+                productId: i.productId,
+                size: i.size || null,
+                color: i.color || null,
+                quantity: i.quantity || 0
+            })),
+            expiresAt: Date.now() + ttlMinutes * 60 * 1000,
+            createdAt: Date.now()
+        });
+    },
+
+    removeReservation: async (orderId) => {
+        await reservationsRef.child(String(orderId)).remove().catch(() => {});
+    },
+
+    // Quantite actuellement reservee (holds non expires) pour un variant donne.
+    // excludeOrderId : ignore le hold de la commande en cours (ne pas se bloquer soi-meme).
+    // Purge au passage les holds expires (best-effort).
+    getHeldQuantity: async (productId, size, color, excludeOrderId = null) => {
+        const snap = await reservationsRef.once('value');
+        const data = snap.val() || {};
+        const now = Date.now();
+        let held = 0;
+        for (const [key, resv] of Object.entries(data)) {
+            if (!resv || !resv.expiresAt) continue;
+            if (resv.expiresAt <= now) { reservationsRef.child(key).remove().catch(() => {}); continue; }
+            if (excludeOrderId != null && key === String(excludeOrderId)) continue;
+            for (const it of (resv.items || [])) {
+                if (parseInt(it.productId) === parseInt(productId)
+                    && (it.size || null) === (size || null)
+                    && (it.color || null) === (color || null)) {
+                    held += it.quantity || 0;
+                }
+            }
+        }
+        return held;
     },
 
     // Contact Messages

@@ -150,14 +150,16 @@ router.post('/create-session', optionalAuth, async (req, res) => {
                 return res.status(400).json({ success: false, error: `Produit ${item.id} non trouvé` });
             }
             const color = item.color || null;
-            // Vérifie le stock disponible (par couleur/taille). Empêche un oversell
-            // même si le client est contourné.
-            const available = getAvailableStock(product, item.size || null, color);
+            // Vérifie le stock disponible (par couleur/taille), MOINS les unités déjà
+            // réservées par d'autres acheteurs en cours de paiement (holds actifs).
+            // Empêche l'oversell même si le client est contourné.
+            const held = await store.getHeldQuantity(product.id, item.size || null, color);
+            const available = getAvailableStock(product, item.size || null, color) - held;
             if ((item.quantity || 0) > available) {
                 const label = product.name + (color ? ` ${color}` : '') + (item.size ? ` ${item.size}` : '');
                 return res.status(409).json({
                     success: false,
-                    error: `Stock insuffisant pour ${label} (reste ${available})`
+                    error: `Stock insuffisant pour ${label} (reste ${Math.max(0, available)})`
                 });
             }
             const colorImage = color && product.images && product.images[color] && product.images[color].main
@@ -253,6 +255,27 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             });
         }
 
+        // ===== Reservation de stock (hold 15 min) =====
+        // Pose un hold sur les unites de cette commande pour qu'un 2e acheteur ne
+        // puisse pas prendre la meme unite pendant le paiement. Puis re-verifie
+        // (anti-course) : si deux sessions quasi simultanees ont reserve la meme
+        // derniere unite, on annule celle-ci (rollback du hold + 409).
+        const RESERVATION_TTL_MIN = 15;
+        await store.addReservation(order.id, orderItems, RESERVATION_TTL_MIN);
+        for (const item of orderItems) {
+            const product = await store.getProductById(item.productId);
+            const otherHeld = await store.getHeldQuantity(item.productId, item.size, item.color, order.id);
+            const available = getAvailableStock(product, item.size, item.color) - otherHeld;
+            if (item.quantity > available) {
+                await store.removeReservation(order.id);
+                const label = item.name + (item.color ? ` ${item.color}` : '') + (item.size ? ` ${item.size}` : '');
+                return res.status(409).json({
+                    success: false,
+                    error: `Stock insuffisant pour ${label} (reste ${Math.max(0, available)})`
+                });
+            }
+        }
+
         // Creer la session Stripe
         const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -297,6 +320,9 @@ router.post('/create-session', optionalAuth, async (req, res) => {
             mode: 'payment',
             success_url: `${frontendUrl}/success.html?order=${order.orderNumber}`,
             cancel_url: `${frontendUrl}/success.html?canceled=true`,
+            // 30 min = minimum imposé par Stripe (le hold de stock, lui, expire en 15 min ;
+            // au-delà, un paiement tardif est détecté comme survente côté applyOrderInventory).
+            expires_at: Math.floor(Date.now() / 1000) + 30 * 60,
             metadata: { orderId: order.id, orderNumber: order.orderNumber }
         });
 
