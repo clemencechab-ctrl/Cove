@@ -101,9 +101,11 @@ npx http-server -p 8080 -c-1   # Serve static files, no cache
 | GET | /api/admin/messages | Owner | Contact messages |
 | POST | /api/webhooks/stripe | No | Stripe webhook |
 
-## Verrou d'accès privé (pré-lancement, jusqu'au 01/07/2026)
+## Verrou d'accès privé — LEVÉ le 01/07/2026 (site désormais public)
 
-Pendant la phase de teaser réseaux sociaux, le site est rendu **privé** : tout visiteur est redirigé vers **`coming-soon.html`** (page d'attente autonome : logo blanc, « Ouverture le 01/07/2026 », champ code d'accès, **+ formulaire d'inscription liste d'attente par email**) tant qu'il n'a pas saisi le code. Le bon code pose `localStorage.coveAccess = 'GRANTED'` et débloque **tout le site** (mémorisé par appareil).
+> **⚠ Le verrou a été RETIRÉ le 2026-07-01 (`node tests/gate.js remove`) : le site est public, accessible à tous, sans redirection vers `coming-soon.html`.** Vérifié en prod : 0 marqueur `COVE-GATE` restant, aucune page ne redirige vers `coming-soon.html`, toutes répondent 200. `coming-soon.html` existe encore sur le disque mais est **orpheline** (plus liée ni référencée) ; la route/limiter `/api/waitlist` restent en place. La section ci-dessous documente le mécanisme **au cas où il faudrait re-verrouiller** (`node tests/gate.js add`). **Reste optionnel** : (1) envoyer l'alerte de lancement aux inscrits waitlist (`node tests/notify-waitlist.js --send`) — action e-mail sortante, à faire sur demande explicite ; (2) supprimer `coming-soon.html` + la route/limiter waitlist si plus utiles.
+
+Pendant la phase de teaser réseaux sociaux, le site était rendu **privé** : tout visiteur était redirigé vers **`coming-soon.html`** (page d'attente autonome : logo blanc, « Ouverture le 01/07/2026 », champ code d'accès, **+ formulaire d'inscription liste d'attente par email**) tant qu'il n'avait pas saisi le code. Le bon code posait `localStorage.coveAccess = 'GRANTED'` et débloquait **tout le site** (mémorisé par appareil).
 
 - **Code d'accès actuel : `jetapinelecode12`** — défini à **un seul endroit**, la const `ACCESS_CODE` en haut du `<script>` de `coming-soon.html`. Pour le changer, éditer cette ligne uniquement.
 - **Le verrou** est un petit `<script>` inline injecté avant `</head>` de **26 pages** (FR + EN), encadré par les marqueurs `COVE-GATE-START` / `COVE-GATE-END`. Il redirige vers `/coming-soon.html` si le flag n'est pas posé. **Limite assumée** : protection côté client (contournable par inspection du source) — suffisant pour empêcher les clients de commander pendant le teaser, pas une sécurité serveur.
