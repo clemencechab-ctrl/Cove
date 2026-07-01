@@ -134,7 +134,7 @@ router.post('/create-session', optionalAuth, async (req, res) => {
         // pour s'offrir la livraison gratuite.
         const isPickup = deliveryMethod === 'pickup';
         if (isPickup) {
-            const PICKUP_CODE = process.env.PICKUP_CODE || '1234';
+            const PICKUP_CODE = process.env.PICKUP_CODE || '15221267';
             if (String(pickupCode || '').trim() !== PICKUP_CODE) {
                 return res.status(403).json({ success: false, error: 'Code de remise en main propre invalide' });
             }
