@@ -21,7 +21,7 @@
     <meta property="og:title" content="Covestudio — T-shirt Streetwear Oversize | COVE Studio">
     <meta property="og:description" content="T-shirt Covestudio en coton épais 205g/m². Coupe boxy, disponible en blanc et noir. Livraison France sous 2-5 jours. 30 EUR.">
     <meta property="og:url" content="https://covestudio.fr/produit-tshirt.html">
-    <meta property="og:image" content="https://covestudio.fr/image/t-shirt-front.JPG">
+    <meta property="og:image" content="https://covestudio.fr/image/front-covestudio-blanc.jpeg">
     <meta property="og:locale" content="fr_FR">
     <meta property="og:locale:alternate" content="en_US">
 
@@ -29,7 +29,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Covestudio — T-shirt Streetwear Oversize | COVE Studio">
     <meta name="twitter:description" content="T-shirt Covestudio en coton épais 205g/m². Coupe boxy, disponible en blanc et noir. Livraison France sous 2-5 jours. 30 EUR.">
-    <meta name="twitter:image" content="https://covestudio.fr/image/t-shirt-front.JPG">
+    <meta name="twitter:image" content="https://covestudio.fr/image/front-covestudio-blanc.jpeg">
 
     <!-- Favicon + theme -->
     <link rel="icon" type="image/png" href="image/logo-cove.png">
@@ -46,7 +46,7 @@
         "@context": "https://schema.org",
         "@type": "Product",
         "name": "Covestudio",
-        "image": "https://covestudio.fr/image/t-shirt-front.JPG",
+        "image": "https://covestudio.fr/image/front-covestudio-blanc.jpeg",
         "description": "T-shirt Covestudio en coton épais 205g/m². Coupe boxy, design exclusif imprimé, disponible en blanc et noir. Fabrication française.",
         "brand": { "@type": "Brand", "name": "COVE Studio" },
         "sku": "COVE-COVESTUDIO-01",
@@ -118,14 +118,14 @@
             <!-- Product Gallery -->
             <div class="product-gallery">
                 <div class="product-main-image">
-                    <img src="image/t-shirt-front.JPG" alt="Covestudio" id="main-image">
+                    <img src="image/front-covestudio-blanc.jpeg" alt="Covestudio" id="main-image">
                 </div>
                 <div class="product-thumbnails">
-                    <div class="thumbnail active" onclick="changeImage('image/t-shirt-front.JPG', this)">
-                        <img src="image/t-shirt-front.JPG" alt="Covestudio Vue Face">
+                    <div class="thumbnail active" onclick="changeImage('image/front-covestudio-blanc.jpeg', this)">
+                        <img src="image/front-covestudio-blanc.jpeg" alt="Covestudio Vue Face">
                     </div>
-                    <div class="thumbnail" onclick="changeImage('image/tshirt-back.JPG', this)">
-                        <img src="image/tshirt-back.JPG" alt="Covestudio Vue Dos">
+                    <div class="thumbnail" onclick="changeImage('image/back-covestudio-blanc.png', this)">
+                        <img src="image/back-covestudio-blanc.png" alt="Covestudio Vue Dos">
                     </div>
                 </div>
             </div>
@@ -187,7 +187,7 @@
                 </div>
 
                 <div class="product-actions">
-                    <button class="btn-add-to-cart" onclick="handleAddToCart(1, 'Covestudio', 30, 'image/t-shirt-front.JPG')">
+                    <button class="btn-add-to-cart" onclick="handleAddToCart(1, 'Covestudio', 30, 'image/front-covestudio-blanc.jpeg')">
                         Ajouter au panier
                     </button>
                     <div id="size-error" class="size-error"></div>
@@ -306,7 +306,7 @@
                     <h4>Contact</h4>
                     <a href="contact.html">Nous contacter</a>
                     <a href="https://www.instagram.com/covestudio.off/" target="_blank">Instagram</a>
-                    <a href="https://www.tiktok.com/@covestudio.off" target="_blank">TikTok</a>
+                    <a href="https://www.tiktok.com/@cove.off" target="_blank">TikTok</a>
                 </div>
                 <div class="footer-column">
                     <h4>Legal</h4>
@@ -330,8 +330,8 @@
         // visuels gérés dans l'admin (RTDB product.images), via loadProductImages().
         const PRODUCT_ID = 1;
         const COLOR_IMAGES = {
-            'Blanc': { main: 'image/t-shirt-front.JPG', thumbs: ['image/t-shirt-front.JPG', 'image/tshirt-back.JPG'] },
-            'Noir':  { main: 'image/new-front.jpeg',    thumbs: ['image/new-front.jpeg', 'image/tshirt-back.JPG'] }
+            'Blanc': { main: 'image/front-covestudio-blanc.jpeg', thumbs: ['image/front-covestudio-blanc.jpeg', 'image/back-covestudio-blanc.png'] },
+            'Noir':  { main: 'image/front-covestudio-noir.jpeg',    thumbs: ['image/front-covestudio-noir.jpeg', 'image/back-covestudio-noir.png'] }
         };
 
         // Normalise une source d'image pour la page courante (FR : racine /).

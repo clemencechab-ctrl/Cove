@@ -21,7 +21,7 @@
     <meta property="og:title" content="Grandir sans bruit — T-shirt Streetwear Oversize | COVE Studio">
     <meta property="og:description" content="T-shirt Grandir sans bruit en coton épais 205g/m². Coupe boxy, disponible en blanc et noir. Livraison France sous 2-5 jours. 30 EUR.">
     <meta property="og:url" content="https://covestudio.fr/produit-hoodie.html">
-    <meta property="og:image" content="https://covestudio.fr/image/t-shirt-chat-drole-2.webp">
+    <meta property="og:image" content="https://covestudio.fr/image/front-gsb-blanc.jpeg">
     <meta property="og:locale" content="fr_FR">
     <meta property="og:locale:alternate" content="en_US">
 
@@ -29,7 +29,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Grandir sans bruit — T-shirt Streetwear Oversize | COVE Studio">
     <meta name="twitter:description" content="T-shirt Grandir sans bruit en coton épais 205g/m². Coupe boxy, disponible en blanc et noir. Livraison France sous 2-5 jours. 30 EUR.">
-    <meta name="twitter:image" content="https://covestudio.fr/image/t-shirt-chat-drole-2.webp">
+    <meta name="twitter:image" content="https://covestudio.fr/image/front-gsb-blanc.jpeg">
 
     <!-- Favicon + theme -->
     <link rel="icon" type="image/png" href="image/logo-cove.png">
@@ -46,7 +46,7 @@
         "@context": "https://schema.org",
         "@type": "Product",
         "name": "Grandir sans bruit",
-        "image": "https://covestudio.fr/image/t-shirt-chat-drole-2.webp",
+        "image": "https://covestudio.fr/image/front-gsb-blanc.jpeg",
         "description": "T-shirt Grandir sans bruit en coton épais 205g/m². Coupe boxy, design exclusif imprimé, disponible en blanc et noir. Fabrication française.",
         "brand": { "@type": "Brand", "name": "COVE Studio" },
         "sku": "COVE-GRANDIR-01",
@@ -118,14 +118,14 @@
             <!-- Product Gallery -->
             <div class="product-gallery">
                 <div class="product-main-image">
-                    <img src="image/t-shirt-chat-drole-2.webp" alt="Grandir sans bruit" id="main-image">
+                    <img src="image/front-gsb-blanc.jpeg" alt="Grandir sans bruit" id="main-image">
                 </div>
                 <div class="product-thumbnails">
-                    <div class="thumbnail active" onclick="changeImage('image/t-shirt-chat-drole-2.webp', this)">
-                        <img src="image/t-shirt-chat-drole-2.webp" alt="Grandir sans bruit Vue Face">
+                    <div class="thumbnail active" onclick="changeImage('image/front-gsb-blanc.jpeg', this)">
+                        <img src="image/front-gsb-blanc.jpeg" alt="Grandir sans bruit Vue Face">
                     </div>
-                    <div class="thumbnail" onclick="changeImage('image/tshirt-back.JPG', this)">
-                        <img src="image/tshirt-back.JPG" alt="Grandir sans bruit Vue Dos">
+                    <div class="thumbnail" onclick="changeImage('image/back-gsb-blanc.jpeg', this)">
+                        <img src="image/back-gsb-blanc.jpeg" alt="Grandir sans bruit Vue Dos">
                     </div>
                 </div>
             </div>
@@ -187,7 +187,7 @@
                 </div>
 
                 <div class="product-actions">
-                    <button class="btn-add-to-cart" onclick="handleAddToCart(2, 'Grandir sans bruit', 30, 'image/t-shirt-chat-drole-2.webp')">
+                    <button class="btn-add-to-cart" onclick="handleAddToCart(2, 'Grandir sans bruit', 30, 'image/front-gsb-blanc.jpeg')">
                         Ajouter au panier
                     </button>
                     <div id="size-error" class="size-error"></div>
@@ -306,7 +306,7 @@
                     <h4>Contact</h4>
                     <a href="contact.html">Nous contacter</a>
                     <a href="https://www.instagram.com/covestudio.off/" target="_blank">Instagram</a>
-                    <a href="https://www.tiktok.com/@covestudio.off" target="_blank">TikTok</a>
+                    <a href="https://www.tiktok.com/@cove.off" target="_blank">TikTok</a>
                 </div>
                 <div class="footer-column">
                     <h4>Legal</h4>
@@ -330,8 +330,8 @@
         // visuels gérés dans l'admin (RTDB product.images), via loadProductImages().
         const PRODUCT_ID = 2;
         const COLOR_IMAGES = {
-            'Blanc': { main: 'image/t-shirt-chat-drole-2.webp', thumbs: ['image/t-shirt-chat-drole-2.webp', 'image/tshirt-back.JPG'] },
-            'Noir':  { main: 'image/t-shirt-front-stripe.jpg',  thumbs: ['image/t-shirt-front-stripe.jpg', 'image/tshirt-back.JPG'] }
+            'Blanc': { main: 'image/front-gsb-blanc.jpeg', thumbs: ['image/front-gsb-blanc.jpeg', 'image/back-gsb-blanc.jpeg'] },
+            'Noir':  { main: 'image/front-gsb-noir.jpeg',  thumbs: ['image/front-gsb-noir.jpeg', 'image/back-gsb-noir.png'] }
         };
 
         // Normalise une source d'image pour la page courante (FR : racine /).

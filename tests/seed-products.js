@@ -43,10 +43,10 @@ const covestudio = {
     category: 'tops',
     colors: ['Blanc', 'Noir'],
     images: {
-        Blanc: { main: 'image/t-shirt-front.JPG', thumbnails: ['image/t-shirt-front.JPG', 'image/tshirt-back.JPG'] },
-        Noir: { main: 'image/new-front.jpeg', thumbnails: ['image/new-front.jpeg', 'image/tshirt-back.JPG'] }
+        Blanc: { main: 'image/front-covestudio-blanc.jpeg', thumbnails: ['image/front-covestudio-blanc.jpeg', 'image/back-covestudio-blanc.png'] },
+        Noir: { main: 'image/front-covestudio-noir.jpeg', thumbnails: ['image/front-covestudio-noir.jpeg', 'image/back-covestudio-noir.png'] }
     },
-    image: 'image/t-shirt-front.JPG',
+    image: 'image/front-covestudio-blanc.jpeg',
     sizeStock: { Blanc: fullSizeStock(), Noir: fullSizeStock() },
     updatedAt: new Date().toISOString()
 };
@@ -60,10 +60,10 @@ const grandirSansBruit = {
     category: 'tops',
     colors: ['Blanc', 'Noir'],
     images: {
-        Blanc: { main: 'image/t-shirt-chat-drole-2.webp', thumbnails: ['image/t-shirt-chat-drole-2.webp', 'image/tshirt-back.JPG'] },
-        Noir: { main: 'image/t-shirt-front-stripe.jpg', thumbnails: ['image/t-shirt-front-stripe.jpg', 'image/tshirt-back.JPG'] }
+        Blanc: { main: 'image/front-gsb-blanc.jpeg', thumbnails: ['image/front-gsb-blanc.jpeg', 'image/back-gsb-blanc.jpeg'] },
+        Noir: { main: 'image/front-gsb-noir.jpeg', thumbnails: ['image/front-gsb-noir.jpeg', 'image/back-gsb-noir.png'] }
     },
-    image: 'image/t-shirt-chat-drole-2.webp',
+    image: 'image/front-gsb-blanc.jpeg',
     sizeStock: { Blanc: fullSizeStock(), Noir: fullSizeStock() },
     updatedAt: new Date().toISOString()
 };

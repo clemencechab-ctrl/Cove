@@ -2,8 +2,9 @@ const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs');
 
-// URL publique pour les images produits
-const PUBLIC_URL = process.env.PUBLIC_URL || 'https://clemencechab-ctrl.github.io/Cove';
+// URL publique pour les images produits (défaut = prod, pour que les visuels des
+// emails se chargent — des images cassées nuisent à la délivrabilité et au sérieux).
+const PUBLIC_URL = process.env.PUBLIC_URL || 'https://covestudio.fr';
 
 // Bandeau complet (noir avec logo blanc integre, fusionne en une seule image)
 // Une image ne sera pas inversee par Gmail Android en mode sombre.
@@ -85,12 +86,20 @@ function createTransporter() {
 const transporter = createTransporter();
 
 function getFromAddress() {
-    return process.env.EMAIL_FROM || 'contact@cove.com';
+    const addr = process.env.EMAIL_FROM || 'cove.off@gmail.com';
+    // Nom d'expéditeur lisible (« COVE ») : signal de légitimité qui aide au
+    // classement en boîte principale plutôt qu'en spam/promotions.
+    return /</.test(addr) ? addr : `COVE <${addr}>`;
 }
 
 // Envoyer un email (ou log en console si pas de transporter)
 async function sendMail(mailOptions) {
     if (transporter) {
+        // Reply-To vers l'adresse support : les emails auxquels on peut répondre
+        // sont mieux classés (boîte principale) que ceux en no-reply anonyme.
+        if (!mailOptions.replyTo) {
+            mailOptions = { ...mailOptions, replyTo: process.env.EMAIL_FROM || 'cove.off@gmail.com' };
+        }
         if (typeof mailOptions.html === 'string') {
             // Enveloppe le fragment HTML dans un document complet (avec <head>)
             if (!mailOptions.html.includes('<!DOCTYPE')) {

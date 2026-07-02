@@ -120,6 +120,13 @@ Pendant la phase de teaser réseaux sociaux, le site était rendu **privé** : t
 - Firebase service account JSON at project root (referenced in `backend/src/config/firebase.js`)
 - Firebase project: `covestudio` (europe-west1)
 
+## Emails transactionnels — envoi & délivrabilité
+
+- **Envoi via Gmail SMTP** (`smtp.gmail.com:587`), compte `cove.off@gmail.com` (`EMAIL_USER`/`EMAIL_PASS`, mot de passe d'application). Donc les emails sont **DKIM-signés par Gmail** (pas un défaut d'authentification) → le problème de placement est surtout la **classification Gmail (onglet Promotions)**, pas le spam pur.
+- **Client + owner reçoivent 2 emails distincts** à chaque commande payée : `sendOrderConfirmation` (→ `order.customer.email`) et `sendOrderNotificationToOwner` (→ owner). Déclenchés ensemble dans le webhook Stripe (`webhooks.js`) + fallback `/verify` (`checkout.js`). Log SMTP détaillé par envoi : `[SMTP] to=… accepted=[…] rejected=[…] response="250 …"`. **Un `250 OK` + `accepted` = Gmail a pris l'email en charge** : si le client « ne l'a pas reçu », c'est quasi toujours **Spam/Promotions**, pas un bug. Vérifier via les logs Cloud Run (`gcloud logging read … textPayload:"[SMTP]"`).
+- **Renvoyer une confirmation** : script one-off qui charge la commande (RTDB, par `orderNumber`) et appelle `sendOrderConfirmation(order)`. **Forcer `process.env.PUBLIC_URL='https://covestudio.fr'` AVANT `require('email.js')`** (le module lit `PUBLIC_URL` à l'import, ligne 6) sinon les images produit de l'email pointent ailleurs.
+- **Améliorations délivrabilité en place (2026-07-01)** : (1) défaut `PUBLIC_URL` = `https://covestudio.fr` (avant : une URL GitHub Pages → images cassées) ; (2) expéditeur nommé `COVE <cove.off@gmail.com>` (`getFromAddress`) ; (3) `Reply-To` ajouté à tous les envois (`sendMail`). **Limite honnête** : on ne peut PAS garantir l'onglet « Principale » (Gmail décide). Le levier le plus fort restant = passer à un **expéditeur sur le domaine `covestudio.fr`** (Google Workspace ou provider type Resend/Postmark) avec **SPF/DKIM/DMARC** — nécessite DNS + compte, non fait. Autre levier : alléger le gros bandeau image 600px (`getEmailHeader`) qui est un signal « Promotions ».
+
 ## Stripe — moyens de paiement
 
 - `checkout.js` utilise `payment_method_types: ['card']`. **`card` inclut Apple Pay et Google Pay automatiquement** (wallets), sans vérification de domaine car on utilise Stripe **Checkout hébergé**. Aucune clé publique côté frontend.
