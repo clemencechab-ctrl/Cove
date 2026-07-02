@@ -71,7 +71,7 @@ router.get('/stats', async (req, res) => {
         const users = await store.getAllUsers();
 
         const totalOrders = orders.length;
-        const totalRevenue = Math.round(orders.reduce((sum, o) => sum + (o.total || 0), 0) * 100) / 100;
+        const totalRevenue = Math.round(orders.filter(o => o.status === 'paid').reduce((sum, o) => sum + (o.total || 0), 0) * 100) / 100;
         const totalClients = users.filter(u => u.role === 'client').length;
 
         res.json({
