@@ -71,7 +71,12 @@ router.get('/stats', async (req, res) => {
         const users = await store.getAllUsers();
 
         const totalOrders = orders.length;
-        const totalRevenue = Math.round(orders.filter(o => o.status === 'paid').reduce((sum, o) => sum + (o.total || 0), 0) * 100) / 100;
+        // "paid" seul ne suffit pas : une commande payée passe ensuite par
+        // confirmed/processing/shipped/delivered et son status n'est alors
+        // plus 'paid' bien qu'elle ait bien été encaissée. On se base donc sur
+        // paidAt (posé une seule fois par le webhook Stripe / applyOrderInventory)
+        // en excluant les commandes annulées.
+        const totalRevenue = Math.round(orders.filter(o => o.paidAt && o.status !== 'cancelled').reduce((sum, o) => sum + (o.total || 0), 0) * 100) / 100;
         const totalClients = users.filter(u => u.role === 'client').length;
 
         res.json({
