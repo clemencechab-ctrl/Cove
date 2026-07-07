@@ -375,12 +375,17 @@ router.post('/verify', async (req, res) => {
                     await store.updateOrderPayment(order.id, {
                         paymentIntentId: session.payment_intent
                     });
-                    await store.applyOrderInventory(order.id);
-                    const { sendOrderConfirmation, sendOrderNotificationToOwner } = require('../utils/email');
-                    const fullOrder = await store.getOrderById(order.id);
-                    if (fullOrder) {
-                        sendOrderConfirmation(fullOrder);
-                        sendOrderNotificationToOwner(fullOrder);
+                    const justApplied = await store.applyOrderInventory(order.id);
+                    // N'envoyer les emails que si CETTE requete a effectivement applique
+                    // l'inventaire (sinon deja fait par le webhook Stripe qui a couru en
+                    // meme temps, cf. race documentee dans CLAUDE.md).
+                    if (justApplied) {
+                        const { sendOrderConfirmation, sendOrderNotificationToOwner } = require('../utils/email');
+                        const fullOrder = await store.getOrderById(order.id);
+                        if (fullOrder) {
+                            sendOrderConfirmation(fullOrder);
+                            sendOrderNotificationToOwner(fullOrder);
+                        }
                     }
                     return res.json({
                         success: true,

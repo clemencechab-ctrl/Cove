@@ -39,14 +39,19 @@ router.post('/stripe', express.raw({ type: 'application/json' }), async (req, re
                 await store.updateOrderPayment(orderId, {
                     paymentIntentId: session.payment_intent
                 });
-                await store.applyOrderInventory(orderId);
+                const justApplied = await store.applyOrderInventory(orderId);
 
                 console.log(`Webhook Stripe: commande ${orderNumber} marquee comme payee`);
 
-                const fullOrder = await store.getOrderById(orderId);
-                if (fullOrder) {
-                    sendOrderConfirmation(fullOrder);
-                    sendOrderNotificationToOwner(fullOrder);
+                // N'envoyer les emails que si CETTE requete a effectivement applique
+                // l'inventaire (justApplied === false => deja fait par le fallback /verify
+                // qui a couru en meme temps, cf. race documentee dans CLAUDE.md).
+                if (justApplied) {
+                    const fullOrder = await store.getOrderById(orderId);
+                    if (fullOrder) {
+                        sendOrderConfirmation(fullOrder);
+                        sendOrderNotificationToOwner(fullOrder);
+                    }
                 }
             } catch (err) {
                 console.error(`Webhook Stripe: erreur lors de la mise a jour de ${orderNumber}:`, err.message);
