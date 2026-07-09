@@ -70,13 +70,15 @@ router.get('/stats', async (req, res) => {
         const orders = await store.getOrders();
         const users = await store.getAllUsers();
 
-        const totalOrders = orders.length;
         // "paid" seul ne suffit pas : une commande payée passe ensuite par
         // confirmed/processing/shipped/delivered et son status n'est alors
         // plus 'paid' bien qu'elle ait bien été encaissée. On se base donc sur
-        // paidAt (posé une seule fois par le webhook Stripe / applyOrderInventory)
-        // en excluant les commandes annulées.
-        const totalRevenue = Math.round(orders.filter(o => o.paidAt && o.status !== 'cancelled').reduce((sum, o) => sum + (o.total || 0), 0) * 100) / 100;
+        // paidAt (posé une seule fois par le webhook Stripe / applyOrderInventory),
+        // qui distingue aussi les commandes réellement payées des paniers Stripe
+        // abandonnés/expirés (jamais payés, mais toujours créés en base en 'pending').
+        const paidOrders = orders.filter(o => o.paidAt);
+        const totalOrders = paidOrders.length;
+        const totalRevenue = Math.round(paidOrders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + (o.total || 0), 0) * 100) / 100;
         const totalClients = users.filter(u => u.role === 'client').length;
 
         res.json({
@@ -97,7 +99,9 @@ router.get('/stats', async (req, res) => {
 router.get('/clients', async (req, res) => {
     try {
         const users = await store.getAllUsers();
-        const orders = await store.getOrders();
+        // Ne compter que les commandes réellement payées (paidAt) : un panier Stripe
+        // abandonné/expiré crée une commande 'pending' en base mais n'a jamais été payé.
+        const orders = (await store.getOrders()).filter(o => o.paidAt);
 
         // Filtrer uniquement les clients (pas les owners/admins)
         const clients = users
@@ -166,10 +170,11 @@ router.delete('/clients/:uid', async (req, res) => {
     }
 });
 
-// GET /api/admin/orders - Retourne toutes les commandes
+// GET /api/admin/orders - Retourne les commandes réellement payées
+// (exclut les paniers Stripe abandonnés/expirés, jamais payés mais créés en 'pending' en base)
 router.get('/orders', async (req, res) => {
     try {
-        const orders = await store.getOrders();
+        const orders = (await store.getOrders()).filter(o => o.paidAt);
         const sortedOrders = orders.sort((a, b) =>
             new Date(b.createdAt) - new Date(a.createdAt)
         );

@@ -476,6 +476,67 @@ async function sendCancelReturnRequest(order, type, reason, customerEmail) {
     }
 }
 
+// Email envoyé à un client dont la commande n'a jamais été payée (session Stripe
+// expirée/abandonnée) pour l'informer que rien n'a été débité et que la commande
+// n'a pas été validée.
+async function sendPaymentPendingNotice(order) {
+    try {
+        const itemsHtml = (order.items || []).map(item => `
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; width: 60px;">
+                    ${item.image ? `<img src="${getImageUrl(item.image)}" alt="${escapeHtml(item.name)}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 4px;">` : ''}
+                </td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(item.name)}${item.size ? ' — ' + escapeHtml(item.size) : ''}${item.color ? ' — ' + escapeHtml(item.color) : ''}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${(item.price * item.quantity).toFixed(2)} &euro;</td>
+            </tr>
+        `).join('');
+
+        const shopUrl = `${PUBLIC_URL}/shop.html`;
+
+        const html = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                ${getEmailHeader()}
+                <h2>Votre commande n'a pas été finalisée</h2>
+                <p>Bonjour ${escapeHtml(order.customer.firstName)},</p>
+                <p>Vous avez récemment commencé une commande sur COVE (référence <strong>${escapeHtml(order.orderNumber)}</strong>), mais le paiement n'a pas abouti : <strong>aucune somme n'a été débitée</strong> et votre commande est restée en attente, elle n'a donc pas été validée ni préparée.</p>
+
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                    <thead>
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 8px; text-align: left;"></th>
+                            <th style="padding: 8px; text-align: left;">Produit</th>
+                            <th style="padding: 8px; text-align: center;">Qté</th>
+                            <th style="padding: 8px; text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+
+                <p>Si vous souhaitez toujours vous procurer ces articles, vous pouvez repasser commande directement depuis la boutique :</p>
+                <p style="text-align:center; margin: 24px 0;">
+                    <a href="${shopUrl}" style="display:inline-block; background:#000; color:#fff; text-decoration:none; padding:14px 32px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; font-size:14px;">Retourner sur la boutique</a>
+                </p>
+                <p>Si vous avez déjà réglé cette commande par un autre moyen ou rencontrez un souci, répondez simplement à cet email, nous reviendrons vers vous rapidement.</p>
+                <p>À bientôt,<br>L'équipe COVE</p>
+            </div>
+        `;
+
+        await sendMail({
+            from: getFromAddress(),
+            to: order.customer.email,
+            subject: `COVE — Votre commande #${order.orderNumber} n'a pas été finalisée`,
+            html
+        });
+
+        console.log(`Email "paiement en attente" envoyé pour commande ${order.orderNumber}`);
+    } catch (error) {
+        console.error(`Erreur envoi email paiement en attente commande ${order.orderNumber}:`, error.message);
+    }
+}
+
 // Alerte "drop" : envoyée aux inscrits de la liste d'attente le jour du lancement.
 // Appelée par le script tests/notify-waitlist.js après la levée du verrou privé.
 async function sendDropAlert(email) {
@@ -504,5 +565,6 @@ module.exports = {
     sendContactNotification,
     sendOrderNotificationToOwner,
     sendCancelReturnRequest,
-    sendDropAlert
+    sendDropAlert,
+    sendPaymentPendingNotice
 };
